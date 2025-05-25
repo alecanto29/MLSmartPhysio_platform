@@ -1,0 +1,53 @@
+.loading {
+    padding: 2rem;
+    font-size: 1.2rem;
+}
+
+.error-message {
+    padding: 2rem;
+    color: red;
+    font-weight: bold;
+}
+
+/* Sfocatura dello sfondo */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(5px); /* Sfoca lo sfondo */
+    background-color: rgba(0, 0, 0, 0.2); /* Colore trasparente sopra */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Popup modale */
+.modal {
+    background-color: #ffffff;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.retry-button {
+    margin-top: 1rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+    background-color: #2563eb;
+}

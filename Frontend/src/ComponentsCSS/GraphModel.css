@@ -1,0 +1,85 @@
+/* Griglia principale per i grafici */
+.graphGrid {
+    display: grid;
+    gap: 32px; /* spazio tra i grafici */
+    justify-items: center;
+    width: 100%;
+    max-width: 1400px; /* facoltativo */
+}
+
+/* Layout per 'Inertial data' - 3x3 con scroll */
+.inertial-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding-right: 10px;
+}
+
+/* Layout per 'sEMG data' - griglia fluida */
+.semg-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Stile per ogni grafico */
+.channel-graph {
+    background-color: #64A3C5; /* colore di sfondo */
+    border: 2px solid #03314F;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Assicurati che i grafici si adattino correttamente */
+}
+
+/* Titolo del canale */
+.channel-title {
+    color: #03314F;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+/* Wrapper per la griglia dei grafici */
+.graphGrid-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Quando un grafico è espanso, aggiungi l'effetto blur alla griglia */
+.graphGrid-wrapper.blur .graphGrid {
+    filter: blur(6px);
+    pointer-events: none;
+}
+
+/* Blocca lo scroll del body quando un grafico è espanso */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Overlay quando un grafico è espanso */
+.graphOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4); /* sfondo scuro dietro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* Aggiungi una media query per ridurre la griglia su dispositivi mobili */
+@media (max-width: 768px) {
+    .inertial-grid {
+        grid-template-columns: repeat(2, 1fr); /* due colonne su schermi più piccoli */
+    }
+}
+
+@media (max-width: 480px) {
+    .inertial-grid {
+        grid-template-columns: 1fr; /* una colonna su schermi molto piccoli */
+    }
+}

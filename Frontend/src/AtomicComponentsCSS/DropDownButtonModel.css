@@ -1,0 +1,60 @@
+.custom-dropdown {
+    position: relative;
+    width: 200px;
+    font-family: sans-serif;
+}
+
+/* Bottone principale */
+.dropdown-toggle {
+    width: 100%;
+    background-color: #E5E4E4;
+    border: 2px solid #87A5C1;
+    border-radius: 6px;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.dropdown-toggle:hover {
+    background-color: #f3f4f6;
+}
+
+.caret {
+    font-size: 0.75rem;
+    margin-left: 8px;
+}
+
+/* Menu dropdown */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    background-color: #fff;
+    border: 1px solid #87A5C1;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 4px;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Voci del menu */
+.dropdown-item {
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    color: #1f2937;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+}

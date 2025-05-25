@@ -1,0 +1,178 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Blocca lo scroll e riempi tutto */
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Contenitore principale a tutta pagina */
+.main-container {
+    position: fixed;
+    top: 62px;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: #D6DAE6; /* grigio chiaro */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: auto 1fr auto;
+    padding: 24px;
+}
+
+/* Titolo + DropDown in alto a sinistra */
+.top-left {
+    grid-row: 1;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    color: #535bf2;
+}
+
+.top-right {
+    grid-row: 1;
+    grid-column: 3;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.bottom-right {
+    grid-row: 3;
+    grid-column: 3;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 54px;
+}
+
+.bottom-left {
+    grid-row: 3;
+    grid-column: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 16px;
+    margin-bottom: 40px;
+}
+
+
+.title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.dropdown {
+    width: 200px;
+}
+
+.start-btn {
+    background-color: #22c55e;
+    color: white;
+    padding: 15px 51px;
+    border-radius: 6px;
+    margin-bottom: 9px;
+}
+
+.start-btn:hover{
+    background-color: #63D01B;
+}
+
+
+.stop-btn {
+    background-color: #ef4444;
+    color: white;
+    padding: 15px 51px;
+    border-radius: 6px;
+    margin-bottom: 9px;
+}
+
+.stop-btn:hover{
+    background-color: red;
+}
+
+.start-btn,
+.stop-btn {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+.start-btn:focus,
+.stop-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.download-btn {
+    background-color: #176F9F; /* blu */
+    border: 1px solid #03314F;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: -3px;
+}
+
+.download-btn:hover {
+    background-color: #2563eb; /* blu più scuro al passaggio */
+}
+
+.download-btn:disabled {
+    background-color: darkgrey; /* grigio chiaro */
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.graphContainer {
+    grid-row: 2;
+    grid-column: 1 / span 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    padding: 10px;
+    height: auto; /* Allow height to adjust based on content */
+}
+
+/* Scroll attivo per dati inerziali */
+.graphContainer.scroll-enabled {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Scroll disattivato per sEMG */
+.graphContainer.scroll-disabled {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+/* Scrollbar per browser WebKit (Chrome, Edge, Safari) */
+.graphContainer.scroll-enabled::-webkit-scrollbar {
+    width: 10px;
+}
+
+.graphContainer.scroll-enabled::-webkit-scrollbar-track {
+    background: #D6DAE6; /* stesso grigio chiaro dello sfondo */
+    border-radius: 6px;
+}
+
+.graphContainer.scroll-enabled::-webkit-scrollbar-thumb {
+    background-color: #176F9F; /* blu coerente con il pulsante Download */
+    border-radius: 6px;
+    border: 2px solid #D6DAE6; /* crea spazio tra thumb e track */
+}
+
+.graphContainer.scroll-enabled::-webkit-scrollbar-thumb:hover {
+    background-color: #03314F; /* blu più scuro per l'hover */
+}
