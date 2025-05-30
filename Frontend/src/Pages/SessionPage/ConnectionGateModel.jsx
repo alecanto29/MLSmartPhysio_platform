@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import ControlPanel from "./ControlPanel";
+import ControlPanel from "./ControlPanel.jsx";
 
-import "../ComponentsCSS/ConnectionGateStyle.css";
+import "../../ComponentsCSS/ConnectionGateStyle.css";
 
 /**
  * Componente responsabile della gestione della connessione seriale

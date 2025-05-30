@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import ChannelGraph from "../AtomicComponents/ChannelGraph.jsx";
-import "../ComponentsCSS/GraphModel.css";
+import ChannelGraph from "../../AtomicComponents/ChannelGraph.jsx";
+import "../../ComponentsCSS/GraphModel.css";
 
 const GraphModel = ({ data, type }) => {
     const [expandedChannel, setExpandedChannel] = useState(null);

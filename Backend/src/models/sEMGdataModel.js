@@ -1,7 +1,11 @@
-
 const mongoose = require("mongoose");
 
 const sEMGdataSchema = new mongoose.Schema({
+    sessionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Sessions",
+        required: true,
+    },
     data: {
         type: [Number],
         required: true,
@@ -12,6 +16,10 @@ const sEMGdataSchema = new mongoose.Schema({
             message: "L'array deve contenere esattamente 8 valori numerici."
         }
     },
+    timestamp: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = mongoose.model("sEMGdata", sEMGdataSchema, "sEMGdata");

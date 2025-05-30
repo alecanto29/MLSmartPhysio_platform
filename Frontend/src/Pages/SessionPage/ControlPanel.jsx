@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import ButtonModel from "../AtomicComponents/ButtonModel";
-import DropDownButtonModel from "../AtomicComponents/DropDownButtonModel";
+import ButtonModel from "../../AtomicComponents/ButtonModel.jsx";
+import DropDownButtonModel from "../../AtomicComponents/DropDownButtonModel.jsx";
 import axios from "axios";
-import "../ComponentsCSS/ControlPanel.css";
-import TimerModel from "../Components/TimerModel";
+import "../../ComponentsCSS/ControlPanel.css";
+import TimerModel from "./TimerModel.jsx";
 import GraphModel from "./GraphModel.jsx";
-import Client from "../Client";
+import Client from "../../Client.jsx";
 
 /**
  * Componente principale del pannello di controllo.

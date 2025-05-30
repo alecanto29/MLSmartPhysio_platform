@@ -6,9 +6,9 @@ import React, {
     useState,              // Hook per gestire lo stato
 } from "react";
 
-import "../ComponentsCSS/Timer.css";
+import "../../ComponentsCSS/Timer.css";
 
-import TextInfoModel from "../AtomicComponents/TextInfoModel.jsx";
+import TextInfoModel from "../../AtomicComponents/TextInfoModel.jsx";
 
 // Definizione del componente TimerModel, controllato tramite `ref` esterno
 const TimerModel = forwardRef((props, ref) => {
