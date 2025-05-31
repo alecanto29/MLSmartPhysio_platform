@@ -21,6 +21,7 @@ async function getDoctorById(doctorId) {
     }
 }
 
+
 async function createNewDoctor(doctorData) {
     try {
         if (!doctorData) {
