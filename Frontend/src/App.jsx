@@ -1,11 +1,11 @@
 import './App.css';
-import ControlPanel from "../src/Pages/SessionPage/ControlPanel.jsx";
+import LoginPage from "../src/Pages/LoginPage.jsx";
 
 function App() {
     return (
         <div>
             <div className="main-container">
-                <ControlPanel />
+                <LoginPage />
             </div>
         </div>
     );
