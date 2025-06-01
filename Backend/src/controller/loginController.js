@@ -10,7 +10,7 @@ const registerNewUser = async (req, res) => {
         const createdUser = await loginService.registerNewUser(userData);
         res.status(201).json(createdUser);
     } catch (error) {
-        res.status(500).json({ error: "Errore durante la registrazione del medico" });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -22,7 +22,7 @@ const login = async (req, res) => {
         const loginResult = await loginService.login(email, password);
         res.status(200).json(loginResult);
     } catch (error) {
-        res.status(401).json({ error: "Errore durante il login dell'utente" });
+        res.status(401).json({ error: error.message });
     }
 };
 

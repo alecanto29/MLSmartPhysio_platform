@@ -21,6 +21,11 @@ async function getDoctorById(doctorId) {
     }
 }
 
+async function getDoctorByEmail(email) {
+    const Doctor = require("../models/Doctor"); // o il tuo modello esatto
+    return await Doctor.findOne({ email });
+}
+
 
 async function createNewDoctor(doctorData) {
     try {
@@ -52,4 +57,4 @@ async function deleteDoctor(idDoctorToRemove) {
     }
 }
 
-module.exports = {getAllDoctors, getDoctorById, createNewDoctor, deleteDoctor};
+module.exports = {getAllDoctors, getDoctorById, createNewDoctor, deleteDoctor, getDoctorByEmail};

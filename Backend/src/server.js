@@ -41,15 +41,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-
 // Import delle rotte
 const sEMGdataRoutes = require("../src/routes/sEMGdataRoutes");
 const inertialDataRoutes = require("../src/routes/inertialDataRoutes");
 const serialRoutes = require("../src/routes/serialRoutes")
+const loginRoutes = require ("../src/routes/loginRoutes");
 
 app.use("/smartPhysio/semg", sEMGdataRoutes);
 app.use("/smartPhysio/inertial", inertialDataRoutes);
-app.use("/smartPhysio", serialRoutes)
+app.use("/smartPhysio", serialRoutes);
+app.use("/smartPhysio/auth", loginRoutes);
 
 // Porta server
 const PORT = process.env.PORT || 5000;
