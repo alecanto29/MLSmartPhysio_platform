@@ -21,7 +21,13 @@ const LoginPage = () => {
                 password,
             });
 
-            localStorage.setItem("token", response.data.token);
+            const token = response.data.token;
+            localStorage.setItem("token", token);
+
+            const decoded = JSON.parse(atob(token.split('.')[1]));
+            console.log("Decoded JWT:", decoded);
+            localStorage.setItem("doctorName", `${decoded.name} ${decoded.surname}`);
+
             setMessageType("success");
             setMessage("Login effettuato correttamente");
 

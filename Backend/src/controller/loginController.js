@@ -7,10 +7,10 @@ app.use(express.json());
 const registerNewUser = async (req, res) => {
     try {
         const userData = req.body;
-        const createdUser = await loginService.registerNewUser(userData);
-        res.status(201).json(createdUser);
+        const result = await loginService.registerNewUser(userData);
+        res.status(201).json(result);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 

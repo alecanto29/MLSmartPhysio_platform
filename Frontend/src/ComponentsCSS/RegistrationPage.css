@@ -34,7 +34,7 @@
     padding: 40px 60px;
 }
 
-.user-icon {
+.user-icon i{
     font-size: 60px;
     color: #003344;
     margin-bottom: 30px;
@@ -53,7 +53,10 @@
     row-gap: 20px;
     width: 100%;
     max-width: 800px;
+    margin-top: 50px;
 }
+
+
 
 .input-block:nth-child(1) { grid-area: name; }
 .input-block:nth-child(2) { grid-area: surname; }

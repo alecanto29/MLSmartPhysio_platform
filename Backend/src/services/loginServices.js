@@ -33,13 +33,28 @@ async function registerNewUser(newUser) {
         };
 
         const user = await doctorService.createNewDoctor(doctorToSave);
-        return user;
+
+        const token = jwt.sign(
+            {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                surname: user.surname
+            },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        return {
+            token,
+            doctorId: user._id,
+            name: user.name,
+            surname: user.surname
+        };
     } catch (error) {
         throw new Error(error.message);
     }
 }
-
-
 
 async function login(email, password) {
     try {
@@ -54,9 +69,16 @@ async function login(email, password) {
             throw new Error("Password errata");
         }
 
-        const token = jwt.sign({ id: doctor._id, email: doctor.email }, JWT_SECRET, {
-            expiresIn: "1h",
-        });
+        const token = jwt.sign(
+            {
+                id: doctor._id,
+                email: doctor.email,
+                name: doctor.name,
+                surname: doctor.surname
+            },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
 
         return {
             token,
@@ -68,7 +90,6 @@ async function login(email, password) {
         throw new Error(error.message);
     }
 }
-
 
 async function hashPassword(plainPassword) {
     const saltRounds = 10;

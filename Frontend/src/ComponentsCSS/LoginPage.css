@@ -19,13 +19,13 @@ body, html {
 .login-logo {
     width: 300px;
     height: auto;
-    margin-bottom: -20px;
+    margin-bottom: 40px;
 }
 
-.user-icon {
+.user-icon i{
     font-size: 60px;
     color: #003344;
-    margin-top: 30px;     /* icona un po' più in basso */
+    margin-top: 20px;     /* icona un po' più in basso */
     margin-bottom: 30px;
 }
 

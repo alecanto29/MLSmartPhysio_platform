@@ -36,6 +36,13 @@ const RegistrationPage = () => {
                 birthDate,
             });
             console.log("Registrazione completata:", response.data);
+
+            const token = response.data.token;
+            localStorage.setItem("token", token);
+
+            const decoded = JSON.parse(atob(token.split('.')[1]));
+            localStorage.setItem("doctorName", `${decoded.name} ${decoded.surname}`);
+
             setMessage("Registrazione avvenuta con successo");
             setMessageType("success");
 
@@ -66,7 +73,9 @@ const RegistrationPage = () => {
             </div>
 
             <div className="registration-right">
-                <i className="bi bi-person-circle user-icon"></i>
+                <div className="user-icon">
+                    <i className="bi bi-person-circle"></i>
+                </div>
 
                 <div className="form-grid">
                     <div className="input-block">

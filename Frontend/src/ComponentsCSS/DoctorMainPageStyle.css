@@ -1,0 +1,137 @@
+/* DoctorMainPageStyle.css */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #c8f1ff;
+}
+
+.main-dashboard {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
+.logo-img {
+    height: 100px;
+    margin-left: -20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+    gap: 10px;
+    margin-right: 10px;
+}
+
+.user-icon {
+    font-size: 35px;
+    color: #000;
+}
+
+.actions-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 270px; /* spazio tra le icone */
+    margin-top: 10px;
+}
+
+.icon-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.icon-box:hover {
+    transform: scale(1.05);
+}
+
+.img-icon {
+    height: 200px;
+    width: 200px;
+}
+
+.icon-box p {
+    margin-top: 15px;
+    font-size: 22px;
+    font-weight: 500;
+    color: #000;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    flex-wrap: wrap;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.summary-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.summary-icon {
+    width: 50px;
+    height: 50px;
+}
+
+.text-base {
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 8px;
+    color: #000;
+}
+
+.dashboard-label {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.blue {
+    color: #2c6db8;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.green {
+    color: #1ca31c;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.red {
+    color: #e10000;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+body {
+    overflow: hidden;
+}
