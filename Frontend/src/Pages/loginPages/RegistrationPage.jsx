@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../ComponentsCSS/RegistrationPage.css";
+import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
+import TextFieldModel from "../../AtomicComponents/TextFieldModel.jsx";
 
 
 const RegistrationPage = () => {
@@ -18,6 +20,9 @@ const RegistrationPage = () => {
 
     const birthDateRef = useRef(null);
 
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("succes")
+
     const handleRegistration = async () => {
         try {
             const response = await axios.post("/smartPhysio/auth/register", {
@@ -31,9 +36,25 @@ const RegistrationPage = () => {
                 birthDate,
             });
             console.log("Registrazione completata:", response.data);
-            navigate("/doctor");
+            setMessage("Registrazione avvenuta con successo");
+            setMessageType("success");
+
+            setTimeout(() =>{
+                navigate("/doctor");
+            },1000);
+
         } catch (error) {
-            console.error("Errore durante la registrazione:", error.response?.data || error.message);
+
+            setMessageType("error");
+
+            const errorMsg =
+                typeof error.response?.data === "string"
+                    ? error.response.data
+                    : error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Errore durante la registrazione";
+
+            setMessage(errorMsg);
         }
     };
 
@@ -50,7 +71,7 @@ const RegistrationPage = () => {
                 <div className="form-grid">
                     <div className="input-block">
                         <label>Name</label>
-                        <input
+                        <TextFieldModel
                             type="text"
                             placeholder="Insert your name here..."
                             value={name}
@@ -60,7 +81,7 @@ const RegistrationPage = () => {
 
                     <div className="input-block">
                         <label>Surname</label>
-                        <input
+                        <TextFieldModel
                             type="text"
                             placeholder="Insert your surname here..."
                             value={surname}
@@ -70,7 +91,7 @@ const RegistrationPage = () => {
 
                     <div className="input-block">
                         <label>Fiscal Code</label>
-                        <input
+                        <TextFieldModel
                             type="text"
                             placeholder="Insert your fiscal code here..."
                             value={fiscalCode}
@@ -80,7 +101,7 @@ const RegistrationPage = () => {
 
                     <div className="input-block">
                         <label>Specialization</label>
-                        <input
+                        <TextFieldModel
                             type="text"
                             placeholder="Insert your specialization here..."
                             value={specialization}
@@ -90,7 +111,7 @@ const RegistrationPage = () => {
 
                     <div className="input-block">
                         <label>Email</label>
-                        <input
+                        <TextFieldModel
                             type="email"
                             placeholder="Insert your email here..."
                             value={email}
@@ -122,7 +143,7 @@ const RegistrationPage = () => {
 
                     <div className="input-block">
                         <label>Password</label>
-                        <input
+                        <TextFieldModel
                             type="password"
                             placeholder="Insert your password here..."
                             value={password}
@@ -132,7 +153,7 @@ const RegistrationPage = () => {
 
                     <div className="input-block">
                         <label>License Number</label>
-                        <input
+                        <TextFieldModel
                             type="text"
                             placeholder="Insert your license number here..."
                             value={licenseNumber}
@@ -144,6 +165,10 @@ const RegistrationPage = () => {
                 <button className="confirm-button" onClick={handleRegistration}>
                     Confirm
                 </button>
+
+                <MessageHandlerModel messageInfo={message}
+                                     type={messageType}
+                                     onClear={() => setMessage("")}/>
             </div>
         </div>
     );

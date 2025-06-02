@@ -4,11 +4,15 @@ import TextFieldModel from "../../AtomicComponents/TextFieldModel.jsx";
 import ButtonModel from "../../AtomicComponents/ButtonModel.jsx";
 import { useNavigate } from "react-router-dom";
 import "../../ComponentsCSS/LoginPage.css";
+import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("success");
 
     const handleLogin = async () => {
         try {
@@ -18,9 +22,24 @@ const LoginPage = () => {
             });
 
             localStorage.setItem("token", response.data.token);
-            navigate("/doctor");
+            setMessageType("success");
+            setMessage("Login effettuato correttamente");
+
+            setTimeout(() => {
+                navigate("/doctor");
+            }, 1000);
+
         } catch (error) {
-            console.error("Errore durante il login:", error.response?.data || error.message);
+            setMessageType("error");
+
+            const errorMsg =
+                typeof error.response?.data === "string"
+                    ? error.response.data
+                    : error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Errore durante il login";
+
+            setMessage(errorMsg);
         }
     };
 
@@ -35,6 +54,7 @@ const LoginPage = () => {
             <div className="login-form">
 
                 <div className="input-group">
+                    <label>Email</label>
                     <TextFieldModel
                         type="email"
                         placeholder="Insert your email here..."
@@ -44,6 +64,7 @@ const LoginPage = () => {
                 </div>
 
                 <div className="input-group">
+                    <label>Password</label>
                     <TextFieldModel
                         type="password"
                         placeholder="Insert your password here..."
@@ -52,10 +73,15 @@ const LoginPage = () => {
                     />
                 </div>
 
-                <div>
+                <div className="button-row">
                     <ButtonModel buttonText="Sign Up" onClick={() => navigate("/registration")} />
                     <ButtonModel buttonText="Login" onClick={handleLogin} />
                 </div>
+                <MessageHandlerModel
+                    messageInfo={message}
+                    type={messageType}
+                    onClear={() => setMessage("")}
+                />
             </div>
         </div>
     );
