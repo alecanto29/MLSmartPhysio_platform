@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "../../ComponentsCSS/RegistrationPage.css";
 import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
 import TextFieldModel from "../../AtomicComponents/TextFieldModel.jsx";
+import ButtonModel from "../../AtomicComponents/ButtonModel.jsx";
 
 
 const RegistrationPage = () => {
@@ -171,9 +172,7 @@ const RegistrationPage = () => {
                     </div>
                 </div>
 
-                <button className="confirm-button" onClick={handleRegistration}>
-                    Confirm
-                </button>
+                <ButtonModel className="confirm-button" buttonText={"Confirm"} onClick={handleRegistration} />
 
                 <MessageHandlerModel messageInfo={message}
                                      type={messageType}

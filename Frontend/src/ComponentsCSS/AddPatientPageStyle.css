@@ -1,0 +1,177 @@
+.page-container {
+    width: 100vw;
+    height: 100vh;
+    background-color: #c8f1ff;
+    box-sizing: border-box;
+}
+
+/* Header con spaziatura orizzontale */
+.header-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* ← logo a sinistra, utente a destra */
+    align-items: center;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+/* Logo a sinistra */
+.logo-img {
+    height: 70px;
+    object-fit: contain;
+}
+
+/* Utente a destra */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #003344;
+}
+
+/* Icona utente */
+.user-icon {
+    font-size: 28px;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -30px;
+}
+
+.form-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: -50px;
+    margin-top: 40px;
+    color: #003344;
+}
+
+.title-icon {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px 50px;
+    width: 80%;
+    max-width: 900px;
+}
+
+.input-block {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-block label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #003344;
+}
+
+.input-block input {
+    padding: 10px 14px;
+    border: 1px solid #003344;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: white;
+    color: #003344;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.input-block textarea {
+    padding: 10px 14px;
+    border: 1px solid #003344;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: white;
+    color: #003344;
+    outline: none;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 100px;
+    width: 100%;
+}
+
+/* Gender box */
+.gender-options {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 16px;
+    border: 1px solid #003344;
+    border-radius: 10px;
+    background-color: white;
+    margin-top: 6px;
+    max-width: 300px; /* << aggiunto */
+    margin-left: auto;  /* << per centrare */
+    margin-right: auto;
+}
+
+.gender-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #003344;
+}
+
+.confirm-button-wrapper {
+    margin-top: -10px;
+    display: flex;
+    justify-content: center;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.birth-date-input {
+    width: 100%;
+    padding-right: 40px; /* Spazio per il pulsante */
+}
+
+.calendar-button {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.calendar-icon {
+    font-size: 20px;
+    color: #003344;
+}
+
+.bottom-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 32px;
+    color: #003344;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.bottom-icon:hover {
+    transform: scale(1.1);
+    color: #005566;
+}
+
+
+

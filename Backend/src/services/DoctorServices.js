@@ -1,5 +1,6 @@
 const Doctor = require("../models/Doctor");
 
+
 async function getAllDoctors() {
     try {
         const data = await Doctor.find();
@@ -25,6 +26,23 @@ async function getDoctorByEmail(email) {
     const Doctor = require("../models/Doctor"); // o il tuo modello esatto
     return await Doctor.findOne({ email });
 }
+
+async function getDoctorAppointments(doctorID) {
+    try {
+        const doctor = await Doctor.findById(doctorID); // o con .populate(...) se ti servono i dettagli
+
+        if (!doctor) {
+            throw new Error(`Nessun medico trovato con id ${doctorID}`);
+        }
+
+        // Se appointments è undefined, restituisci array vuoto
+        return doctor.appointments || [];
+    } catch (error) {
+        console.error("Errore nel recupero degli appuntamenti:", error.message);
+        throw new Error("Errore durante il recupero degli appuntamenti del medico");
+    }
+}
+
 
 
 async function createNewDoctor(doctorData) {
@@ -57,4 +75,4 @@ async function deleteDoctor(idDoctorToRemove) {
     }
 }
 
-module.exports = {getAllDoctors, getDoctorById, createNewDoctor, deleteDoctor, getDoctorByEmail};
+module.exports = {getAllDoctors, getDoctorById, createNewDoctor, deleteDoctor, getDoctorByEmail, getDoctorAppointments};

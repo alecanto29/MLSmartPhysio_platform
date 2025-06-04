@@ -23,6 +23,15 @@ const getDoctorById = async(req, res) =>{
     }
 };
 
+const getDoctorAppointments = async(req, res) => {
+    try{
+        const doctorAppointments = await doctorService.getDoctorAppointments(req.user.id);
+        res.status(200).json(doctorAppointments);
+    }catch(error){
+        res.status(500).json({error: `Errore durante la restituzione degli appuntamenti del medico, id: ${req.params.id}`});
+    }
+}
+
 
 const createNewDoctor = async (req, res) => {
     try {
@@ -49,5 +58,6 @@ module.exports = {
     getAllDoctors,
     getDoctorById,
     createNewDoctor,
-    deleteDoctorById
+    deleteDoctorById,
+    getDoctorAppointments
 };

@@ -26,7 +26,7 @@ const getAllCriticPatients = async (req, res) => {
         const criticalPatients = await patientService.getAllCriticPatients(req.user.id);
         res.status(200).json(criticalPatients);
     } catch (error) {
-        res.status(500).json({ error: "Errore durante il conteggio dei pazienti critici" });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -35,7 +35,7 @@ const createNewPatient = async (req, res) => {
         const newPatient = await patientService.createNewPatient(req.body, req.user.id);
         res.status(201).json(newPatient);
     } catch (error) {
-        res.status(500).json({ error: "Errore durante la creazione del nuovo paziente" });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -47,7 +47,7 @@ const deleteNewPatient = async (req, res) => {
         }
         res.status(200).json(deletedPatient);
     } catch (error) {
-        res.status(500).json({ error: `Errore durante l'eliminazione del paziente con id: ${req.params.id}` });
+        res.status(500).json({ error: error.message });
     }
 };
 

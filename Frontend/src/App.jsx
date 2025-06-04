@@ -4,6 +4,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import LoginPage from "./Pages/loginPages/LoginPage.jsx";
 import RegistrationPage from "./Pages/loginPages/RegistrationPage.jsx";
 import DoctorMainPage from "./Pages/DoctorMainPage.jsx";
+import AddPatientPage from "./Pages/AddPatientPage.jsx";
+import AppointmentCalendar from "./Pages/AppointmentsPages/AppointmentsListPage.jsx";
+import TakeAppointmentPage from "./Pages/AppointmentsPages/TakeAppointmentPage.jsx";
 
 const App = () => {
     return (
@@ -13,6 +16,9 @@ const App = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/registration" element={<RegistrationPage />} />
                 <Route path="/doctor" element={<DoctorMainPage />} />
+                <Route path="/add-patient" element={<AddPatientPage />} />
+                <Route path="/appointments" element={<AppointmentCalendar />} />
+                <Route path="/takeappointments" element={<TakeAppointmentPage />} />
             </Routes>
         </Router>
     );

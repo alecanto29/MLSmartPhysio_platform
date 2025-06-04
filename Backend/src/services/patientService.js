@@ -1,4 +1,5 @@
 const patientModel = require("../models/Patient");
+const bcrypt = require("bcrypt");
 
 // Tutti i pazienti del medico loggato
 const getAllPatients = async (doctorId) => {
@@ -17,6 +18,16 @@ const getAllCriticPatients = async (doctorId) => {
 
 // Creazione di un nuovo paziente assegnato al medico loggato
 const createNewPatient = async (patientData, doctorId) => {
+
+    if (
+        !patientData.name || !patientData.surname || !patientData.fiscalCode ||
+        !patientData.healthCardNumber || !patientData.gender ||
+        !patientData.birthDate || !patientData.medicalHistory
+    ) {
+        throw new Error("Tutti i campi sono obbligatori");
+    }
+
+
     const newPatient = new patientModel({
         ...patientData,
         primaryDoctor: doctorId

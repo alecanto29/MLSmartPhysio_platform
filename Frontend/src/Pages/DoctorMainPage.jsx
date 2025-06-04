@@ -8,13 +8,14 @@ import "../ComponentsCSS/DoctorMainPageStyle.css";
 const DoctorMainPage = () => {
     const [patientsNumber, setPatientsNumber] = useState();
     const [criticalPatientsNumber, setCriticalPatientsNumber] = useState();
-    const [appointmentsNumber, setAppointmentsNumber] = useState(5); // statico, oppure fetchabile
+    const [appointmentsNumber, setAppointmentsNumber] = useState();
 
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchPatientsNumber();
         fetchCriticalPatientsNumber();
+        fetchAppointmentsNumber();
     }, []);
 
     const fetchPatientsNumber = async () => {
@@ -30,6 +31,21 @@ const DoctorMainPage = () => {
             console.error("Errore nel recupero pazienti:", error);
         }
     };
+
+    const fetchAppointmentsNumber = async () => {
+        try{
+            const token = localStorage.getItem("token");
+            const response = await axios.get("/smartPhysio/doctor/appointments", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setAppointmentsNumber(response.data.length);
+        }catch(error){
+            console.error("Errore nel recupero del numero di appuntamenti:", error);
+        }
+
+    }
 
     const fetchCriticalPatientsNumber = async () => {
         try {

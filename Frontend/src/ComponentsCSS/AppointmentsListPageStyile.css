@@ -1,0 +1,33 @@
+
+
+/* Header con spaziatura orizzontale */
+.header-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* ← logo a sinistra, utente a destra */
+    align-items: center;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+/* Logo a sinistra */
+.logo-img {
+    height: 70px;
+    object-fit: contain;
+}
+
+/* Utente a destra */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #003344;
+}
+
+/* Icona utente */
+.user-icon {
+    font-size: 28px;
+}
