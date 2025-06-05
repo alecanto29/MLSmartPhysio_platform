@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import TextInfoModel from "../AtomicComponents/TextInfoModel.jsx";
 import "../ComponentsCSS/DoctorMainPageStyle.css";
 
@@ -11,12 +11,14 @@ const DoctorMainPage = () => {
     const [appointmentsNumber, setAppointmentsNumber] = useState();
 
     const navigate = useNavigate();
+    const location = useLocation();
+
 
     useEffect(() => {
         fetchPatientsNumber();
         fetchCriticalPatientsNumber();
         fetchAppointmentsNumber();
-    }, []);
+    }, [location]);
 
     const fetchPatientsNumber = async () => {
         try {
@@ -33,19 +35,28 @@ const DoctorMainPage = () => {
     };
 
     const fetchAppointmentsNumber = async () => {
-        try{
+        try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("/smartPhysio/doctor/appointments", {
+            const response = await axios.get("/smartPhysio/appointments", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setAppointmentsNumber(response.data.length);
-        }catch(error){
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Azzeri ore/minuti/secondi
+
+            const todaysApp = response.data.filter(app => {
+                const appDate = new Date(app.date);
+                appDate.setHours(0, 0, 0, 0);
+                return appDate.getTime() === today.getTime();
+            });
+
+            setAppointmentsNumber(todaysApp.length);
+        } catch (error) {
             console.error("Errore nel recupero del numero di appuntamenti:", error);
         }
-
-    }
+    };
 
     const fetchCriticalPatientsNumber = async () => {
         try {

@@ -66,11 +66,40 @@ const AddPatientPage = () => {
     return (
         <div className="page-container">
             {/* HEADER */}
-            <header className="header-bar">
-                <img src="/images/app_logo.png" alt="Logo" className="logo-img" />
-                <div className="user-info">
+            <header style={{
+                position: 'absolute',
+                top: '30px',
+                left: '0',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                padding: '0 40px',
+                boxSizing: 'border-box'
+            }}>
+                {/* LOGO IN ALTO A SINISTRA */}
+                <img
+                    src="/images/app_logo.png"
+                    alt="Logo"
+                    style={{
+                        height: '70px',
+                        objectFit: 'contain',
+                        marginTop: '0'
+                    }}
+                />
+
+                {/* INFO UTENTE IN ALTO A DESTRA */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    color: '#003344',
+                    marginTop: '0'
+                }}>
                     <span>{localStorage.getItem("doctorName") || "Utente"}</span>
-                    <i className="bi bi-person-circle user-icon"></i>
+                    <i className="bi bi-person-circle" style={{ fontSize: '28px' }}></i>
                 </div>
             </header>
 
@@ -78,7 +107,7 @@ const AddPatientPage = () => {
             <div className="form-container">
                 <div className="form-title">
                     <img src="/images/patient_blue.png" alt="Icona paziente" className="title-icon" />
-                    <h2>Aggiungi nuovo paziente</h2>
+                    <h2>Add new patience</h2>
                 </div>
                 <form className="form-grid">
                     <div className="input-block">

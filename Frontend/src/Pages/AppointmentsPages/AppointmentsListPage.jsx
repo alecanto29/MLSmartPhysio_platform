@@ -7,8 +7,12 @@ import axios from 'axios';
 import { Paper, Typography, Button, GlobalStyles } from '@mui/material';
 
 const AppointmentCalendar = () => {
+
     const [events, setEvents] = useState([]);
     const navigate = useNavigate();
+
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
         axios.get('http://localhost:5000/smartPhysio/appointments', {
@@ -17,11 +21,21 @@ const AppointmentCalendar = () => {
             }
         })
             .then(res => {
-                const transformed = res.data.map(app => ({
-                    title: app.patient?.name || 'Appuntamento',
-                    start: `${app.date}T${app.time}`,
-                    end: `${app.date}T${add30Min(app.time)}`
-                }));
+                const transformed = res.data.map(app => {
+                    const name = app.patient?.name || '';
+                    const surname = app.patient?.surname || '';
+                    return {
+                        title: (name + ' ' + surname).trim() || 'Appuntamento',
+                        start: `${app.date.split("T")[0]}T${app.time}`,
+                        end: `${app.date.split("T")[0]}T${add30Min(app.time)}`,
+                        extendedProps: {
+                            patient: app.patient,
+                            date: app.date.split("T")[0],
+                            time: app.time,
+                            notes: app.notes
+                        }
+                    };
+                });
                 setEvents(transformed);
             })
             .catch(err => console.error(err));
@@ -34,40 +48,57 @@ const AppointmentCalendar = () => {
         return date.toTimeString().slice(0, 5);
     };
 
-    const takeNewAppointments = async () => {
-        try{
-
-        }catch(error){
-
-        }
-    }
 
     return (
         <div className="page-container" style={{ backgroundColor: '#ccf2ff', minHeight: '100vh', position: 'relative' }}>
             {/* HEADER */}
             <header style={{
+                position: 'absolute',
+                top: '30px',
+                left: '0',
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '20px 40px',
+                alignItems: 'flex-start',
+                padding: '0 40px',
                 boxSizing: 'border-box'
             }}>
-                <img src="/images/app_logo.png" alt="Logo" style={{ height: '60px', objectFit: 'contain' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold', color: '#003344' }}>
+                {/* LOGO IN ALTO A SINISTRA */}
+                <img
+                    src="/images/app_logo.png"
+                    alt="Logo"
+                    style={{
+                        height: '70px',
+                        objectFit: 'contain',
+                        marginTop: '0'
+                    }}
+                />
+
+                {/* INFO UTENTE IN ALTO A DESTRA */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    color: '#003344',
+                    marginTop: '0'
+                }}>
                     <span>{localStorage.getItem("doctorName") || "Utente"}</span>
                     <i className="bi bi-person-circle" style={{ fontSize: '28px' }}></i>
                 </div>
             </header>
+
+
 
             {/* TITOLO */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '16px',
-                marginLeft: '120px',
-                marginTop: '10px',
-                marginBottom: '10px'
+                marginLeft: '80px',
+                marginTop: '70px', // aumentato per lasciare spazio al logo
+                marginBottom: '40px'
             }}>
                 <img
                     src="/images/calendar.png"
@@ -115,6 +146,22 @@ const AppointmentCalendar = () => {
                 },
                 '.fc-timegrid-slot': {
                     height: '60px !important',
+                },
+                '.fc-timegrid-event': {
+                    width: '101% !important',         // Aumenta la larghezza fino quasi a toccare i bordi
+                    margin: '0 auto',                // Centra il rettangolo nella cella
+                },
+                '.fc-event': {
+                    height: '200% !important',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    padding: '5px 12px',
+                    fontSize: '0.85rem'
+                },
+                '.fc-event-title': {
+                    whiteSpace: 'normal',
+                    overflowWrap: 'break-word'
                 }
             }} />
 
@@ -127,7 +174,7 @@ const AppointmentCalendar = () => {
                     backgroundColor: '#f9f9f9',
                     maxWidth: '1200px',
                     width: '100%',
-                    margin: '10px auto 60px auto',
+                    margin: '-30px auto 60px auto', // aumentato da 10px a 40px
                     boxShadow: '0 6px 24px rgba(0, 0, 0, 0.08)',
                     overflow: 'hidden'
                 }}
@@ -147,6 +194,11 @@ const AppointmentCalendar = () => {
                         right: 'timeGridDay,timeGridWeek'
                     }}
                     dayHeaderFormat={{ weekday: 'short', month: 'numeric', day: 'numeric' }}
+
+                    eventClick={(info) => {
+                        setSelectedEvent(info.event);
+                        setIsDialogOpen(true);
+                    }}
                 />
 
                 <Button
@@ -185,6 +237,39 @@ const AppointmentCalendar = () => {
                     cursor: 'pointer'
                 }}
             />
+
+            {selectedEvent && isDialogOpen && (
+                <Paper
+                    elevation={6}
+                    style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        backgroundColor: 'white',
+                        padding: '24px',
+                        borderRadius: '12px',
+                        zIndex: 1500,
+                        width: '300px',
+                        boxShadow: '0 6px 20px rgba(0,0,0,0.2)'
+                    }}
+                >
+                    <Typography variant="h6" gutterBottom>
+                        Appointment Details
+                    </Typography>
+                    <Typography><strong>Date:</strong> {selectedEvent.extendedProps.date}</Typography>
+                    <Typography><strong>Time:</strong> {selectedEvent.extendedProps.time}</Typography>
+                    <Typography><strong>Patient:</strong> {selectedEvent.extendedProps.patient?.name} {selectedEvent.extendedProps.patient?.surname}</Typography>
+                    <Typography><strong>Notes:</strong> {selectedEvent.extendedProps.notes || "—"}</Typography>
+                    <Button
+                        onClick={() => setIsDialogOpen(false)}
+                        variant="outlined"
+                        sx={{ marginTop: '16px' }}
+                    >
+                        Close
+                    </Button>
+                </Paper>
+            )}
         </div>
     );
 };
