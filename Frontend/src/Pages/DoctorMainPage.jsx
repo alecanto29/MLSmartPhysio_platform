@@ -88,7 +88,7 @@ const DoctorMainPage = () => {
                     <img src="/images/add_patient.png" alt="Add" className="img-icon" />
                     <p>Add New Patient</p>
                 </div>
-                <div onClick={() => navigate("/patients")} className="icon-box">
+                <div onClick={() => navigate("/patients-list")} className="icon-box">
                     <img src="/images/patients_list.png" alt="List" className="img-icon" />
                     <p>Patient List</p>
                 </div>
@@ -112,7 +112,7 @@ const DoctorMainPage = () => {
                     <TextInfoModel textInfo={patientsNumber} className="green" />
                 </div>
                 <div className="summary-box">
-                    <img src="/images/red_patients.png" alt="High Risk" className="summary-icon" />
+                    <img src="/images/red_patient.png" alt="High Risk" className="summary-icon" />
                     <TextInfoModel textInfo={"High-risk patients"} className="dashboard-label" />
 
                     <TextInfoModel textInfo={criticalPatientsNumber} className="red" />

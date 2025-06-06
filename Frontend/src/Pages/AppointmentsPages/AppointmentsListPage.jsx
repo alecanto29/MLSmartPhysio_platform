@@ -15,7 +15,7 @@ const AppointmentCalendar = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/smartPhysio/appointments', {
+        axios.get('smartPhysio/appointments', {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
