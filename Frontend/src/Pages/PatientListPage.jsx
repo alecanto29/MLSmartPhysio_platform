@@ -136,7 +136,7 @@ const PatientListPage = () => {
                             {/* AZIONI */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
-                                    <img src="/images/patient_details.png" alt="details" style={{ height: '50px' }} />
+                                    <img src="/images/patient_details.png" alt="details" style={{ height: '50px' }} onClick={() => navigate(`/patient-details/${p._id}`)}/>
                                     <span style={{ fontSize: '13px', color: '#003344' }}>Patient details</span>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>

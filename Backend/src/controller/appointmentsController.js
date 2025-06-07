@@ -48,6 +48,7 @@ const deleteOldAppointments = async (req, res) => {
 };
 
 
+
 module.exports = {
     getAllAppointments,
     getAllAppointmentsDate,

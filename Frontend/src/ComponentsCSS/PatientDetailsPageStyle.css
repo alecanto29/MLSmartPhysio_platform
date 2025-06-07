@@ -1,0 +1,199 @@
+/* Contesto generale */
+.page-container {
+    background-color: #b3ecff;
+    min-height: 100vh;
+    padding: 20px 40px 40px 40px;
+    color: black;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    height: 60px;
+}
+
+.user {
+    font-weight: bold;
+    font-size: 18px;
+    color: #003344;
+}
+
+.icon {
+    font-size: 28px;
+}
+
+/* Titolo sezione */
+.title-section {
+    display: flex;
+    align-items: center;
+    margin-top: 16px; /* ridotto ancora */
+    gap: 16px;
+}
+
+.title-icon {
+    height: 50px;
+}
+
+.title-text {
+    color: #003344;
+    font-weight: bold;
+    font-size: 26px;
+}
+
+/* Box centrale */
+.patient-box {
+    background-color: white;
+    margin-top: 12px; /* ancora più vicino al titolo */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #003344;
+    position: relative;
+    margin-left: 76px;
+    margin-right: 40px;
+    max-width: calc(100% - 120px);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Icona ingranaggio */
+.edit-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    cursor: pointer;
+}
+
+.gear-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Nome paziente */
+.patient-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px; /* dimezzato */
+    color: black;
+}
+
+.user-icon {
+    height: 60px;
+}
+
+/* Messaggio di conferma o errore */
+.message {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    color: black;
+}
+
+.message.success {
+    background-color: #d4edda;
+}
+
+.message.error {
+    background-color: #f8d7da;
+}
+
+/* Griglia dati */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; /* ridotto il gap */
+    margin-top: 0px; /* eliminato spazio inutile */
+    color: black;
+}
+
+.info-grid input,
+.info-grid textarea,
+.info-grid select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 4px;
+    border: 1px solid #003344;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Radio button e opzioni orizzontali */
+.horizontal-options {
+    display: flex;
+    gap: 20px;
+    margin-top: 4px;
+    align-items: center;
+}
+
+.input-block {
+    margin-top: 12px; /* più compatto */
+}
+
+.custom-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Bottone salva */
+.save-section {
+    margin-top: 16px; /* più compatto */
+    text-align: center;
+}
+
+.save-button {
+    padding: 8px 24px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Pulsante back */
+.back-button,
+.back-icon {
+    font-size: 36px;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    color: #003344;
+    cursor: pointer;
+}
+
+/* Stato iniziale */
+.loading {
+    padding: 24px;
+    color: black;
+}
+
+/* Responsive layout: mobile */
+@media (max-width: 768px) {
+    .patient-box {
+        margin-left: 16px;
+        margin-right: 16px;
+        max-width: unset;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .horizontal-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

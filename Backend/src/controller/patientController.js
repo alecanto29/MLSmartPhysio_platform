@@ -51,10 +51,24 @@ const deleteNewPatient = async (req, res) => {
     }
 };
 
+const updatePatientInfo = async (req, res) => {
+    try {
+        const updatedPatient = await patientService.updatePatientInfo(
+            req.body,
+            req.user.id,
+            req.params.id
+        );
+        res.status(200).json(updatedPatient);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getAllPatients,
     getPatientById,
     getAllCriticPatients,
     createNewPatient,
-    deleteNewPatient
+    deleteNewPatient,
+    updatePatientInfo
 };

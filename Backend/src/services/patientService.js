@@ -1,5 +1,6 @@
 const patientModel = require("../models/Patient");
 const bcrypt = require("bcrypt");
+const appointmentsModel = require("../models/Appointment");
 
 // Tutti i pazienti del medico loggato
 const getAllPatients = async (doctorId) => {
@@ -38,13 +39,41 @@ const createNewPatient = async (patientData, doctorId) => {
 
 // Eliminazione paziente SOLO se appartiene al medico loggato
 const deleteNewPatient = async (patientId, doctorId) => {
-    return await patientModel.findOneAndDelete({ _id: patientId, primaryDoctor: doctorId });
+    await appointmentsModel.deleteMany({ patient: patientId });
+
+    return await patientModel.findOneAndDelete({
+        _id: patientId,
+        primaryDoctor: doctorId
+    });
 };
+
+const updatePatientInfo = async (patientData, doctorID, patientID) => {
+    // Verifica che il paziente appartenga al medico
+    const patient = await patientModel.findOne({ _id: patientID, primaryDoctor: doctorID });
+    if (!patient) {
+        throw new Error("Paziente non trovato o non autorizzato");
+    }
+
+    // Aggiorna solo i campi specificati
+    patient.name = patientData.name;
+    patient.surname = patientData.surname;
+    patient.fiscalCode = patientData.fiscalCode;
+    patient.healthCardNumber = patientData.healthCardNumber;
+    patient.gender = patientData.gender;
+    patient.birthDate = patientData.birthDate;
+    patient.medicalHistory = patientData.medicalHistory;
+    patient.isCritical = patientData.isCritical;
+
+    await patient.save();
+    return patient;
+};
+
 
 module.exports = {
     getAllPatients,
     getPatientById,
     getAllCriticPatients,
     createNewPatient,
-    deleteNewPatient
+    deleteNewPatient,
+    updatePatientInfo
 };

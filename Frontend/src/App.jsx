@@ -8,6 +8,7 @@ import AddPatientPage from "./Pages/AddPatientPage.jsx";
 import AppointmentCalendar from "./Pages/AppointmentsPages/AppointmentsListPage.jsx";
 import TakeAppointmentPage from "./Pages/AppointmentsPages/TakeAppointmentPage.jsx";
 import PatientListPage from "./Pages/PatientListPage.jsx";
+import PatientDetailsPage from "./Pages/PatientDetailsPage.jsx";
 
 const App = () => {
     return (
@@ -21,6 +22,7 @@ const App = () => {
                 <Route path="/appointments" element={<AppointmentCalendar />} />
                 <Route path="/takeappointments" element={<TakeAppointmentPage />} />
                 <Route path="/patients-list" element={<PatientListPage />} />
+                <Route path="/patient-details/:id" element={<PatientDetailsPage />} />
             </Routes>
         </Router>
     );

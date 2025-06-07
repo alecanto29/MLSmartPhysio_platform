@@ -112,22 +112,26 @@ const AddPatientPage = () => {
                 <form className="form-grid">
                     <div className="input-block">
                         <label>Name</label>
-                        <TextFieldModel placeholder="Insert name here..." value={name} onChange={(e) => setName(e.target.value)} />
+                        <TextFieldModel placeholder="Insert name here..." value={name}
+                                        onChange={(e) => setName(e.target.value)}/>
                     </div>
 
                     <div className="input-block">
                         <label>Surname</label>
-                        <TextFieldModel placeholder="Insert surname here..." value={surname} onChange={(e) => setSurname(e.target.value)} />
+                        <TextFieldModel placeholder="Insert surname here..." value={surname}
+                                        onChange={(e) => setSurname(e.target.value)}/>
                     </div>
 
                     <div className="input-block">
                         <label>Fiscal code</label>
-                        <TextFieldModel placeholder="Insert fiscal code here..." value={fiscalCode} onChange={(e) => setFiscalCode(e.target.value)} />
+                        <TextFieldModel placeholder="Insert fiscal code here..." value={fiscalCode}
+                                        onChange={(e) => setFiscalCode(e.target.value)}/>
                     </div>
 
                     <div className="input-block">
                         <label>Health card number</label>
-                        <TextFieldModel placeholder="Insert Health card number here..." value={healthCardNumber} onChange={(e) => setHealthCardNumber(e.target.value)} />
+                        <TextFieldModel placeholder="Insert Health card number here..." value={healthCardNumber}
+                                        onChange={(e) => setHealthCardNumber(e.target.value)}/>
                     </div>
 
                     <div className="input-block">
@@ -165,26 +169,41 @@ const AddPatientPage = () => {
 
 
                     <div className="input-block full-width">
-                        <label>Gender</label>
-                        <div className="gender-options">
-                            <label>
-                                <input type="radio" name="gender" value="Male" checked={gender === "Male"} onChange={() => setGender("Male")} />
+                        <label htmlFor="gender-selection">Gender</label>
+                        <div id="gender-selection" className="gender-options">
+                            <label className="custom-radio">
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Male"
+                                    checked={gender === "Male"}
+                                    onChange={() => setGender("Male")}
+                                />
+                                <span className="radio-circle"></span>
                                 Male
                             </label>
-                            <label>
-                                <input type="radio" name="gender" value="Female" checked={gender === "Female"} onChange={() => setGender("Female")} />
+                            <label className="custom-radio">
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Female"
+                                    checked={gender === "Female"}
+                                    onChange={() => setGender("Female")}
+                                />
+                                <span className="radio-circle"></span>
                                 Female
                             </label>
                         </div>
                     </div>
 
+
                 </form>
 
                 <div className="confirm-button-wrapper">
-                    <ButtonModel buttonText={"Confirm"} onClick={handleAddPatient} />
+                    <ButtonModel buttonText={"Confirm"} onClick={handleAddPatient}/>
                 </div>
 
-                <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
+                <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")}/>
             </div>
 
             {/* ICONA HOME */}

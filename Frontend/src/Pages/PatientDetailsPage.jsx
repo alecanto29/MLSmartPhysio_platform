@@ -1,0 +1,218 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
+import "../ComponentsCSS/PatientDetailsPageStyle.css";
+
+const PatientDetailsPage = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+
+    const [patient, setPatient] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("success");
+
+    useEffect(() => {
+        handlePatientDetails();
+    }, []);
+
+    const handlePatientDetails = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`/smartPhysio/patient/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setPatient(response.data);
+        } catch (error) {
+            console.error("Errore durante il recupero dei dati del paziente");
+        }
+    };
+
+    const updatePatientDetails = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.put(`/smartPhysio/patient/${id}`, patient, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setMessage("Paziente modificato con successo");
+            setMessageType("success");
+            setIsEditMode(false);
+        } catch (error) {
+            setMessageType("error");
+            const errorMsg =
+                typeof error.response?.data === "string"
+                    ? error.response.data
+                    : error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Errore durante la modifica";
+            setMessage(errorMsg);
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setPatient({
+            ...patient,
+            [name]: type === "checkbox" ? checked : value,
+        });
+    };
+
+    const formatGender = (genderCode) => {
+        switch (genderCode) {
+            case "M":
+                return "Male";
+            case "F":
+                return "Female";
+            case "Other":
+                return "Other";
+            default:
+                return genderCode;
+        }
+    };
+
+    if (!patient) return <p className="loading">Caricamento in corso...</p>;
+
+    return (
+        <div className="page-container">
+            <div className="header">
+                <img src="/images/app_logo.png" className="logo" alt="logo" />
+                <div className="user">
+                    {localStorage.getItem("doctorName") || "Utente"}{" "}
+                    <i className="bi bi-person-circle icon" />
+                </div>
+            </div>
+
+            <div className="title-section">
+                <img src="/images/patient_blue.png" alt="icon" className="title-icon" />
+                <h2 className="title-text">Patient Details</h2>
+            </div>
+
+            <div className="patient-box">
+                <div className="edit-icon" onClick={() => setIsEditMode(!isEditMode)}>
+                    <img src="/images/update_icon.png" alt="Edit" className="gear-image" />
+                </div>
+
+                <div className="patient-header">
+                    <img
+                        src={patient.isCritical ? "/images/red_patient.png" : "/images/green_patient.png"}
+                        alt="patient avatar"
+                        className="user-icon"
+                    />
+                    <h3>{patient.name} {patient.surname}</h3>
+                </div>
+
+                {message && (
+                    <div className={`message ${messageType}`}>
+                        {message}
+                    </div>
+                )}
+
+                <div className="info-grid">
+                    {/* Colonna sinistra */}
+                    <div>
+                        <p><strong>Name:</strong> {isEditMode ? <input name="name" value={patient.name} onChange={handleChange} /> : patient.name}</p>
+                        <p><strong>Surname:</strong> {isEditMode ? <input name="surname" value={patient.surname} onChange={handleChange} /> : patient.surname}</p>
+                        <p><strong>Fiscal Code:</strong> {isEditMode ? <input name="fiscalCode" value={patient.fiscalCode} onChange={handleChange} /> : patient.fiscalCode}</p>
+                        <p><strong>Health Card Number:</strong> {isEditMode ? <input name="healthCardNumber" value={patient.healthCardNumber} onChange={handleChange} /> : patient.healthCardNumber}</p>
+                    </div>
+
+                    {/* Colonna destra */}
+                    <div>
+                        <p><strong>Birth Date:</strong> {isEditMode ? (
+                            <input type="date" name="birthDate" value={patient.birthDate?.substring(0, 10)} onChange={handleChange} />
+                        ) : new Date(patient.birthDate).toLocaleDateString()}</p>
+
+                        <p><strong>Medical history:</strong></p>
+                        {isEditMode ? (
+                            <textarea name="medicalHistory" value={patient.medicalHistory} onChange={handleChange} rows="3" style={{ width: "100%" }} />
+                        ) : (
+                            <p>{patient.medicalHistory}</p>
+                        )}
+
+                        {/* Gender */}
+                        {isEditMode ? (
+                            <div className="input-block full-width">
+                                <label htmlFor="gender-selection"><strong>Gender:</strong></label>
+                                <div id="gender-selection" className="horizontal-options">
+                                    <label className="custom-radio">
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            value="Male"
+                                            checked={patient.gender === "Male"}
+                                            onChange={handleChange}
+                                        />
+                                        <span className="radio-circle"></span>
+                                        Male
+                                    </label>
+                                    <label className="custom-radio">
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            value="Female"
+                                            checked={patient.gender === "Female"}
+                                            onChange={handleChange}
+                                        />
+                                        <span className="radio-circle"></span>
+                                        Female
+                                    </label>
+                                </div>
+                            </div>
+                        ) : (
+                            <p><strong>Gender:</strong> {patient.gender}</p>
+                        )}
+
+                        {/* Is Critical */}
+                        {isEditMode ? (
+                            <div className="input-block full-width">
+                                <label htmlFor="critical-selection"><strong>Is critical:</strong></label>
+                                <div id="critical-selection" className="horizontal-options">
+                                    <label className="custom-radio">
+                                        <input
+                                            type="radio"
+                                            name="isCritical"
+                                            value={true}
+                                            checked={patient.isCritical === true}
+                                            onChange={() => setPatient({ ...patient, isCritical: true })}
+                                        />
+                                        <span className="radio-circle"></span>
+                                        Yes
+                                    </label>
+                                    <label className="custom-radio">
+                                        <input
+                                            type="radio"
+                                            name="isCritical"
+                                            value={false}
+                                            checked={patient.isCritical === false}
+                                            onChange={() => setPatient({ ...patient, isCritical: false })}
+                                        />
+                                        <span className="radio-circle"></span>
+                                        No
+                                    </label>
+                                </div>
+                            </div>
+                        ) : (
+                            <p><strong>Is critical:</strong> {patient.isCritical ? "Yes" : "No"}</p>
+                        )}
+                    </div>
+                </div>
+
+
+                {isEditMode && (
+                    <div className="save-section">
+                        <button className="save-button" onClick={updatePatientDetails}>
+                            Save Changes
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <i
+                className="bi bi-arrow-left back-icon"
+                onClick={() => navigate("/patients-list")}
+            />
+        </div>
+    );
+};
+
+export default PatientDetailsPage;

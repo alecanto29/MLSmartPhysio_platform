@@ -84,6 +84,7 @@ const deleteOldAppointments = async () => {
     }
 };
 
+
 module.exports = {
     getAllAppointments,
     getAllAppointmentsDate,
