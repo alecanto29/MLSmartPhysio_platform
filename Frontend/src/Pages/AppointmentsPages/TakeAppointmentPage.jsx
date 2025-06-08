@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../ComponentsCSS/TakeAppointmentPageStyle.css";
 import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
+import Header from "../../AtomicComponents/Header.jsx";
 
 const TakeAppointmentPage = () => {
     const [patients, setPatients] = useState([]);
@@ -43,22 +44,11 @@ const TakeAppointmentPage = () => {
             const token = localStorage.getItem("token");
             await axios.post(
                 "/smartPhysio/appointments/newAppointments",
-                {
-                    date,
-                    time,
-                    notes,
-                    specificPatient,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+                { date, time, notes, specificPatient },
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-
             setMessage("Appuntamento creato con successo");
             setMessageType("success");
-
             setShowPopup(false);
             setDate("");
             setTime("");
@@ -79,42 +69,7 @@ const TakeAppointmentPage = () => {
     return (
         <div className="page-container">
             {/* HEADER */}
-            <header style={{
-                position: 'absolute',
-                top: '30px',
-                left: '0',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: '0 40px',
-                boxSizing: 'border-box'
-            }}>
-                {/* LOGO IN ALTO A SINISTRA */}
-                <img
-                    src="/images/app_logo.png"
-                    alt="Logo"
-                    style={{
-                        height: '70px',
-                        objectFit: 'contain',
-                        marginTop: '0'
-                    }}
-                />
-
-                {/* INFO UTENTE IN ALTO A DESTRA */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    color: '#003344',
-                    marginTop: '0'
-                }}>
-                    <span>{localStorage.getItem("doctorName") || "Utente"}</span>
-                    <i className="bi bi-person-circle" style={{ fontSize: '28px' }}></i>
-                </div>
-            </header>
+            <Header />
 
             {/* TITOLO */}
             <div className="title-container">
@@ -138,11 +93,6 @@ const TakeAppointmentPage = () => {
                 ))}
             </ul>
 
-            {/* ICONA Indietro */}
-            <i
-                className="bi bi-arrow-left back-icon"
-                onClick={() => navigate("/appointments")}
-            />
             {/* POPUP */}
             {showPopup && (
                 <div className="popup-overlay">
@@ -170,7 +120,13 @@ const TakeAppointmentPage = () => {
                 </div>
             )}
 
+            {/* MESSAGE */}
             <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
+
+            {/* FRECCIA IN BASSO A DESTRA */}
+            <div className="back-icon-container" onClick={() => navigate("/appointments")}>
+                <i className="bi bi-arrow-left"></i>
+            </div>
         </div>
     );
 };

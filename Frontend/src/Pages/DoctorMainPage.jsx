@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import TextInfoModel from "../AtomicComponents/TextInfoModel.jsx";
 import "../ComponentsCSS/DoctorMainPageStyle.css";
+import Header from "../AtomicComponents/Header.jsx";
 
 
 const DoctorMainPage = () => {
@@ -75,13 +76,7 @@ const DoctorMainPage = () => {
 
     return (
         <div className="main-dashboard">
-            <div className="header">
-                <img src="/images/app_logo.png" alt="Logo" className="logo-img" />
-                <div className="user-info">
-                    <span>{localStorage.getItem("doctorName") || "Nome Cognome"}</span>
-                    <i className="bi bi-person-circle user-icon"></i>
-                </div>
-            </div>
+            <Header />
 
             <div className="actions-row">
                 <div onClick={() => navigate("/add-patient")} className="icon-box">

@@ -2,7 +2,7 @@
 .page-container {
     background-color: #b3ecff;
     min-height: 100vh;
-    padding: 20px 40px 40px 40px;
+    padding: 20px 40px;
     color: black;
 }
 
@@ -31,12 +31,14 @@
 .title-section {
     display: flex;
     align-items: center;
-    margin-top: 16px; /* ridotto ancora */
-    gap: 16px;
+    margin-top: 0px;
+    gap: -5px;
+
+    margin-left: 50px;
 }
 
 .title-icon {
-    height: 50px;
+    height: 60px;
 }
 
 .title-text {
@@ -48,7 +50,7 @@
 /* Box centrale */
 .patient-box {
     background-color: white;
-    margin-top: 12px; /* ancora più vicino al titolo */
+    margin-top: 10px;
     padding: 20px;
     border-radius: 8px;
     border: 1px solid #003344;
@@ -57,7 +59,6 @@
     margin-right: 40px;
     max-width: calc(100% - 120px);
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 /* Icona ingranaggio */
@@ -75,20 +76,33 @@
     display: block;
 }
 
-/* Nome paziente */
+/* Intestazione paziente */
 .patient-header {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 12px; /* dimezzato */
+    margin-top: -40px;
+    margin-bottom: -30px;
     color: black;
 }
 
-.user-icon {
-    height: 60px;
+.patient-header h3 {
+    margin-top: 20px; /* oppure 10px, 12px, ecc. a seconda di quanto vuoi abbassarlo */
 }
 
-/* Messaggio di conferma o errore */
+textarea[name="medicalHistory"] {
+    resize: none !important;
+    overflow: auto;
+}
+
+.user-icon {
+    height: 70px;
+    position: relative;
+    top: 20px; /* 👈 sposta solo l’icona verso il basso */
+}
+
+
+/* Messaggi */
 .message {
     padding: 12px;
     border-radius: 6px;
@@ -104,42 +118,57 @@
     background-color: #f8d7da;
 }
 
-/* Griglia dati */
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px; /* ridotto il gap */
-    margin-top: 0px; /* eliminato spazio inutile */
-    color: black;
+/* Griglia a righe */
+.info-grid-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
-.info-grid input,
-.info-grid textarea,
-.info-grid select {
-    width: 100%;
+/* Ogni riga contiene due campi */
+.row {
+    display: flex;
+    gap: 24px;
+}
+
+/* Ogni campo */
+.field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input, textarea uniformati */
+.field input,
+.field textarea,
+.field select {
+    margin-top: 6px;
     padding: 10px;
-    margin-top: 4px;
     border: 1px solid #003344;
     border-radius: 5px;
+    font-size: 14px;
     background-color: white;
     color: black;
-    font-size: 14px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
-textarea {
+.field textarea {
     resize: vertical;
 }
 
-/* Radio button e opzioni orizzontali */
+/* Visualizzazione medicalHistory */
+.medical-display {
+    padding-top: 6px;
+    font-size: 14px;
+}
+
+/* Radio buttons */
 .horizontal-options {
     display: flex;
     gap: 20px;
-    margin-top: 4px;
+    margin-top: 6px;
     align-items: center;
-}
-
-.input-block {
-    margin-top: 12px; /* più compatto */
 }
 
 .custom-radio {
@@ -150,12 +179,12 @@ textarea {
 
 /* Bottone salva */
 .save-section {
-    margin-top: 16px; /* più compatto */
+    margin-top: 24px;
     text-align: center;
 }
 
 .save-button {
-    padding: 8px 24px;
+    padding: 10px 26px;
     background-color: #0077cc;
     color: white;
     border: none;
@@ -163,15 +192,22 @@ textarea {
     cursor: pointer;
 }
 
-/* Pulsante back */
-.back-button,
-.back-icon {
-    font-size: 36px;
+/* Icona ritorno */
+.back-icon-container {
     position: fixed;
     bottom: 20px;
-    left: 20px;
-    color: #003344;
+    right: 20px;
+    z-index: 9999;
     cursor: pointer;
+}
+
+.back-icon-container i {
+    font-size: 36px;
+    color: #003344;
+}
+
+.back-icon-container i:hover {
+    color: #005566;
 }
 
 /* Stato iniziale */
@@ -180,7 +216,8 @@ textarea {
     color: black;
 }
 
-/* Responsive layout: mobile */
+
+/* Responsive */
 @media (max-width: 768px) {
     .patient-box {
         margin-left: 16px;
@@ -188,8 +225,8 @@ textarea {
         max-width: unset;
     }
 
-    .info-grid {
-        grid-template-columns: 1fr;
+    .row {
+        flex-direction: column;
     }
 
     .horizontal-options {

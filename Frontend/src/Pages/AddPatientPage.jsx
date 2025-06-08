@@ -6,6 +6,7 @@ import React from "react";
 import ButtonModel from "../AtomicComponents/ButtonModel.jsx";
 import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
 import "../ComponentsCSS/AddPatientPageStyle.css";
+import Header from "../AtomicComponents/Header.jsx";
 
 const AddPatientPage = () => {
     const [name, setName] = useState("");
@@ -64,44 +65,9 @@ const AddPatientPage = () => {
     }
 
     return (
-        <div className="page-container">
+        <div className="page-container" style={{ position: "relative" }}>
             {/* HEADER */}
-            <header style={{
-                position: 'absolute',
-                top: '30px',
-                left: '0',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: '0 40px',
-                boxSizing: 'border-box'
-            }}>
-                {/* LOGO IN ALTO A SINISTRA */}
-                <img
-                    src="/images/app_logo.png"
-                    alt="Logo"
-                    style={{
-                        height: '70px',
-                        objectFit: 'contain',
-                        marginTop: '0'
-                    }}
-                />
-
-                {/* INFO UTENTE IN ALTO A DESTRA */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    color: '#003344',
-                    marginTop: '0'
-                }}>
-                    <span>{localStorage.getItem("doctorName") || "Utente"}</span>
-                    <i className="bi bi-person-circle" style={{ fontSize: '28px' }}></i>
-                </div>
-            </header>
+            <Header />
 
             {/* MAIN FORM */}
             <div className="form-container">

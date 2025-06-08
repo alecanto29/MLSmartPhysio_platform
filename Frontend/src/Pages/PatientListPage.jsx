@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
+import Header from "../AtomicComponents/Header.jsx";
 
 const PatientListPage = () => {
     const [patients, setPatients] = useState([]);
@@ -67,22 +68,7 @@ const PatientListPage = () => {
     return (
         <div className="page-container" style={{ backgroundColor: '#ccf2ff', minHeight: '100vh' }}>
             {/* HEADER */}
-            <header style={{
-                position: 'absolute',
-                top: '30px',
-                left: '0',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: '0 40px'
-            }}>
-                <img src="/images/app_logo.png" alt="Logo" style={{ height: '70px' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold', fontSize: '16px', color: '#003344' }}>
-                    <span>{localStorage.getItem("doctorName") || "Utente"}</span>
-                    <i className="bi bi-person-circle" style={{ fontSize: '28px' }}></i>
-                </div>
-            </header>
+            <Header />
 
             {/* TITOLO */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '80px', marginLeft: '80px', marginBottom: '30px' }}>

@@ -9,7 +9,8 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; /* cambia da 'center' */
+    padding-top: 40px; /* spazio superiore gestito meglio */
     height: 100vh;
     width: 100vw;
     background-color: #c8f1ff;
@@ -19,21 +20,27 @@ body, html {
 .login-logo {
     width: 300px;
     height: auto;
-    margin-bottom: 40px;
+    margin-bottom: 10px; /* meno spazio sotto */
+    margin-top: 50px;
 }
 
-.user-icon i{
+.user-icon {
+    margin-top: 10px; /* poco spazio sopra */
+    margin-bottom: 50px; /* meno spazio sotto */
+}
+
+.user-icon i {
     font-size: 60px;
     color: #003344;
-    margin-top: 20px;     /* icona un po' più in basso */
-    margin-bottom: 30px;
 }
+
+
 
 .login-form {
     width: 100%;
     max-width: 400px;
     padding: 0 20px;       /* rimosso padding verticale */
-    margin-top: -10px;     /* spinge verso l'alto il blocco form */
+    margin-top: -20px;     /* spinge verso l'alto il blocco form */
     text-align: center;
 }
 

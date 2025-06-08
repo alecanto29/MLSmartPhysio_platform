@@ -5,6 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import axios from 'axios';
 import { Paper, Typography, Button, GlobalStyles } from '@mui/material';
+import Header from "../../AtomicComponents/Header.jsx";
 
 const AppointmentCalendar = () => {
 
@@ -52,42 +53,7 @@ const AppointmentCalendar = () => {
     return (
         <div className="page-container" style={{ backgroundColor: '#ccf2ff', minHeight: '100vh', position: 'relative' }}>
             {/* HEADER */}
-            <header style={{
-                position: 'absolute',
-                top: '30px',
-                left: '0',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: '0 40px',
-                boxSizing: 'border-box'
-            }}>
-                {/* LOGO IN ALTO A SINISTRA */}
-                <img
-                    src="/images/app_logo.png"
-                    alt="Logo"
-                    style={{
-                        height: '70px',
-                        objectFit: 'contain',
-                        marginTop: '0'
-                    }}
-                />
-
-                {/* INFO UTENTE IN ALTO A DESTRA */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    color: '#003344',
-                    marginTop: '0'
-                }}>
-                    <span>{localStorage.getItem("doctorName") || "Utente"}</span>
-                    <i className="bi bi-person-circle" style={{ fontSize: '28px' }}></i>
-                </div>
-            </header>
+            <Header />
 
 
 

@@ -107,93 +107,37 @@ const PatientDetailsPage = () => {
                     </div>
                 )}
 
-                <div className="info-grid">
-                    {/* Colonna sinistra */}
-                    <div>
-                        <p><strong>Name:</strong> {isEditMode ? <input name="name" value={patient.name} onChange={handleChange} /> : patient.name}</p>
-                        <p><strong>Surname:</strong> {isEditMode ? <input name="surname" value={patient.surname} onChange={handleChange} /> : patient.surname}</p>
-                        <p><strong>Fiscal Code:</strong> {isEditMode ? <input name="fiscalCode" value={patient.fiscalCode} onChange={handleChange} /> : patient.fiscalCode}</p>
-                        <p><strong>Health Card Number:</strong> {isEditMode ? <input name="healthCardNumber" value={patient.healthCardNumber} onChange={handleChange} /> : patient.healthCardNumber}</p>
+                <div className="info-grid-rows">
+                    <div className="row">
+                        <div className="field"><strong>Name:</strong> {isEditMode ? <input name="name" value={patient.name} onChange={handleChange} /> : patient.name}</div>
+                        <div className="field"><strong>Birth Date:</strong> {isEditMode ? <input type="date" name="birthDate" value={patient.birthDate?.substring(0, 10)} onChange={handleChange} /> : new Date(patient.birthDate).toLocaleDateString()}</div>
                     </div>
-
-                    {/* Colonna destra */}
-                    <div>
-                        <p><strong>Birth Date:</strong> {isEditMode ? (
-                            <input type="date" name="birthDate" value={patient.birthDate?.substring(0, 10)} onChange={handleChange} />
-                        ) : new Date(patient.birthDate).toLocaleDateString()}</p>
-
-                        <p><strong>Medical history:</strong></p>
-                        {isEditMode ? (
-                            <textarea name="medicalHistory" value={patient.medicalHistory} onChange={handleChange} rows="3" style={{ width: "100%" }} />
-                        ) : (
-                            <p>{patient.medicalHistory}</p>
-                        )}
-
-                        {/* Gender */}
-                        {isEditMode ? (
-                            <div className="input-block full-width">
-                                <label htmlFor="gender-selection"><strong>Gender:</strong></label>
-                                <div id="gender-selection" className="horizontal-options">
-                                    <label className="custom-radio">
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="Male"
-                                            checked={patient.gender === "Male"}
-                                            onChange={handleChange}
-                                        />
-                                        <span className="radio-circle"></span>
-                                        Male
-                                    </label>
-                                    <label className="custom-radio">
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="Female"
-                                            checked={patient.gender === "Female"}
-                                            onChange={handleChange}
-                                        />
-                                        <span className="radio-circle"></span>
-                                        Female
-                                    </label>
-                                </div>
+                    <div className="row">
+                        <div className="field"><strong>Surname:</strong> {isEditMode ? <input name="surname" value={patient.surname} onChange={handleChange} /> : patient.surname}</div>
+                        <div className="field">
+                            <strong>Medical history:</strong>
+                            {isEditMode
+                                ? <textarea name="medicalHistory" value={patient.medicalHistory} onChange={handleChange} rows="3" />
+                                : <div className="medical-display">{patient.medicalHistory}</div>}
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="field"><strong>Fiscal Code:</strong> {isEditMode ? <input name="fiscalCode" value={patient.fiscalCode} onChange={handleChange} /> : patient.fiscalCode}</div>
+                        <div className="field"><strong>Gender:</strong> {isEditMode ? (
+                            <div className="horizontal-options">
+                                <label className="custom-radio"><input type="radio" name="gender" value="Male" checked={patient.gender === "Male"} onChange={handleChange} /> <span className="radio-circle"></span>Male</label>
+                                <label className="custom-radio"><input type="radio" name="gender" value="Female" checked={patient.gender === "Female"} onChange={handleChange} /> <span className="radio-circle"></span>Female</label>
                             </div>
-                        ) : (
-                            <p><strong>Gender:</strong> {patient.gender}</p>
-                        )}
-
-                        {/* Is Critical */}
-                        {isEditMode ? (
-                            <div className="input-block full-width">
-                                <label htmlFor="critical-selection"><strong>Is critical:</strong></label>
-                                <div id="critical-selection" className="horizontal-options">
-                                    <label className="custom-radio">
-                                        <input
-                                            type="radio"
-                                            name="isCritical"
-                                            value={true}
-                                            checked={patient.isCritical === true}
-                                            onChange={() => setPatient({ ...patient, isCritical: true })}
-                                        />
-                                        <span className="radio-circle"></span>
-                                        Yes
-                                    </label>
-                                    <label className="custom-radio">
-                                        <input
-                                            type="radio"
-                                            name="isCritical"
-                                            value={false}
-                                            checked={patient.isCritical === false}
-                                            onChange={() => setPatient({ ...patient, isCritical: false })}
-                                        />
-                                        <span className="radio-circle"></span>
-                                        No
-                                    </label>
-                                </div>
+                        ) : patient.gender}</div>
+                    </div>
+                    <div className="row">
+                        <div className="field"><strong>Health Card Number:</strong> {isEditMode ? <input name="healthCardNumber" value={patient.healthCardNumber} onChange={handleChange} /> : patient.healthCardNumber}</div>
+                        <div className="field"><strong>Is critical:</strong> {isEditMode ? (
+                            <div className="horizontal-options">
+                                <label className="custom-radio"><input type="radio" name="isCritical" value={true} checked={patient.isCritical === true} onChange={() => setPatient({ ...patient, isCritical: true })} /><span className="radio-circle"></span>Yes</label>
+                                <label className="custom-radio"><input type="radio" name="isCritical" value={false} checked={patient.isCritical === false} onChange={() => setPatient({ ...patient, isCritical: false })} /><span className="radio-circle"></span>No</label>
                             </div>
-                        ) : (
-                            <p><strong>Is critical:</strong> {patient.isCritical ? "Yes" : "No"}</p>
-                        )}
+                        ) : patient.isCritical ? "Yes" : "No"}</div>
                     </div>
                 </div>
 
@@ -207,10 +151,9 @@ const PatientDetailsPage = () => {
                 )}
             </div>
 
-            <i
-                className="bi bi-arrow-left back-icon"
-                onClick={() => navigate("/patients-list")}
-            />
+            <div className="back-icon-container" onClick={() => navigate("/patients-list")}>
+                <i className="bi bi-arrow-left"></i>
+            </div>
         </div>
     );
 };
