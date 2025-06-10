@@ -2,6 +2,7 @@
 const inertialData = require("../models/inertialDataModel");
 const {Parser} = require("json2csv");
 
+
 //Metodo per ricavare tutti inerziali i dati inerziali dal db
 async function getAllInertialData(){
     try{
@@ -10,6 +11,11 @@ async function getAllInertialData(){
     }catch(error){
         throw new Error(`Errore durante il recupero dei dati sEMG: ${error.message}`);
     }
+}
+
+const getAllInertialDataBySession = async (sessionID) =>{
+    const sessionData = await inertialData.find({sessionId: sessionID});
+    return sessionData
 }
 
 //Metodo per ricavare tutti i dati inerziali di un canale specifico
@@ -51,8 +57,12 @@ async function deleteAllInertialData(){
     }
 }
 
+const deleteAllInertialDataBySession = async (sessionID) =>{
+    return await inertialData.deleteMany({sessionId: sessionID});
+}
+
 //Metodo per salvare i dati inerziali sul db
-async function saveInertialData(dataArray) {
+async function saveInertialData(dataArray, sessionID) {
     try {
         // Filtra solo le sequenze valide di 9 elementi
         const validData = dataArray.filter(entry =>
@@ -68,7 +78,10 @@ async function saveInertialData(dataArray) {
         }
 
         //Adattamento dei dati al formato previsto dal modello inertialDataModel che dichiara una prop. data
-        const formattedData = validData.map(entry => ({ data: entry }));
+        const formattedData = validData.map(entry => ({
+            data: entry,
+            sessionId: sessionID
+        }));
 
         //salva tutti gli oggetti formattedData nel database MongoDB in una sola operazione (mongoose)
         await inertialData.insertMany(formattedData);
@@ -109,5 +122,11 @@ async function InertialasCSVexport() {
 
 
 module.exports = {
-    getAllInertialData, getDataByChannel, deleteAllInertialData, saveInertialData, InertialasCSVexport
+    getAllInertialData,
+    getAllInertialDataBySession,
+    getDataByChannel,
+    deleteAllInertialData,
+    deleteAllInertialDataBySession,
+    saveInertialData,
+    InertialasCSVexport
 }

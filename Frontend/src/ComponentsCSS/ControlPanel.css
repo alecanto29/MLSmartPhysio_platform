@@ -12,18 +12,19 @@ html, body {
     overflow: hidden;
 }
 
+
 /* Contenitore principale a tutta pagina */
 .main-container {
-    position: fixed;
-    top: 62px;
-    left: 0;
+    position: relative;
+    padding-top: 40px; /* spazio per evitare sovrapposizione con Header */
     height: 100vh;
     width: 100vw;
-    background-color: #D6DAE6; /* grigio chiaro */
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: auto 1fr auto;
-    padding: 24px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: #C9EEFF; /* sfondo azzurro */
 }
 
 /* Titolo + DropDown in alto a sinistra */
@@ -52,7 +53,7 @@ html, body {
     justify-content: flex-end;
     align-items: flex-end;
     gap: 12px;
-    margin-bottom: 54px;
+    margin-bottom: 30px;
 }
 
 .bottom-left {
@@ -62,7 +63,7 @@ html, body {
     align-items: flex-end;
     justify-content: flex-start;
     padding: 16px;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
 }
 
 
@@ -175,4 +176,25 @@ html, body {
 
 .graphContainer.scroll-enabled::-webkit-scrollbar-thumb:hover {
     background-color: #03314F; /* blu più scuro per l'hover */
+}
+.top-center {
+    grid-row: 1;
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+}
+
+/* Icone home e back */
+.top-icon {
+    font-size: 28px;
+    color: #03314F;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.top-icon:hover {
+    transform: scale(1.1);
+    color: #2563eb;
 }

@@ -1,4 +1,5 @@
-const serialService = require("../services/serialService.js")
+const serialService = require("../services/serialService.js");
+const sessionService = require("../services/sessionService");
 
 const startScanning = async () => {
     try {
@@ -25,21 +26,23 @@ const getStatus = (req, res) => {
 
 const sendMessage = async (req, res) => {
     try {
-        //invio del comando ricevuto dal body della richiesta
         const command = req.body.data[0].replace("\\r", "\r");
-        console.log(`Comando ricevuto dal client: ${command}`);
+        const sessionID = req.body.sessionId;
 
-        //chiamata al service per mandare il comando ricevuto da richiesta alle board
+        if (!sessionID) {
+            return res.status(400).json({ error: "sessionId mancante nel body" });
+        }
+
+        console.log(`Comando ricevuto: ${command} (sessionId: ${sessionID})`);
+
         await serialService.sendSequentially(command);
 
-        //se comando Start allora inizio trasmissione dati
         if (command === "Start\r") {
             console.log("Avvio lettura dati...");
-            serialService.startReading();
+            serialService.startReading(sessionID);
         }
 
         res.status(200).json({ message: "Comando inviato con successo" });
-
     } catch (error) {
         console.error("Errore nell'invio dei dati: ", error);
         res.status(500).json({ error: "Errore nell'invio dei dati." });

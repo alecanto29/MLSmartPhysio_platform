@@ -9,6 +9,7 @@ import AppointmentCalendar from "./Pages/AppointmentsPages/AppointmentsListPage.
 import TakeAppointmentPage from "./Pages/AppointmentsPages/TakeAppointmentPage.jsx";
 import PatientListPage from "./Pages/PatientListPage.jsx";
 import PatientDetailsPage from "./Pages/PatientDetailsPage.jsx";
+import ConnectionGateModel from "./Pages/SessionPages/ConnectionGateModel.jsx";
 
 const App = () => {
     return (
@@ -23,6 +24,7 @@ const App = () => {
                 <Route path="/takeappointments" element={<TakeAppointmentPage />} />
                 <Route path="/patients-list" element={<PatientListPage />} />
                 <Route path="/patient-details/:id" element={<PatientDetailsPage />} />
+                <Route path="/session/:id" element={<ConnectionGateModel />} />
             </Routes>
         </Router>
     );

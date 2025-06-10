@@ -49,6 +49,7 @@ const loginRoutes = require ("../src/routes/loginRoutes");
 const patientRoutes = require ("../src/routes/patienceRoutes");
 const doctorRoutes = require ("../src/routes/doctorRoutes");
 const appointmentsRoutes = require ("../src/routes/appointmentsRoutes");
+const sessionsRoutes = require ("../src/routes/sessionRoutes");
 
 app.use("/smartPhysio/semg", sEMGdataRoutes);
 app.use("/smartPhysio/inertial", inertialDataRoutes);
@@ -57,6 +58,7 @@ app.use("/smartPhysio/auth", loginRoutes);
 app.use("/smartPhysio/patient", patientRoutes);
 app.use("/smartPhysio/doctor", doctorRoutes);
 app.use("/smartPhysio/appointments", appointmentsRoutes);
+app.use("/smartPhysio/sessions", sessionsRoutes);
 
 // Porta server
 const PORT = process.env.PORT || 5000;

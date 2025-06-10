@@ -114,7 +114,7 @@ let sEMGTemp = "";
 //Stringa della sequenza trasmessa da IMU board
 let imuTemp = "";
 
-const handleSEMGRawData = async (data) => {
+const handleSEMGRawData = async (data, sessionID) => {
     //aggiunta dei dati in stringa al temp
     sEMGTemp += data.toString();
 
@@ -139,14 +139,14 @@ const handleSEMGRawData = async (data) => {
 
             //se il buffer raggiunge una quantità maggiore a 50 salvataggio dei dati sul db e svuotamento buffer
             if (sEMGBuffer.length >= 50) {
-                await sEMGService.savesEMGdata(sEMGBuffer);
+                await sEMGService.savesEMGdata(sEMGBuffer, sessionID);
                 sEMGBuffer = [];
             }
         }
     }
 };
 
-const handleIMURawData = async (data) => {
+const handleIMURawData = async (data, sessionID) => {
     imuTemp += data.toString();
     const sequences = imuTemp.split('\n');
     imuTemp = sequences.pop().trim();
@@ -159,7 +159,7 @@ const handleIMURawData = async (data) => {
             imuBuffer.push(parsed);
             if (io) io.emit("imuData", parsed);
             if (imuBuffer.length >= 50) {
-                await InertialService.saveInertialData(imuBuffer);
+                await InertialService.saveInertialData(imuBuffer, sessionID);
                 imuBuffer = [];
             }
         } else {
@@ -202,21 +202,19 @@ const parseFloatSequence = (sequence, expectedLength) => {
     return results.slice(0, expectedLength);  // Ritorna solo i primi 'expectedLength' valori
 };
 
-const startReading = () => {
+const startReading = (sessionID) => {
     if (!serialPorts.sEMG && !serialPorts.IMU) {
         console.warn("Nessuna porta seriale attiva per iniziare la lettura.");
     }
 
-    //set della porta sEMG alla gestione dei dati trasmessi con il metodo handleSEMGRawData
     if (serialPorts.sEMG) {
         serialPorts.sEMG.removeAllListeners("data");
-        serialPorts.sEMG.on("data", handleSEMGRawData);
+        serialPorts.sEMG.on("data", (data) => handleSEMGRawData(data, sessionID));
     }
 
-    //set della porta IMU alla gestione dei dati trasmessi con il metodo handleIMURawData
     if (serialPorts.IMU) {
         serialPorts.IMU.removeAllListeners("data");
-        serialPorts.IMU.on("data", handleIMURawData);
+        serialPorts.IMU.on("data", (data) => handleIMURawData(data, sessionID));
     }
 };
 

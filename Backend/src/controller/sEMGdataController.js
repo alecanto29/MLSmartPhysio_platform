@@ -19,6 +19,15 @@ const getData = async (req, res) => {
     }
 };
 
+const getAllsEMGdataBySession = async (req, res) => {
+    try{
+        const sessionData = await sEMGService.getAllsEMGdataBySession(req.params.id);
+        res.status(200).json(sessionData);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+
 const getDataByChannel = async (req, res) => {
     try {
         //otteniamo i dati sEMG relativi ad un canale passato per id preso dalla richiesta
@@ -38,6 +47,15 @@ const deleteAllsEMGdata = async (req, res) => {
         res.status(500).json({ error: "Errore eliminazione" });
     }
 };
+
+const deleteAllsEMGdataBySession = async (req, res) =>{
+    try{
+        const result = await sEMGService.deleteAllsEMGdataBySession(req.params.id);
+        res.json(result);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
 
 const sEMGexportAsCSV = async (req, res) => {
     try {
@@ -66,5 +84,7 @@ module.exports = {
     getData,
     getDataByChannel,
     deleteAllsEMGdata,
-    sEMGexportAsCSV
+    sEMGexportAsCSV,
+    deleteAllsEMGdataBySession,
+    getAllsEMGdataBySession
 };

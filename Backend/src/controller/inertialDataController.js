@@ -19,6 +19,15 @@ const getData = async (req, res) => {
     }
 };
 
+const getAllInertialDataBySession = async (req, res) => {
+    try{
+        const sessionData = await service.getAllInertialDataBySession(req.params.id);
+        res.status(200).json(sessionData);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+
 const getDataByChannel = async (req, res) => {
     try {
         //format json dei dati ricevuti dal service per singolo canale passato per id dalla richiesta
@@ -38,6 +47,15 @@ const deleteAllInertialData = async (req, res) => {
         res.status(500).json({ error: "Errore eliminazione" });
     }
 };
+
+const deleteAllInertialDataBySession = async (req, res) =>{
+    try{
+        const result = await service.deleteAllInertialDataBySession(req.params.id);
+        res.json(result);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
 
 const InertialExportAsCSV = async (req, res) => {
     try {
@@ -66,5 +84,7 @@ module.exports = {
     getData,
     getDataByChannel,
     deleteAllInertialData,
-    InertialExportAsCSV
+    InertialExportAsCSV,
+    getAllInertialDataBySession,
+    deleteAllInertialDataBySession
 }

@@ -5,14 +5,16 @@ import axios from "axios";
 import "../../ComponentsCSS/ControlPanel.css";
 import TimerModel from "./TimerModel.jsx";
 import GraphModel from "./GraphModel.jsx";
+import {useNavigate, useParams} from "react-router-dom";
 import Client from "../../Client.jsx";
+import Header from "../../AtomicComponents/Header.jsx";
 
 /**
  * Componente principale del pannello di controllo.
  * Permette la selezione del tipo di dato (sEMG/Inerziali),
  * avvio/arresto dello streaming e download dei dati.
  */
-const MainMenu = () => {
+const ControlPanel = () => {
     const dropdownItems = ["sEMG data", "Inertial data"];
     const [selectedItem, setSelectedItem] = useState("Graph type"); // Tipo di grafico selezionato
 
@@ -21,6 +23,10 @@ const MainMenu = () => {
     const [isStreaming, setIsStreaming] = useState(false);  // Stato streaming attivo
     const [graphData, setGraphData] = useState(Array(8).fill().map(() => [])); // Dati per i grafici
     const latestPayload = useRef(Array(8).fill(0)); // Ultimi valori ricevuti (buffer temporaneo)
+
+    const { id } = useParams();
+
+    const navigate = useNavigate();
 
     /**
      * Gestisce il riempimento progressivo dei grafici durante lo streaming.
@@ -70,8 +76,10 @@ const MainMenu = () => {
     const handleStart = async () => {
         try {
             timerRef.current?.start();
+            console.log(id);
             await axios.post("/smartPhysio/send", {
-                data: ["Start\\r"]
+                data: ["Start\\r"],
+                sessionId: id
             });
             setIsStreaming(!isStreaming);
         } catch (err) {
@@ -86,7 +94,8 @@ const MainMenu = () => {
         try {
             timerRef.current?.stop();
             await axios.post("/smartPhysio/send", {
-                data: ["Stop\\r"]
+                data: ["Stop\\r"],
+                sessionId: id
             });
             setIsStreaming(!isStreaming);
         } catch (err) {
@@ -166,6 +175,7 @@ const MainMenu = () => {
 
     return (
         <div className="main-container">
+
             {/* Dropdown per selezione tipo dati */}
             <div className="top-left">
                 <DropDownButtonModel
@@ -207,10 +217,28 @@ const MainMenu = () => {
                 />
             </div>
 
+            <div className="top-center">
+                <i
+                    className="bi bi-arrow-left top-icon"
+                    onClick={async () => {
+                        await handleStop();
+                        navigate("/patient-list");
+                    }}
+                ></i>
+
+                <i
+                    className="bi bi-house-door-fill top-icon"
+                    onClick={async () => {
+                        await handleStop();
+                        navigate("/doctor");
+                    }}
+                ></i>
+            </div>
+
             {/* Timer visibile solo internamente (ref) */}
             <TimerModel ref={timerRef} />
         </div>
     );
 };
 
-export default MainMenu;
+export default ControlPanel;

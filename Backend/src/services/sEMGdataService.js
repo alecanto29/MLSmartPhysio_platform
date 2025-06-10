@@ -11,6 +11,11 @@ async function getAllsEMGdata(){
     }
 }
 
+const getAllsEMGdataBySession = async (sessionID) =>{
+        const sessionData = await sEMGdata.find({sessionId: sessionID});
+        return sessionData
+}
+
 //Metodo per ricavare tutti i dati sEMG di un canale specifico
 async function getDataByChannel(channelNumber){
 
@@ -50,9 +55,13 @@ async function deleteAllsEMGdata(){
     }
 }
 
+const deleteAllsEMGdataBySession = async (sessionID) =>{
+    return await sEMGdata.deleteMany({sessionId: sessionID});
+}
+
 
 //Metodo per salvare i dati sEMG sul db
-async function savesEMGdata(dataArray) {
+async function savesEMGdata(dataArray, sessionID) {
     try {
         // Filtra solo le sequenze valide di 8 elementi
         const validData = dataArray.filter(entry =>
@@ -68,7 +77,10 @@ async function savesEMGdata(dataArray) {
         }
 
         //Adattamento dei dati al formato previsto dal modello sEMGdataModel che dichiara una prop. data
-        const formattedData = validData.map(entry => ({ data: entry }));
+        const formattedData = validData.map(entry => ({
+            data: entry,
+            sessionId: sessionID
+        }));
 
         //salva tutti gli oggetti formattedData nel database MongoDB in una sola operazione (mongoose)
         await sEMGdata.insertMany(formattedData);
@@ -106,4 +118,10 @@ async function sEMGasCSVexport() {
     }
 }
 
-module.exports = {getAllsEMGdata, getDataByChannel, deleteAllsEMGdata, savesEMGdata, sEMGasCSVexport};
+module.exports = {getAllsEMGdata,
+    getAllsEMGdataBySession,
+    getDataByChannel,
+    deleteAllsEMGdata,
+    deleteAllsEMGdataBySession,
+    savesEMGdata,
+    sEMGasCSVexport};

@@ -13,11 +13,6 @@ const sessionSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    status: {
-        type: String,
-        enum: ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "ERROR"],
-        default: "SCHEDULED"
-    },
     patient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Patients",

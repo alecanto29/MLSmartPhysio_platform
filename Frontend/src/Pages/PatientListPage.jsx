@@ -32,6 +32,48 @@ const PatientListPage = () => {
         setShowPopup(true);
     };
 
+    const createSession = async (patientId) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await axios.post("/smartPhysio/sessions", {
+                patient: patientId,
+                time: new Date().toISOString(),
+                data: [],
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const sessionId = response.data._id;
+
+            // ✅ salva localmente se ti serve
+            localStorage.setItem("activeSessionId", sessionId);
+
+            setMessage("Sessione creata con successo");
+            setMessageType("success");
+
+            // ✅ Redirect con session ID nell'URL
+            navigate(`/session/${sessionId}`);
+
+        } catch (error) {
+            setMessageType("error");
+
+            const errorMsg =
+                typeof error.response?.data === "string"
+                    ? error.response.data
+                    : error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Errore durante la creazione della sessione";
+
+            setMessage(errorMsg);
+        }
+    };
+
+
+
+
     const confirmDelete = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -126,7 +168,7 @@ const PatientListPage = () => {
                                     <span style={{ fontSize: '13px', color: '#003344' }}>Patient details</span>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
-                                    <img src="/images/session_registration.png" alt="register" style={{ height: '50px' }} />
+                                    <img src="/images/session_registration.png" alt="register" style={{ height: '50px' }} onClick={() => createSession(p._id)} />
                                     <span style={{ fontSize: '13px', color: '#003344' }}>Register session</span>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>

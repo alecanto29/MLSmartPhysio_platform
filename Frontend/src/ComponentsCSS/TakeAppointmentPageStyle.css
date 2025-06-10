@@ -203,3 +203,21 @@
 .message-handler-box.error {
     background-color: #dc3545;
 }
+
+.date-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.calendar-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.calendar-button .calendar-icon {
+    font-size: 1.2rem;
+    color: #007bff;
+}

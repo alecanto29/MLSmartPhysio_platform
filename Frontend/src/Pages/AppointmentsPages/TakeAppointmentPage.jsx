@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef  } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../ComponentsCSS/TakeAppointmentPageStyle.css";
@@ -14,6 +14,8 @@ const TakeAppointmentPage = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
+
+    const dateRef = useRef(null);
 
     const navigate = useNavigate();
 
@@ -99,10 +101,29 @@ const TakeAppointmentPage = () => {
                     <div className="popup-content">
                         <h3>New Appointment</h3>
                         <form onSubmit={handleSubmit}>
-                            <label>
+                            <label className="date-label-with-button">
                                 Date:
-                                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                                <div className="date-input-wrapper">
+                                    <input
+                                        type="date"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        required
+                                        ref={dateRef}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="calendar-button"
+                                        onClick={() =>
+                                            dateRef.current?.showPicker?.() ||
+                                            dateRef.current?.focus()
+                                        }
+                                    >
+                                        <i className="bi bi-calendar calendar-icon"></i>
+                                    </button>
+                                </div>
                             </label>
+
                             <label>
                                 Time:
                                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
