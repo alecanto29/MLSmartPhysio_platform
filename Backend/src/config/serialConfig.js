@@ -123,7 +123,7 @@ const sendTestCommand = (serial, reject, timeoutDuration = 3000, resolved, portP
         if (!resolved.called) { // Se non è stata risolta in tempo...
             resolved.called = true;
             closePortSafely(serial); // Chiude la porta
-            reject(); // Rifiuta la promessa
+            reject(new Error(`Timeout durante il test sulla porta ${portPath}`)); // ✅ Fixato
         }
     }, timeoutDuration);
 
@@ -220,10 +220,18 @@ const testCom = async () => {
 
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+let isTestRunning = false;
 
 const testComWithRetry = async (maxRetries = 0, retryDelayMs = 5000) => {
+    if (isTestRunning) {
+        console.warn("⚠️ testComWithRetry è già in esecuzione. Uscita anticipata.");
+        return null;
+    }
+
+    isTestRunning = true;
+    shouldStopRetries = false; // reset
+
     let attempts = 0;
-    shouldStopRetries = false; // reset all’inizio
 
     while (!shouldStopRetries) {
         console.log("Ciclo attivo in testComWithRetry (shouldStopRetries:", shouldStopRetries, ")");
@@ -234,25 +242,29 @@ const testComWithRetry = async (maxRetries = 0, retryDelayMs = 5000) => {
         try {
             const result = await testCom();
             if (result && result["sEMG_MLSmartPhysio"] && result["IMU_MLSmartPhysio"]) {
-                console.log("Entrambe le board rilevate!", globalFoundPorts);
+                console.log("✅ Entrambe le board rilevate!", globalFoundPorts);
+                isTestRunning = false;
                 return result;
             }
         } catch (err) {
-            console.error("Errore in testCom:", err);
+            console.error("❌ Errore in testCom:", err);
         }
 
         if (maxRetries > 0 && attempts >= maxRetries) {
-            console.log("Raggiunto il numero massimo di tentativi.");
+            console.log("⛔ Raggiunto il numero massimo di tentativi.");
+            isTestRunning = false;
             return null;
         }
 
-        console.log(`Ritento tra ${retryDelayMs / 1000} secondi...`);
+        console.log(`🔁 Ritento tra ${retryDelayMs / 1000} secondi...`);
         await delay(retryDelayMs);
     }
 
-    console.log("Connessione interrotta manualmente da stopRetries().");
+    console.log("🛑 Connessione interrotta manualmente da stopRetries().");
+    isTestRunning = false;
     return null;
 };
+
 
 const stopRetries = () => {
     console.log("stopRetries() invocato – richiesta di annullamento testComWithRetry");

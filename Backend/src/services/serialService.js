@@ -15,8 +15,25 @@ let serialPorts = {
 //interruzione della conessione
 let connectionAborted = false;
 
-const initializeSocket = (socketInstance) => {
-    io = socketInstance;
+let activeSocketCount = 0;
+
+const initializeSocket = (ioInstance) => {
+    io = ioInstance;
+
+    io.on("connection", (socket) => {
+        console.log("🟢 Client connesso");
+        activeSocketCount++;
+
+        socket.on("disconnect", async () => {
+            console.log("🔌 Client disconnesso");
+            activeSocketCount--;
+
+            if (activeSocketCount <= 0) {
+                console.log("🛑 Nessun client attivo: chiudo le porte seriali");
+                await closeConnection();  // <-- chiude le board!
+            }
+        });
+    });
 };
 
 //metodo per ottenere lo stato della connessione
@@ -262,6 +279,7 @@ const closeConnection = async () => {
     isConnected = false;
     console.log("🔒 Connessione chiusa e risorse rilasciate.");
 };
+
 
 
 // Funzioni helper solo per testing
