@@ -259,6 +259,10 @@ const stopRetries = () => {
     shouldStopRetries = true;
 };
 
+const resetRetryFlag = () => {
+    shouldStopRetries = false;
+};
+
 module.exports = {
     testCom,
     testComWithRetry,
@@ -270,5 +274,6 @@ module.exports = {
         serialPorts = {};
         console.log("Found ports and serial ports reset.");
     },
-    stopRetries
+    stopRetries,
+    resetRetryFlag
 };

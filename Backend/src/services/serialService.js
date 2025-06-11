@@ -1,4 +1,4 @@
-const { testComWithRetry, resetFoundPorts, getSerialPorts, stopRetries } = require('../config/serialConfig');
+const { testComWithRetry, resetFoundPorts, getSerialPorts, stopRetries, resetRetryFlag  } = require('../config/serialConfig');
 const sEMGService = require("../services/sEMGdataService");
 const InertialService = require("../services/inertialDataService");
 
@@ -53,6 +53,7 @@ const sendSequentially = (message, delay = 50, index = 0) => {
 
 //Metodo per la ricerca e apertura connessione
 const openConnection = async () => {
+    resetRetryFlag();
     //se il sistema è gia connesso return
     if (isConnected) {
         console.log("Connessione già attiva.");
@@ -218,34 +219,50 @@ const startReading = (sessionID) => {
     }
 };
 
-const closeConnection = () => {
-    console.log("closeConnection invocata");
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    //ferma i tentativi di connessione
+const closeConnection = async () => {
+    console.log("🔌 closeConnection invocata");
+
     stopRetries();
     connectionAborted = true;
 
     if (!isConnected) {
-        console.log("Nessuna connessione attiva da chiudere.");
+        console.log("⚠️ Nessuna connessione attiva da chiudere.");
         return;
     }
 
-    //chiusura delle connessioni seriali
     for (const [key, serial] of Object.entries(serialPorts)) {
-        if (serial && serial.isOpen) {
-            serial.close((err) => {
-                if (err) {
-                    console.error(`Errore chiusura porta ${key}:`, err.message);
-                } else {
-                    console.log(`Porta ${key} chiusa correttamente`);
-                }
-            });
+        if (serial) {
+            console.log(`[DEBUG] Porta ${key} isOpen prima di chiusura:`, serial.isOpen);
+
+            if (serial.isOpen) {
+                await new Promise((resolve) => {
+                    serial.close((err) => {
+                        if (err) {
+                            console.error(`❌ Errore chiusura porta ${key}:`, err.message);
+                        } else {
+                            console.log(`✅ Porta ${key} chiusa correttamente`);
+                        }
+                        resolve();
+                    });
+                });
+            } else {
+                console.log(`ℹ️ Porta ${key} era già chiusa`);
+            }
+
+            // Dopo la chiusura, proviamo a vedere se lo stato cambia
+            console.log(`[DEBUG] Porta ${key} isOpen dopo chiusura (potenzialmente outdated):`, serial.isOpen);
         }
     }
 
-    //chiusura stato della connessione
+    console.log("⏳ Attendo 500ms per il rilascio completo delle porte da parte del sistema operativo...");
+    await delay(500);
+
     isConnected = false;
+    console.log("🔒 Connessione chiusa e risorse rilasciate.");
 };
+
 
 // Funzioni helper solo per testing
 const __setConnected = (val) => { isConnected = val; };
