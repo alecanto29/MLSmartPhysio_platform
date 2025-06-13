@@ -93,6 +93,10 @@
 textarea[name="medicalHistory"] {
     resize: none !important;
     overflow: auto;
+    line-height: 1.2em;
+    height: 9.6em; /* 8 righe × 1.2em */
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .user-icon {
@@ -161,6 +165,8 @@ textarea[name="medicalHistory"] {
 .medical-display {
     padding-top: 6px;
     font-size: 14px;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 /* Radio buttons */
@@ -214,6 +220,15 @@ textarea[name="medicalHistory"] {
 .loading {
     padding: 24px;
     color: black;
+}
+
+.medical-history-textarea {
+    line-height: 20px;
+    max-height: 160px; /* 8 righe * 20px */
+    overflow-y: auto;
+    resize: none;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 

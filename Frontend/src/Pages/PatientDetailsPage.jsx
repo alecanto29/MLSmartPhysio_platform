@@ -112,7 +112,26 @@ const PatientDetailsPage = () => {
                         <div className="field">
                             <strong>Medical history:</strong>
                             {isEditMode
-                                ? <textarea name="medicalHistory" value={patient.medicalHistory} onChange={handleChange} rows="3" />
+                                ? <textarea
+                                    name="medicalHistory"
+                                    value={patient.medicalHistory}
+                                    onChange={(e) => {
+                                        const lineHeight = 20; // Altezza riga in px
+                                        const maxLines = 8;
+
+                                        const textarea = e.target;
+                                        textarea.rows = 1; // Reset temporaneo per misurare scrollHeight
+                                        const currentHeight = textarea.scrollHeight;
+                                        const currentLines = Math.floor(currentHeight / lineHeight);
+
+                                        if (currentLines <= maxLines) {
+                                            setPatient({ ...patient, medicalHistory: textarea.value });
+                                        }
+                                    }}
+                                    rows="8"
+                                    className="medical-history-textarea"
+                                />
+
                                 : <div className="medical-display">{patient.medicalHistory}</div>}
                         </div>
                     </div>
