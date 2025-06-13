@@ -50,7 +50,7 @@ const deleteAllInertialData = async (req, res) => {
 
 const deleteAllInertialDataBySession = async (req, res) =>{
     try{
-        const result = await service.deleteAllInertialDataBySession(req.params.id);
+        const result = await service.deleteAllInertialDataBySession(req.params.sessionId);
         res.json(result);
     }catch(error){
         res.status(500).json({error: error.message});
@@ -61,7 +61,7 @@ const InertialExportAsCSV = async (req, res) => {
     try {
 
         // Chiama il servizio che recupera i dati inerziali dal db e li converte in stringa CSV
-        const csv = await service.InertialasCSVexport();
+        const csv = await service.InertialasCSVexport(req.params.sessionID);
 
         // Impostazione header HTTP per risposta contenente file CSV
         res.setHeader("Content-Type", "text/csv");
@@ -72,9 +72,6 @@ const InertialExportAsCSV = async (req, res) => {
         // Invia il file CSV come risposta
         res.status(200).send(csv);
 
-        //cancellazione dati dopo ogni download della sessione
-        await service.deleteAllInertialData();
-        console.log("Dati Inerziali cancellati");
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

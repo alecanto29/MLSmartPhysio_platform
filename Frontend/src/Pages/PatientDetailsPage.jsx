@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../ComponentsCSS/PatientDetailsPageStyle.css";
+import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
 
 const PatientDetailsPage = () => {
     const { id } = useParams();
@@ -101,12 +102,6 @@ const PatientDetailsPage = () => {
                     <h3>{patient.name} {patient.surname}</h3>
                 </div>
 
-                {message && (
-                    <div className={`message ${messageType}`}>
-                        {message}
-                    </div>
-                )}
-
                 <div className="info-grid-rows">
                     <div className="row">
                         <div className="field"><strong>Name:</strong> {isEditMode ? <input name="name" value={patient.name} onChange={handleChange} /> : patient.name}</div>
@@ -154,6 +149,9 @@ const PatientDetailsPage = () => {
             <div className="back-icon-container" onClick={() => navigate("/patients-list")}>
                 <i className="bi bi-arrow-left"></i>
             </div>
+
+            <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
+
         </div>
     );
 };

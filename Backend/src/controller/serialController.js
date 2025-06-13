@@ -6,7 +6,8 @@ const startScanning = async () => {
         //chiama il service per iniziare la scannerizzazione delle porte
         await serialService.openConnection();
     } catch (error) {
-        console.error("Errore durante l'apertura della connessione seriale:", error);}
+        console.error("Errore durante l'apertura della connessione seriale:", error);
+    }
 }
 
 const stopScanning = async () => {
@@ -23,6 +24,7 @@ const getStatus = (req, res) => {
     const status = serialService.getConnectionStatus();
     res.json({ connected: status });
 };
+
 
 const sendMessage = async (req, res) => {
     try {

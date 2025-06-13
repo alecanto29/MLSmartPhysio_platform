@@ -1,0 +1,156 @@
+.page-container {
+    background-color: #ccf2ff;
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+.session-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 110px;
+    margin-left: 80px;
+    margin-bottom: 30px;
+}
+
+.session-title img {
+    height: 70px;
+}
+
+.session-title h2 {
+    color: #003344;
+    font-weight: bold;
+}
+
+.session-list {
+    list-style: none;
+    padding: 0 40px;
+}
+
+.session-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: #e0f7fa;
+    padding: 10px 24px;
+    border-radius: 16px;
+    border: 1.5px solid #003344;
+    margin-bottom: 14px;
+    justify-content: space-between;
+    transition: border 0.3s ease-in-out;
+}
+
+.session-item:hover {
+    border: 2px solid #0077cc;
+}
+
+.session-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: bold;
+    font-size: 18px;
+    color: #003344;
+}
+
+.session-info img {
+    height: 70px;
+}
+
+.session-actions {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.action-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.action-block img {
+    height: 50px;
+}
+
+.action-block span {
+    font-size: 13px;
+    color: #003344;
+    margin-top: 4px;
+}
+
+.back-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 32px;
+    color: #003344;
+    cursor: pointer;
+}
+
+.delete-icon {
+    color: red;
+    font-size: 22px;
+    cursor: pointer;
+    margin-right: 14px;
+    align-self: flex-start;
+}
+
+/* Popup conferma */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    width: 320px;
+    text-align: center;
+}
+
+.popup-buttons {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.delete-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Icona del cestino */
+.session-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;              /* distanza tra icona cestino e card */
+    margin-bottom: 14px;
+    padding: 0 40px;
+}
+
+.trash-icon {
+    color: red;
+    font-size: 22px;
+    cursor: pointer;
+    margin-left: -20px;       /* meno margine per spostarlo a sinistra */
+    margin-top: -18px;
+    align-self: center;     /* centrato verticalmente */
+    transition: transform 0.2s ease;
+}
+
+

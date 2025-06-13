@@ -1,0 +1,189 @@
+/* Contesto generale */
+.session-page-container {
+    background-color: #b3ecff;
+    min-height: 100vh;
+    padding: 20px 1000px;
+    color: black;
+    box-sizing: border-box;
+}
+
+/* Titolo */
+.session-title-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: -900px;
+    margin-top: 100px
+}
+
+.session-title-icon {
+    height: 60px;
+}
+
+.session-title-text {
+    color: #003344;
+    font-weight: bold;
+    font-size: 26px;
+}
+
+/* Box centrale: aggiunto `position: relative` se non già presente */
+.session-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #003344;
+    width: 900px;
+    box-sizing: border-box;
+    margin-left: -850px;
+    margin-top: 20px;
+    position: relative; /* necessario per posizionare l'ingranaggio */
+}
+
+/* Icona modifica: correttamente in alto a destra della card */
+.session-edit-icon {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.session-gear-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+/* Layout interno con la colonna di sinistra arricchita */
+.session-info-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 40px; /* leggermente abbassato per non sovrapporsi all'icona */
+}
+
+.session-left {
+    flex: 1;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    color: black;
+}
+
+/* Rimuovi "Doctor" da .session-right se presente */
+.session-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: black;
+}
+
+/* Campo textarea / display note */
+.session-notes-input {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #003344;
+    border-radius: 5px;
+    resize: vertical;
+    font-size: 14px;
+    min-height: 120px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.session-notes-display {
+    font-size: 14px;
+    padding: 6px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Bottone salva */
+.session-save-section {
+    margin-top: 24px;
+    text-align: left;
+}
+
+.session-save-button {
+    padding: 10px 26px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Icona ritorno */
+.session-back-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.session-back-icon i {
+    font-size: 36px;
+    color: #003344;
+}
+
+.session-back-icon i:hover {
+    color: #005566;
+}
+
+/* Stato iniziale */
+.session-loading {
+    padding: 24px;
+    color: black;
+    font-size: 18px;
+    text-align: center;
+}
+
+.session-row {
+    display: flex;
+    gap: 20px;
+}
+
+.session-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-break: break-word;
+}
+
+
+.session-notes-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #003344;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 20px;        /* <<< importante */
+    max-height: 160px;        /* 8 righe x 20px */
+    overflow-y: auto;
+    resize: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .session-box {
+        margin-left: 16px;
+        margin-right: 16px;
+        max-width: unset;
+    }
+
+    .session-info-grid {
+        flex-direction: column;
+    }
+}

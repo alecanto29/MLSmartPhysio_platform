@@ -50,7 +50,7 @@ const deleteAllsEMGdata = async (req, res) => {
 
 const deleteAllsEMGdataBySession = async (req, res) =>{
     try{
-        const result = await sEMGService.deleteAllsEMGdataBySession(req.params.id);
+        const result = await sEMGService.deleteAllsEMGdataBySession(req.params.sessionId);
         res.json(result);
     }catch(error){
         res.status(500).json({error: error.message});
@@ -61,7 +61,7 @@ const sEMGexportAsCSV = async (req, res) => {
     try {
 
         // Chiama il servizio che recupera i dati sEMG dal db e li converte in stringa CSV
-        const csv = await sEMGService.sEMGasCSVexport();
+        const csv = await sEMGService.sEMGasCSVexport(req.params.sessionID);
 
         // Impostazione header HTTP per risposta contenente file CSV
         res.setHeader("Content-Type", "text/csv");
@@ -72,9 +72,6 @@ const sEMGexportAsCSV = async (req, res) => {
         // Invia il file CSV come risposta
         res.status(200).send(csv);
 
-        //cancellazione dei dati sEMG dal db dopo il download di ogni sessione
-        await sEMGService.deleteAllsEMGdata();
-        console.log("Dati sEMG cancellati dal database");
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

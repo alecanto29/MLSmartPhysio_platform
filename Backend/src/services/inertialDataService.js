@@ -92,10 +92,10 @@ async function saveInertialData(dataArray, sessionID) {
     }
 }
 
-async function InertialasCSVexport() {
+async function InertialasCSVexport(sessionID) {
     try {
         //Recupera tutti i dati inerziali dalla collezione MongoDB come oggetti JS "lean"
-        const data = await inertialData.find().lean();
+        const data = await inertialData.find({sessionId: sessionID}).lean();
 
         //Per ogni documento, crea un oggetto con le chiavi ch1, ch2, ..., ch9 e valori arrotondati
         const flatData = data.map(doc => {

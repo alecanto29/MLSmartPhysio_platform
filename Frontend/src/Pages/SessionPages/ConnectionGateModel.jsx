@@ -7,45 +7,72 @@ const ConnectionGateModel = () => {
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(true);
     const [showRetry, setShowRetry] = useState(false);
-    const intervalRef = useRef(null);
     const statusIntervalRef = useRef(null);
+    const retryIntervalRef = useRef(null);
+    const isMountedRef = useRef(true);
+
+    useEffect(() => {
+        const cached = localStorage.getItem("boardsConnected");
+        if (cached === "true") {
+            setConnected(true);
+            setLoading(false);
+        }
+    }, []);
 
     const pollConnectionStatus = async () => {
+        console.log("Polling connection status...");
+
         try {
             const res = await axios.get("http://localhost:5000/smartPhysio/status");
 
-            if (res.data.connected) {
-                setConnected(true);
-                setLoading(false);
-                clearInterval(statusIntervalRef.current);
-                clearInterval(intervalRef.current);
+            if (isMountedRef.current) {
+                if (res.data.connected) {
+
+                    localStorage.setItem("boardsConnected", "true");
+
+                    setConnected(true);
+                    setLoading(false);
+
+                    clearInterval(statusIntervalRef.current);
+                    clearInterval(retryIntervalRef.current);
+                } else {
+
+                    localStorage.removeItem("boardsConnected");
+                    setConnected(false);
+                }
             }
         } catch (err) {
-            console.warn("Errore nel polling:", err.message);
+            if (isMountedRef.current) {
+                console.warn("Errore nel polling:", err.message);
+            }
         }
     };
 
-    const tryConnect = async () => {
-        setLoading(true);
-        setShowRetry(false);
-        try {
-            await axios.post("http://localhost:5000/smartPhysio/start");
-        } catch (err) {
-            console.warn("Errore avvio connessione:", err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
-        // ✅ Sempre tenta la connessione (anche dopo un refresh)
-        tryConnect();
-        pollConnectionStatus();
+        isMountedRef.current = true;
 
-        statusIntervalRef.current = setInterval(pollConnectionStatus, 2000);
-        intervalRef.current = setInterval(() => {
-            if (!connected && !loading) setShowRetry(true);
-        }, 10000);
+        const tryConnect = async () => {
+            setLoading(true);
+            setShowRetry(false);
+            try {
+                await axios.post("http://localhost:5000/smartPhysio/start");
+            } catch (err) {
+                console.warn("Errore avvio connessione:", err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (!connected) {
+            tryConnect();
+            pollConnectionStatus();
+
+            statusIntervalRef.current = setInterval(pollConnectionStatus, 2000);
+            retryIntervalRef.current = setInterval(() => {
+                if (!connected && !loading) setShowRetry(true);
+            }, 10000);
+        }
 
         const handleBeforeUnload = () => {
             navigator.sendBeacon("http://localhost:5000/smartPhysio/stop");
@@ -54,11 +81,12 @@ const ConnectionGateModel = () => {
         window.addEventListener("beforeunload", handleBeforeUnload);
 
         return () => {
+            isMountedRef.current = false;
             clearInterval(statusIntervalRef.current);
-            clearInterval(intervalRef.current);
+            clearInterval(retryIntervalRef.current);
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
-    }, []);
+    }, [connected]);
 
     if (!connected) {
         return (
@@ -77,8 +105,9 @@ const ConnectionGateModel = () => {
                         {showRetry && (
                             <button
                                 onClick={() => {
-                                    tryConnect();
                                     setShowRetry(false);
+                                    setLoading(true);
+                                    axios.post("http://localhost:5000/smartPhysio/start").finally(() => setLoading(false));
                                 }}
                                 className="retry-button"
                             >

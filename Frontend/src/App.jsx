@@ -10,6 +10,9 @@ import TakeAppointmentPage from "./Pages/AppointmentsPages/TakeAppointmentPage.j
 import PatientListPage from "./Pages/PatientListPage.jsx";
 import PatientDetailsPage from "./Pages/PatientDetailsPage.jsx";
 import ConnectionGateModel from "./Pages/SessionPages/ConnectionGateModel.jsx";
+import PatientSessionListPage from "./Pages/PatientSessionListPage.jsx";
+import SessionAnalysisPage from "./Pages/SessionAnalysisPage.jsx";
+import SessionDetailsPage from "./Pages/SessionDetailsPage.jsx";
 
 const App = () => {
     return (
@@ -25,6 +28,9 @@ const App = () => {
                 <Route path="/patients-list" element={<PatientListPage />} />
                 <Route path="/patient-details/:id" element={<PatientDetailsPage />} />
                 <Route path="/session/:id" element={<ConnectionGateModel />} />
+                <Route path="/patient-session/:id" element={<PatientSessionListPage />} />
+                <Route path="/session/analysis" element={<SessionAnalysisPage />} />
+                <Route path="/session/details/:id" element={<SessionDetailsPage />} />
             </Routes>
         </Router>
     );

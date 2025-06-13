@@ -21,6 +21,16 @@ const getSessionByID = async (req, res) => {
     }
 };
 
+const getPatientSessionById = async (req, res) => {
+    try{
+        const patientSessions = await sessionService.getPatientSessionById(req.params.id, req.user.id);
+        res.status(200).json(patientSessions);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+
+
 const createSession = async (req, res) => {
     try {
         const newSession = await sessionService.createSession(req.body, req.user.id);
@@ -32,7 +42,8 @@ const createSession = async (req, res) => {
 
 const deleteSessionById = async (req, res) => {
     try {
-        const result = await sessionService.deleteSessionById(req.params.id, req.user.id);
+
+        const result = await sessionService.deleteSessionById(req.params.sessionId, req.user.id);
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: "Sessione non trovata o già eliminata" });
         }
@@ -42,9 +53,22 @@ const deleteSessionById = async (req, res) => {
     }
 };
 
+const updateSession = async (req, res) => {
+    try {
+        const sessionToUpdate = await sessionService.updateSession(req.body, req.user.id, req.params.sessionId);
+        res.status(200).json(sessionToUpdate);
+    } catch (error) {
+        console.error("Errore nel controller updateSession:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     getSession,
     getSessionByID,
     createSession,
-    deleteSessionById
+    deleteSessionById,
+    getPatientSessionById,
+    updateSession
 };

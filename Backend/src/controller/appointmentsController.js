@@ -4,7 +4,6 @@ const getAllAppointments = async (req, res) => {
     try {
         await appointmentsService.deleteOldAppointments();
         const appointments = await appointmentsService.getAllAppointments(req.user.id);
-        console.log("chiamata da frontend, numero appuntamenti:", appointments.length);
         res.status(200).json(appointments);
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -21,16 +21,16 @@ const initializeSocket = (ioInstance) => {
     io = ioInstance;
 
     io.on("connection", (socket) => {
-        console.log("🟢 Client connesso");
+        console.log("Client connesso");
         activeSocketCount++;
 
         socket.on("disconnect", async () => {
-            console.log("🔌 Client disconnesso");
+            console.log("Client disconnesso");
             activeSocketCount--;
 
             if (activeSocketCount <= 0) {
-                console.log("🛑 Nessun client attivo: chiudo le porte seriali");
-                await closeConnection();  // <-- chiude le board!
+                console.log("Nessun client attivo: chiusura delle porte seriali");
+                await closeConnection();
             }
         });
     });
@@ -73,7 +73,8 @@ const openConnection = async () => {
     resetRetryFlag();
     //se il sistema è gia connesso return
     if (isConnected) {
-        console.log("Connessione già attiva.");
+        startReading();
+
         return;
     }
 
@@ -97,8 +98,6 @@ const openConnection = async () => {
 
     //get degli oggetti delle porte seriali dal serialConfig
     const allSerialPorts = getSerialPorts();
-    console.log("Tutte le porte seriali trovate:", allSerialPorts);
-
     //mappa dell'oggetto con le serialPorts ottenute per get
     serialPorts.sEMG = allSerialPorts["sEMG_MLSmartPhysio"];
     serialPorts.IMU  = allSerialPorts["IMU_MLSmartPhysio"];
@@ -239,45 +238,40 @@ const startReading = (sessionID) => {
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const closeConnection = async () => {
-    console.log("🔌 closeConnection invocata");
+    console.log("closeConnection invocata");
 
     stopRetries();
     connectionAborted = true;
 
     if (!isConnected) {
-        console.log("⚠️ Nessuna connessione attiva da chiudere.");
+        console.log("Nessuna connessione attiva da chiudere.");
         return;
     }
 
     for (const [key, serial] of Object.entries(serialPorts)) {
         if (serial) {
-            console.log(`[DEBUG] Porta ${key} isOpen prima di chiusura:`, serial.isOpen);
 
             if (serial.isOpen) {
                 await new Promise((resolve) => {
                     serial.close((err) => {
                         if (err) {
-                            console.error(`❌ Errore chiusura porta ${key}:`, err.message);
+                            console.error(`Errore chiusura porta ${key}:`, err.message);
                         } else {
-                            console.log(`✅ Porta ${key} chiusa correttamente`);
+                            console.log(`Porta ${key} chiusa correttamente`);
                         }
                         resolve();
                     });
                 });
             } else {
-                console.log(`ℹ️ Porta ${key} era già chiusa`);
+                console.log(`Porta ${key} era già chiusa`);
             }
-
-            // Dopo la chiusura, proviamo a vedere se lo stato cambia
-            console.log(`[DEBUG] Porta ${key} isOpen dopo chiusura (potenzialmente outdated):`, serial.isOpen);
         }
     }
 
-    console.log("⏳ Attendo 500ms per il rilascio completo delle porte da parte del sistema operativo...");
     await delay(500);
 
     isConnected = false;
-    console.log("🔒 Connessione chiusa e risorse rilasciate.");
+    console.log("Connessione chiusa e risorse rilasciate.");
 };
 
 

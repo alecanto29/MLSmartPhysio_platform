@@ -143,7 +143,7 @@ const ControlPanel = () => {
      * Scarica i dati sEMG in formato CSV.
      */
     const downloadsEMGData = async () => {
-        const response = await axios.get("/smartPhysio/semg/export/csv", {
+        const response = await axios.get(`/smartPhysio/semg/export/csv/${id}`, {
             responseType: "blob"
         });
         downloadCSVFile(response.data, "sEMG_collection_export.csv");
@@ -153,7 +153,7 @@ const ControlPanel = () => {
      * Scarica i dati inerziali in formato CSV.
      */
     const downloadInertialData = async () => {
-        const response = await axios.get("/smartPhysio/inertial/export/csv", {
+        const response = await axios.get(`/smartPhysio/inertial/export/csv/${id}`, {
             responseType: "blob"
         });
         downloadCSVFile(response.data, "inertial_collection_export.csv");
@@ -222,7 +222,7 @@ const ControlPanel = () => {
                     className="bi bi-arrow-left top-icon"
                     onClick={async () => {
                         await handleStop();
-                        navigate("/patient-list");
+                        navigate("/patients-list");
                     }}
                 ></i>
 

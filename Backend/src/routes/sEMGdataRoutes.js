@@ -10,8 +10,8 @@ router.get("/channel/:id", sEMGdataController.getDataByChannel);
 
 
 router.delete("/", sEMGdataController.deleteAllsEMGdata);
-router.delete("/session/:sessionId", sEMGdataController.deleteAllsEMGdataBySession);
+router.delete("/:sessionId", sEMGdataController.deleteAllsEMGdataBySession);
 
-router.get("/export/csv", sEMGdataController.sEMGexportAsCSV);
+router.get("/export/csv/:sessionID", sEMGdataController.sEMGexportAsCSV);
 
 module.exports = router;

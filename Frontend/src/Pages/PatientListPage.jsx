@@ -172,7 +172,7 @@ const PatientListPage = () => {
                                     <span style={{ fontSize: '13px', color: '#003344' }}>Register session</span>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
-                                    <img src="/images/session_list.png" alt="list" style={{ height: '50px' }} />
+                                    <img src="/images/session_list.png" alt="list" style={{ height: '50px' }} onClick={() => navigate(`/patient-session/${p._id}`)}/>
                                     <span style={{ fontSize: '13px', color: '#003344' }}>Session list</span>
                                 </div>
                             </div>

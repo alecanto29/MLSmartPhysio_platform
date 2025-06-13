@@ -3,9 +3,7 @@ const appointmentsModel = require("../models/Appointment");
 
 const getAllAppointments = async (doctorID) => {
     try {
-        console.log("entrata nel service");
         const results = await appointmentsModel.find({ doctor: doctorID }).populate("patient").populate("doctor");
-        console.log("chiamata da controller, numero appuntamenti:", results.length);
         return results;
     } catch (error) {
         throw new Error("Errore durante il ricavo degli appointments del medico");
@@ -78,7 +76,6 @@ const deleteOldAppointments = async () => {
 
         await appointmentsModel.deleteMany({ date: { $lt: today } });
 
-        console.log("Appuntamenti vecchi cancellati con successo.");
     } catch (err) {
         console.error("Errore durante la cancellazione degli appuntamenti vecchi:", err);
     }

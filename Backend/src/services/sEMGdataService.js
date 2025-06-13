@@ -92,10 +92,10 @@ async function savesEMGdata(dataArray, sessionID) {
 }
 
 
-async function sEMGasCSVexport() {
+async function sEMGasCSVexport(sessionID) {
     try {
         //Recupera tutti i dati sEMG dalla collezione MongoDB come oggetti JS "lean"
-        const data = await sEMGdata.find().lean();
+        const data = await sEMGdata.find({sessionId: sessionID}).lean();
 
         //Per ogni documento, crea un oggetto con le chiavi ch1, ch2, ..., ch9
         const flatData = data.map(doc => {
