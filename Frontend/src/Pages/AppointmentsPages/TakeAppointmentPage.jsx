@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef  } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../ComponentsCSS/TakeAppointmentPageStyle.css";
@@ -14,9 +14,9 @@ const TakeAppointmentPage = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
+    const [searchTerm, setSearchTerm] = useState("");
 
     const dateRef = useRef(null);
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -68,34 +68,57 @@ const TakeAppointmentPage = () => {
         }
     };
 
+    const filteredPatients = patients.filter((p) =>
+        `${p.name} ${p.surname} ${p.fiscalCode}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="page-container">
-            {/* HEADER */}
             <Header />
-
-            {/* TITOLO */}
             <div className="title-container">
                 <img src="/images/calendar.png" alt="Calendar" className="calendar-icon" />
                 <h2>Patient List</h2>
             </div>
 
-            {/* LISTA PAZIENTI */}
-            <ul className="patient-list">
-                {patients.map((p, i) => (
-                    <li key={i} className="patient-card">
-                        <div className="patient-left">
-                            <img src="/images/patient_blue.png" alt="User icon" className="user-img" />
-                            <span className="patient-name">{p.name} {p.surname}</span>
-                        </div>
-                        <div className="patient-right" onClick={() => openPopup(p._id)}>
-                            <img src="/images/calendar_v2.png" alt="Calendar icon" className="calendar-mini" />
-                            <span className="take-label">Take new appointment</span>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            <div className="search-wrapper">
+                <div className="search-input-container">
+                    <i className="bi bi-search search-icon"></i>
+                    <input
+                        type="text"
+                        placeholder="Search by name, surname, fiscal code..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
 
-            {/* POPUP */}
+            <div className="patient-list-container">
+                {filteredPatients.length === 0 ? (
+                    <div style={{ textAlign: "center", color: "#003344", fontWeight: "bold", padding: "20px" }}>
+                        No patient found
+                    </div>
+                ) : (
+                    <ul className="patient-list">
+                        {filteredPatients.map((p, i) => (
+                            <li key={i} className="patient-card">
+                                <div className="patient-left">
+                                    <img src="/images/patient_blue.png" alt="User icon" className="user-img" />
+                                    <div className="patient-details">
+                                        <div className="patient-name">{p.name} {p.surname}</div>
+                                        <div className="patient-birthdate">{new Date(p.birthDate).toLocaleDateString("it-IT")}</div>
+                                        <div className="patient-fiscalcode">{p.fiscalCode}</div>
+                                    </div>
+                                </div>
+                                <div className="patient-right" onClick={() => openPopup(p._id)}>
+                                    <img src="/images/calendar_v2.png" alt="Calendar icon" className="calendar-mini" />
+                                    <span className="take-label">Take new appointment</span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup-content">
@@ -115,15 +138,13 @@ const TakeAppointmentPage = () => {
                                         type="button"
                                         className="calendar-button"
                                         onClick={() =>
-                                            dateRef.current?.showPicker?.() ||
-                                            dateRef.current?.focus()
+                                            dateRef.current?.showPicker?.() || dateRef.current?.focus()
                                         }
                                     >
                                         <i className="bi bi-calendar calendar-icon"></i>
                                     </button>
                                 </div>
                             </label>
-
                             <label>
                                 Time:
                                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
@@ -141,10 +162,8 @@ const TakeAppointmentPage = () => {
                 </div>
             )}
 
-            {/* MESSAGE */}
             <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
 
-            {/* FRECCIA IN BASSO A DESTRA */}
             <div className="back-icon-container" onClick={() => navigate("/appointments")}>
                 <i className="bi bi-arrow-left"></i>
             </div>

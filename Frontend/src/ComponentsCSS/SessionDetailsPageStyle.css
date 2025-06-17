@@ -83,15 +83,18 @@
 /* Campo textarea / display note */
 .session-notes-input {
     width: 100%;
-    max-width: 100%;
     padding: 10px;
     border: 1px solid #003344;
     border-radius: 5px;
-    resize: vertical;
     font-size: 14px;
+    line-height: 20px;
     min-height: 120px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    background-color: white;      /* Forza lo sfondo bianco */
+    color: black;                 /* Colore testo leggibile */
+    resize: none;                 /* Nessuna possibilità di ridimensionare */
+    overflow: hidden;             /* Niente scrollbar */
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .session-notes-display {
@@ -172,6 +175,43 @@
     resize: none;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+textarea.session-notes-input,
+textarea.medical-history-textarea {
+    line-height: 20px;
+    max-height: 160px;             /* max 8 righe visibili */
+    overflow-y: auto;
+    overflow-x: hidden;
+    resize: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background-color: white;
+    color: black;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #003344;
+    border-radius: 5px;
+    box-sizing: border-box;
+
+    /* Scrollbar personalizzata */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
+}
+
+/* Chrome/Edge/Safari */
+textarea.session-notes-input::-webkit-scrollbar,
+textarea.medical-history-textarea::-webkit-scrollbar {
+    width: 6px;
+}
+textarea.session-notes-input::-webkit-scrollbar-thumb,
+textarea.medical-history-textarea::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 51, 68, 0.5);
+    border-radius: 10px;
+}
+textarea.session-notes-input::-webkit-scrollbar-track,
+textarea.medical-history-textarea::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 

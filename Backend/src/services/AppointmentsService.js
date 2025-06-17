@@ -67,8 +67,6 @@ const takeNewAppointment = async (appointmentData, doctorID) => {
 };
 
 
-
-
 const deleteOldAppointments = async () => {
     try {
         const today = new Date();
@@ -81,11 +79,17 @@ const deleteOldAppointments = async () => {
     }
 };
 
+const deleteAppointmentById = async (doctorID, appointmentsID) =>{
+    const deletedAppointments = await appointmentsModel.deleteOne({doctor: doctorID, _id: appointmentsID});
+    return deletedAppointments;
+}
+
 
 module.exports = {
     getAllAppointments,
     getAllAppointmentsDate,
     getAllAppointmentsTime,
     takeNewAppointment,
-    deleteOldAppointments
+    deleteOldAppointments,
+    deleteAppointmentById
 };

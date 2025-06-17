@@ -4,18 +4,24 @@ import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import axios from 'axios';
-import { Paper, Typography, Button, GlobalStyles } from '@mui/material';
+import { Paper, Typography, Button, IconButton, GlobalStyles } from '@mui/material';
 import Header from "../../AtomicComponents/Header.jsx";
+import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const AppointmentCalendar = () => {
-
     const [events, setEvents] = useState([]);
-    const navigate = useNavigate();
-
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const navigate = useNavigate();
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("success");
 
     useEffect(() => {
+        fetchAppointments();
+    }, []);
+
+    const fetchAppointments = () => {
         axios.get('smartPhysio/appointments', {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -26,6 +32,7 @@ const AppointmentCalendar = () => {
                     const name = app.patient?.name || '';
                     const surname = app.patient?.surname || '';
                     return {
+                        id: app._id,
                         title: (name + ' ' + surname).trim() || 'Appuntamento',
                         start: `${app.date.split("T")[0]}T${app.time}`,
                         end: `${app.date.split("T")[0]}T${add30Min(app.time)}`,
@@ -40,7 +47,7 @@ const AppointmentCalendar = () => {
                 setEvents(transformed);
             })
             .catch(err => console.error(err));
-    }, []);
+    };
 
     const add30Min = (time) => {
         const [h, m] = time.split(':');
@@ -49,40 +56,69 @@ const AppointmentCalendar = () => {
         return date.toTimeString().slice(0, 5);
     };
 
+    const deleteAppointment = async (id) => {
+        try {
+            await axios.delete("smartPhysio/appointments/" + id, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            setMessage("Appuntamento eliminato con successo");
+            setMessageType("success");
+
+            setEvents(prev => prev.filter(e => e.id !== id));
+            setIsDialogOpen(false);
+        } catch (error) {
+            setMessageType("error");
+            setMessage("Errore durante l'eliminazione dell'appuntamento");
+        }
+    };
+
+    const renderEventContent = (arg) => {
+        const { event } = arg;
+        return (
+            <div style={{ position: 'relative', paddingRight: '20px' }}>
+                <div>{event.startStr.slice(11, 16)} - {event.endStr.slice(11, 16)}</div>
+                <div>{event.title}</div>
+                <div
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEvent(event);
+                        setIsDialogOpen(true);
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '4px',
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        backgroundColor: '#fff',
+                        color: '#003344',
+                        fontWeight: 'bold',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 0 4px rgba(0,0,0,0.2)',
+                        cursor: 'pointer',
+                        zIndex: 10
+                    }}
+                    title="View details"
+                >
+                    i
+                </div>
+            </div>
+        );
+    };
 
     return (
-        <div className="page-container" style={{ backgroundColor: '#ccf2ff', minHeight: '100vh', position: 'relative' }}>
-            {/* HEADER */}
-            <Header />
-
-
-
-            {/* TITOLO */}
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                marginLeft: '80px',
-                marginTop: '70px', // aumentato per lasciare spazio al logo
-                marginBottom: '40px'
-            }}>
-                <img
-                    src="/images/calendar.png"
-                    alt="Calendar Icon"
-                    style={{ height: '70px' }}
-                />
-                <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    color="#003344"
-                    style={{ fontSize: '1.8rem' }}
-                >
-                    Appointments List
-                </Typography>
-            </div>
-
-            {/* STILI GLOBALI */}
+        <div className="page-container" style={{ backgroundColor: '#ccf2ff', height: '100vh', overflow: 'hidden', position: 'relative' }}>
             <GlobalStyles styles={{
+                html: { height: '100%', overflow: 'hidden' },
+                body: { height: '100%', overflow: 'hidden', margin: 0, padding: 0 },
+                '#root': { height: '100%', overflow: 'hidden' },
+                '.page-container': { height: '100%', overflow: 'hidden' },
                 '.fc-button': {
                     backgroundColor: '#003344',
                     border: 'none',
@@ -104,18 +140,18 @@ const AppointmentCalendar = () => {
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
                 },
-                '.fc-day-today': {
-                    backgroundColor: '#ffebee !important',
-                },
                 '.fc-scroller::-webkit-scrollbar': {
                     display: 'none',
+                },
+                '.fc-day-today': {
+                    backgroundColor: '#ffebee !important',
                 },
                 '.fc-timegrid-slot': {
                     height: '60px !important',
                 },
                 '.fc-timegrid-event': {
-                    width: '101% !important',         // Aumenta la larghezza fino quasi a toccare i bordi
-                    margin: '0 auto',                // Centra il rettangolo nella cella
+                    width: '101% !important',
+                    margin: '0 auto',
                 },
                 '.fc-event': {
                     height: '200% !important',
@@ -123,15 +159,39 @@ const AppointmentCalendar = () => {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     padding: '5px 12px',
-                    fontSize: '0.85rem'
+                    fontSize: '0.85rem',
                 },
                 '.fc-event-title': {
                     whiteSpace: 'normal',
-                    overflowWrap: 'break-word'
+                    overflowWrap: 'break-word',
                 }
             }} />
 
-            {/* CALENDARIO */}
+            <Header />
+
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                marginLeft: '80px',
+                marginTop: '70px',
+                marginBottom: '15px'
+            }}>
+                <img
+                    src="/images/calendar.png"
+                    alt="Calendar Icon"
+                    style={{ height: '70px' }}
+                />
+                <Typography
+                    variant="h4"
+                    fontWeight="bold"
+                    color="#003344"
+                    style={{ fontSize: '1.8rem' }}
+                >
+                    Appointments List
+                </Typography>
+            </div>
+
             <Paper
                 elevation={4}
                 sx={{
@@ -140,8 +200,9 @@ const AppointmentCalendar = () => {
                     backgroundColor: '#f9f9f9',
                     maxWidth: '1200px',
                     width: '100%',
-                    margin: '-30px auto 60px auto', // aumentato da 10px a 40px
+                    margin: '0 auto',
                     boxShadow: '0 6px 24px rgba(0, 0, 0, 0.08)',
+                    flexGrow: 1,
                     overflow: 'hidden'
                 }}
             >
@@ -152,7 +213,7 @@ const AppointmentCalendar = () => {
                     slotMinTime="08:00:00"
                     slotMaxTime="20:00:00"
                     slotDuration="01:00:00"
-                    height={400}
+                    height={450}
                     events={events}
                     headerToolbar={{
                         left: 'prev,next today',
@@ -160,11 +221,11 @@ const AppointmentCalendar = () => {
                         right: 'timeGridDay,timeGridWeek'
                     }}
                     dayHeaderFormat={{ weekday: 'short', month: 'numeric', day: 'numeric' }}
-
                     eventClick={(info) => {
                         setSelectedEvent(info.event);
                         setIsDialogOpen(true);
                     }}
+                    eventContent={renderEventContent}
                 />
 
                 <Button
@@ -190,7 +251,6 @@ const AppointmentCalendar = () => {
                 </Button>
             </Paper>
 
-            {/* HOME ICON */}
             <i
                 className="bi bi-house-door-fill"
                 onClick={() => navigate("/doctor")}
@@ -204,6 +264,7 @@ const AppointmentCalendar = () => {
                 }}
             />
 
+            {/* DIALOG */}
             {selectedEvent && isDialogOpen && (
                 <Paper
                     elevation={6}
@@ -216,7 +277,7 @@ const AppointmentCalendar = () => {
                         padding: '24px',
                         borderRadius: '12px',
                         zIndex: 1500,
-                        width: '300px',
+                        width: '320px',
                         boxShadow: '0 6px 20px rgba(0,0,0,0.2)'
                     }}
                 >
@@ -227,15 +288,20 @@ const AppointmentCalendar = () => {
                     <Typography><strong>Time:</strong> {selectedEvent.extendedProps.time}</Typography>
                     <Typography><strong>Patient:</strong> {selectedEvent.extendedProps.patient?.name} {selectedEvent.extendedProps.patient?.surname}</Typography>
                     <Typography><strong>Notes:</strong> {selectedEvent.extendedProps.notes || "—"}</Typography>
-                    <Button
-                        onClick={() => setIsDialogOpen(false)}
-                        variant="outlined"
-                        sx={{ marginTop: '16px' }}
-                    >
-                        Close
-                    </Button>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                        <Button onClick={() => setIsDialogOpen(false)} variant="outlined">
+                            Close
+                        </Button>
+
+                        <IconButton aria-label="delete" color="error" onClick={() => deleteAppointment(selectedEvent.id)}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </div>
                 </Paper>
             )}
+
+            <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
         </div>
     );
 };

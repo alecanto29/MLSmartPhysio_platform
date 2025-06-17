@@ -4,6 +4,19 @@
     min-height: 100vh;
     padding: 20px 40px;
     color: black;
+
+    overflow-y: auto;         /* permette lo scroll */
+    scrollbar-width: none;    /* Firefox nasconde la scrollbar */
+}
+
+.page-container {
+    height: 100vh;
+    overflow: hidden; /* blocca lo scroll globale */
+}
+
+/* Chrome, Safari, Edge */
+.page-container::-webkit-scrollbar {
+    display: none;
 }
 
 /* Header */
@@ -31,10 +44,14 @@
 .title-section {
     display: flex;
     align-items: center;
-    margin-top: 0px;
+    margin-top: -20px;
     gap: -5px;
 
     margin-left: 50px;
+}
+
+.title-section h2{
+    margin-top: 50px;
 }
 
 .title-icon {
@@ -50,16 +67,39 @@
 /* Box centrale */
 .patient-box {
     background-color: white;
-    margin-top: 10px;
     padding: 20px;
     border-radius: 8px;
     border: 1px solid #003344;
     position: relative;
+    margin-top: 20px;
     margin-left: 76px;
     margin-right: 40px;
     max-width: calc(100% - 120px);
     box-sizing: border-box;
+    max-height: none;       /* default senza limiti */
+    overflow: visible;      /* default visibile */
+    transition: all 0.3s ease;
 }
+
+.patient-box.scroll-mode {
+    height: calc(100vh - 160px); /* adattalo se serve */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
+}
+
+/* Chrome scrollbar */
+.patient-box.scroll-mode::-webkit-scrollbar {
+    width: 6px;
+}
+.patient-box.scroll-mode::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 51, 68, 0.5);
+    border-radius: 10px;
+}
+.patient-box.scroll-mode::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 
 /* Icona ingranaggio */
 .edit-icon {
@@ -81,13 +121,13 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-top: -40px;
-    margin-bottom: -30px;
+    margin-top: -30px;
+    margin-bottom: -10px;
     color: black;
 }
 
 .patient-header h3 {
-    margin-top: 20px; /* oppure 10px, 12px, ecc. a seconda di quanto vuoi abbassarlo */
+    margin-top: 10px; /* oppure 10px, 12px, ecc. a seconda di quanto vuoi abbassarlo */
 }
 
 textarea[name="medicalHistory"] {
@@ -162,12 +202,54 @@ textarea[name="medicalHistory"] {
 }
 
 /* Visualizzazione medicalHistory */
-.medical-display {
-    padding-top: 6px;
+.medical-history-textarea {
+    background-color: white;
+    border: 1px solid #003344;
+    border-radius: 5px;
+    padding: 10px;
     font-size: 14px;
-    word-break: break-word;
+    line-height: 20px;
+    resize: none;
+    overflow-y: auto;            /* solo verticale */
+    overflow-x: hidden;
     white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 100px;            /* 4 righe x 20px */
 }
+
+/* Modalità visualizzazione */
+.medical-display {
+    font-size: 14px;
+    line-height: 20px;
+    max-height: 90px; /* 4 righe */
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 10px;
+
+    /* Rimuove contorno/bordo */
+    border: none;
+    outline: none;
+    background-color: white;
+
+    /* Scrollbar personalizzata */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
+}
+
+/* Chrome/Edge/Safari */
+.medical-display::-webkit-scrollbar {
+    width: 6px;
+}
+.medical-display::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 51, 68, 0.5);
+    border-radius: 10px;
+}
+.medical-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 
 /* Radio buttons */
 .horizontal-options {
@@ -229,6 +311,31 @@ textarea[name="medicalHistory"] {
     resize: none;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* Rende lo sfondo dell’input bianco */
+input[type="date"],
+input[type="time"] {
+    background-color: white;
+    color: #003344;
+    border: 1.5px solid #003344;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Mostra e colora l'icona del calendario */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(33%) sepia(98%) saturate(3054%) hue-rotate(188deg) brightness(95%) contrast(89%);
+    opacity: 1;
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    transform: scale(1.5); /* 🔍 Ingrandisce leggermente */
+    transform-origin: right center;
 }
 
 

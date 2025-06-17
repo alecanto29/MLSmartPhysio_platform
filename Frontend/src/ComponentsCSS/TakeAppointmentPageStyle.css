@@ -1,75 +1,107 @@
-.page-container {
-    background-color: #ccf2ff;
-    min-height: 100vh;
-    padding: 30px 80px;
-    position: relative;
+html, body {
+    overflow: hidden;
+    height: 100%;
+    margin: 0;
 }
 
+/* Contenitore principale */
+.page-container {
+    background-color: #ccf2ff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 80px;
+    box-sizing: border-box;
+    position: relative;
+}
 
 /* TITOLO */
 .title-container {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin-top: 90px;
-}
-
-.title-container h2 {
-    margin-top: 19px;
-    font-weight: bold;
-    color: #003344;
-    font-size: 1.5rem;
+    align-items: center;
+    gap: 5px;
+    margin-top: 50px;
+    margin-left: 80px;
 }
 
 .calendar-icon {
-    height: 60px;
-    margin-top:-2px;
-    align-self: flex-start;
+    height: 80px;
+    margin-top: 50px;
+    margin-left: -50px;
 }
 
-/* LISTA PAZIENTI */
+.title-container h2 {
+    color: #003344;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0;
+    margin-top: 50px;
+}
+
+/* LISTA PAZIENTI SCROLLABILE */
+.patient-list-container {
+    height: calc(4.7 * 100px); /* Altezza per mostrare 4.7 card complete */
+    overflow-y: auto;
+    padding-right: 12px;
+    margin: 20px 40px;
+    box-sizing: content-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
+}
+
+.patient-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+.patient-list-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 51, 68, 0.5);
+    border-radius: 10px;
+}
+.patient-list-container::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 5px;
+}
+
+/* LISTA E CARD */
 .patient-list {
     list-style: none;
     padding: 0;
-    margin: 20px 0 0 0; /* 👈 aumenta il top margin per abbassare le card */
+    margin: 0;
 }
 
 .patient-card {
     background-color: white;
-    border-radius: 12px;
+    border-radius: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 20px;
-    margin-bottom: 10px;
-    border: 2px solid #003344;
-    transition: 0.2s;
+    padding: 10px 24px;
+    margin-bottom: 14px;
+    border: 1.5px solid #003344;
+    transition: border 0.3s ease-in-out;
 }
 
 .patient-card:hover {
-    border-color: #0077cc;
+    border: 2px solid #0077cc;
 }
 
 .patient-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
-.patient-left img,
 .user-img {
-    height: 60px;
-    width: 60px;
+    height: 70px;
+    width: 70px;
     object-fit: contain;
 }
 
 .patient-name {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: bold;
     color: #003344;
 }
 
-/* CALENDARIO A DESTRA */
 .patient-right {
     display: flex;
     flex-direction: column;
@@ -80,8 +112,8 @@
 }
 
 .calendar-mini {
-    height: 48px;
-    width: 48px;
+    height: 50px;
+    width: 50px;
     object-fit: contain;
 }
 
@@ -93,21 +125,7 @@
     text-align: center;
 }
 
-/* ICONA FRECCIA IN BASSO A DESTRA */
-.back-icon-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    cursor: pointer;
-    z-index: 9999;
-}
-
-.back-icon-container i {
-    font-size: 40px;
-    color: #003344;
-}
-
-/* MODAL / POPUP */
+/* MODALE / POPUP */
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -206,6 +224,7 @@
     background-color: #dc3545;
 }
 
+/* INPUT CALENDARIO */
 .date-input-wrapper {
     display: flex;
     align-items: center;
@@ -222,4 +241,63 @@
 .calendar-button .calendar-icon {
     font-size: 1.2rem;
     color: #007bff;
+}
+
+/* FRECCIA IN BASSO A DESTRA */
+.back-icon-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.back-icon-container i {
+    font-size: 40px;
+    color: #003344;
+}
+
+.patient-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.patient-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #003344;
+}
+
+.patient-birthdate,
+.patient-fiscalcode {
+    font-size: 13px;
+    color: #003344;
+    font-weight: normal;
+    margin-top: 2px;
+}
+
+
+/* Cambia colore dell'icona calendario/orologio */
+.popup-content input[type="date"]::-webkit-calendar-picker-indicator,
+.popup-content input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(33%) sepia(98%) saturate(3054%) hue-rotate(188deg) brightness(95%) contrast(89%);
+    cursor: pointer;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    transform: scale(1.5); /* 🔍 Ingrandisce leggermente */
+    transform-origin: right center;
+}
+
+.popup-content input,
+.popup-content textarea,
+.popup-content input[type="date"],
+.popup-content input[type="time"] {
+    background-color: white;           /* ✅ Sfondo bianco */
+    color: #003344;                    /* ✅ Testo leggibile */
+    border: 1.5px solid #003344;       /* Bordo coerente con il tema */
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+    box-sizing: border-box;
 }

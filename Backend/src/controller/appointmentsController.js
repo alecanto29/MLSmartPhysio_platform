@@ -46,6 +46,20 @@ const deleteOldAppointments = async (req, res) => {
     }
 };
 
+const deleteAppointmentById = async (req, res) => {
+    try{
+        const deletedAppointments = await appointmentsService.deleteAppointmentById(req.user.id, req.params.id);
+        if (deletedAppointments.deletedCount === 0) {
+            return res.status(404).json({ error: "Appuntamento non trovata o già eliminata" });
+        }
+        res.status(200).json({ message: "Appuntamento eliminato con successo" });
+    }catch(error){
+        return res.status(500).json("Appuntamento eliminato con successo")
+    }
+
+}
+
+
 
 
 module.exports = {
@@ -53,5 +67,6 @@ module.exports = {
     getAllAppointmentsDate,
     getAllAppointmentsTime,
     takeNewAppointment,
-    deleteOldAppointments
+    deleteOldAppointments,
+    deleteAppointmentById
 };

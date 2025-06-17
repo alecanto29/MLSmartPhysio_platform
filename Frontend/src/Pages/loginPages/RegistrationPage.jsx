@@ -6,7 +6,6 @@ import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx"
 import TextFieldModel from "../../AtomicComponents/TextFieldModel.jsx";
 import ButtonModel from "../../AtomicComponents/ButtonModel.jsx";
 
-
 const RegistrationPage = () => {
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
@@ -18,11 +17,9 @@ const RegistrationPage = () => {
     const [birthDate, setBirthDate] = useState("");
 
     const navigate = useNavigate();
-
     const birthDateRef = useRef(null);
-
     const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState("succes")
+    const [messageType, setMessageType] = useState("success");
 
     const handleRegistration = async () => {
         try {
@@ -36,7 +33,6 @@ const RegistrationPage = () => {
                 licenseNumber,
                 birthDate,
             });
-            console.log("Registrazione completata:", response.data);
 
             const token = response.data.token;
             localStorage.setItem("token", token);
@@ -47,12 +43,11 @@ const RegistrationPage = () => {
             setMessage("Registrazione avvenuta con successo");
             setMessageType("success");
 
-            setTimeout(() =>{
+            setTimeout(() => {
                 navigate("/doctor");
-            },1000);
+            }, 1000);
 
         } catch (error) {
-
             setMessageType("error");
 
             const errorMsg =
@@ -67,116 +62,114 @@ const RegistrationPage = () => {
     };
 
     return (
-        <div className="registration-container">
-            <div className="registration-left">
-                <img src="/images/app_logo.png" alt="Logo MLSmartPhysio" className="login-logo" />
-                <button onClick={() => navigate("/login")}>Sign In</button>
-            </div>
-
-            <div className="registration-right">
-                <div className="user-icon">
-                    <i className="bi bi-person-circle"></i>
+        <div className="registration-page">
+            <div className="registration-container">
+                <div className="registration-left">
+                    <img src="/images/app_logo.png" alt="Logo MLSmartPhysio" className="login-logo" />
+                    <button onClick={() => navigate("/login")}>Sign In</button>
                 </div>
 
-                <div className="form-grid">
-                    <div className="input-block">
-                        <label>Name</label>
-                        <TextFieldModel
-                            type="text"
-                            placeholder="Insert your name here..."
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
+                <div className="registration-right">
+                    <div className="user-icon">
+                        <i className="bi bi-person-circle"></i>
                     </div>
 
-                    <div className="input-block">
-                        <label>Surname</label>
-                        <TextFieldModel
-                            type="text"
-                            placeholder="Insert your surname here..."
-                            value={surname}
-                            onChange={(e) => setSurname(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="input-block">
-                        <label>Fiscal Code</label>
-                        <TextFieldModel
-                            type="text"
-                            placeholder="Insert your fiscal code here..."
-                            value={fiscalCode}
-                            onChange={(e) => setFiscalCode(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="input-block">
-                        <label>Specialization</label>
-                        <TextFieldModel
-                            type="text"
-                            placeholder="Insert your specialization here..."
-                            value={specialization}
-                            onChange={(e) => setSpecialization(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="input-block">
-                        <label>Email</label>
-                        <TextFieldModel
-                            type="email"
-                            placeholder="Insert your email here..."
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="input-block">
-                        <label htmlFor="birth-date">Birth Date</label>
-                        <div className="input-icon-wrapper">
-                            <input
-                                id="birth-date"
-                                ref={birthDateRef}
-                                type="date"
-                                className="birth-date-input"
-                                value={birthDate}
-                                onChange={(e) => setBirthDate(e.target.value)}
+                    <div className="form-grid">
+                        <div className="input-block">
+                            <label>Name</label>
+                            <TextFieldModel
+                                type="text"
+                                placeholder="Insert your name here..."
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                             />
-                            <button
-                                type="button"
-                                className="calendar-button"
-                                onClick={() => birthDateRef.current?.showPicker?.() || birthDateRef.current?.focus()}
-                            >
-                                <i className="bi bi-calendar calendar-icon"></i>
-                            </button>
+                        </div>
+
+                        <div className="input-block">
+                            <label>Surname</label>
+                            <TextFieldModel
+                                type="text"
+                                placeholder="Insert your surname here..."
+                                value={surname}
+                                onChange={(e) => setSurname(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="input-block">
+                            <label>Fiscal Code</label>
+                            <TextFieldModel
+                                type="text"
+                                placeholder="Insert your fiscal code here..."
+                                value={fiscalCode}
+                                onChange={(e) => setFiscalCode(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="input-block">
+                            <label>Specialization</label>
+                            <TextFieldModel
+                                type="text"
+                                placeholder="Insert your specialization here..."
+                                value={specialization}
+                                onChange={(e) => setSpecialization(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="input-block">
+                            <label>Email</label>
+                            <TextFieldModel
+                                type="email"
+                                placeholder="Insert your email here..."
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="input-block">
+                            <label htmlFor="birth-date">Birth Date</label>
+                            <div className="input-icon-wrapper">
+                                <input
+                                    id="birth-date"
+                                    ref={birthDateRef}
+                                    type="date"
+                                    className="birth-date-input"
+                                    value={birthDate}
+                                    onChange={(e) => setBirthDate(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    className="calendar-button"
+                                    onClick={() => birthDateRef.current?.showPicker?.() || birthDateRef.current?.focus()}
+                                >
+                                    <i className="bi bi-calendar calendar-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="input-block">
+                            <label>Password</label>
+                            <TextFieldModel
+                                type="password"
+                                placeholder="Insert your password here..."
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="input-block">
+                            <label>License Number</label>
+                            <TextFieldModel
+                                type="text"
+                                placeholder="Insert your license number here..."
+                                value={licenseNumber}
+                                onChange={(e) => setLicenseNumber(e.target.value)}
+                            />
                         </div>
                     </div>
 
-
-                    <div className="input-block">
-                        <label>Password</label>
-                        <TextFieldModel
-                            type="password"
-                            placeholder="Insert your password here..."
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="input-block">
-                        <label>License Number</label>
-                        <TextFieldModel
-                            type="text"
-                            placeholder="Insert your license number here..."
-                            value={licenseNumber}
-                            onChange={(e) => setLicenseNumber(e.target.value)}
-                        />
-                    </div>
+                    <ButtonModel className="confirm-button" buttonText={"Confirm"} onClick={handleRegistration} />
+                    <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
                 </div>
-
-                <ButtonModel className="confirm-button" buttonText={"Confirm"} onClick={handleRegistration} />
-
-                <MessageHandlerModel messageInfo={message}
-                                     type={messageType}
-                                     onClear={() => setMessage("")}/>
             </div>
         </div>
     );

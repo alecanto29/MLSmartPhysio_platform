@@ -8,5 +8,6 @@ router.get("/", auth, appointmentsController.getAllAppointments);
 router.get("/date", auth, appointmentsController.getAllAppointmentsDate);
 router.get("/time", auth, appointmentsController.getAllAppointmentsTime);
 router.post("/newAppointments", auth, appointmentsController.takeNewAppointment);
+router.delete("/:id", auth, appointmentsController.deleteAppointmentById);
 
 module.exports = router;

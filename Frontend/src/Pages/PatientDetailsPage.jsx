@@ -88,7 +88,7 @@ const PatientDetailsPage = () => {
                 <h2 className="title-text">Patient Details</h2>
             </div>
 
-            <div className="patient-box">
+            <div className={`patient-box ${isEditMode ? "scroll-mode" : ""}`}>
                 <div className="edit-icon" onClick={() => setIsEditMode(!isEditMode)}>
                     <img src="/images/update_icon.png" alt="Edit" className="gear-image" />
                 </div>
@@ -146,7 +146,7 @@ const PatientDetailsPage = () => {
                     </div>
                     <div className="row">
                         <div className="field"><strong>Health Card Number:</strong> {isEditMode ? <input name="healthCardNumber" value={patient.healthCardNumber} onChange={handleChange} /> : patient.healthCardNumber}</div>
-                        <div className="field"><strong>Is critical:</strong> {isEditMode ? (
+                        <div className="field"><strong>Is Priority:</strong> {isEditMode ? (
                             <div className="horizontal-options">
                                 <label className="custom-radio"><input type="radio" name="isCritical" value={true} checked={patient.isCritical === true} onChange={() => setPatient({ ...patient, isCritical: true })} /><span className="radio-circle"></span>Yes</label>
                                 <label className="custom-radio"><input type="radio" name="isCritical" value={false} checked={patient.isCritical === false} onChange={() => setPatient({ ...patient, isCritical: false })} /><span className="radio-circle"></span>No</label>

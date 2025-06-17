@@ -93,6 +93,7 @@ const DoctorMainPage = () => {
                 </div>
             </div>
 
+            <div className="summary-container">
             <div className="summary-row">
                 <div className="summary-box">
                     <img src="/images/dashBoard_calendar.png" alt="Appointments Today" className="summary-icon" />
@@ -108,10 +109,11 @@ const DoctorMainPage = () => {
                 </div>
                 <div className="summary-box">
                     <img src="/images/red_patient.png" alt="High Risk" className="summary-icon" />
-                    <TextInfoModel textInfo={"High-risk patients"} className="dashboard-label" />
+                    <TextInfoModel textInfo={"Priority Patients"} className="dashboard-label" />
 
                     <TextInfoModel textInfo={criticalPatientsNumber} className="red" />
                 </div>
+            </div>
             </div>
         </div>
     );

@@ -75,95 +75,65 @@ const AddPatientPage = () => {
                     <img src="/images/patient_blue.png" alt="Icona paziente" className="title-icon" />
                     <h2>Add new patience</h2>
                 </div>
-                <form className="form-grid">
-                    <div className="input-block">
-                        <label>Name</label>
-                        <TextFieldModel placeholder="Insert name here..." value={name}
-                                        onChange={(e) => setName(e.target.value)}/>
-                    </div>
+                <div className="form-box">
+                    <form className="form-grid">
+                        {/* Riga 1: Nome + Cognome */}
+                        <div className="input-block">
+                            <label>Name</label>
+                            <TextFieldModel placeholder="Insert name here..." value={name} onChange={(e) => setName(e.target.value)} />
+                        </div>
+                        <div className="input-block">
+                            <label>Surname</label>
+                            <TextFieldModel placeholder="Insert surname here..." value={surname} onChange={(e) => setSurname(e.target.value)} />
+                        </div>
 
-                    <div className="input-block">
-                        <label>Surname</label>
-                        <TextFieldModel placeholder="Insert surname here..." value={surname}
-                                        onChange={(e) => setSurname(e.target.value)}/>
-                    </div>
+                        {/* Riga 2: Codice fiscale + Tessera sanitaria */}
+                        <div className="input-block">
+                            <label>Fiscal code</label>
+                            <TextFieldModel placeholder="Insert fiscal code here..." value={fiscalCode} onChange={(e) => setFiscalCode(e.target.value)} />
+                        </div>
+                        <div className="input-block">
+                            <label>Health card number</label>
+                            <TextFieldModel placeholder="Insert Health card number here..." value={healthCardNumber} onChange={(e) => setHealthCardNumber(e.target.value)} />
+                        </div>
 
-                    <div className="input-block">
-                        <label>Fiscal code</label>
-                        <TextFieldModel placeholder="Insert fiscal code here..." value={fiscalCode}
-                                        onChange={(e) => setFiscalCode(e.target.value)}/>
-                    </div>
+                        {/* Riga 3: Medical history a tutta larghezza */}
+                        <div className="input-block full-width">
+                            <label>Medical history</label>
+                            <textarea
+                                placeholder="Insert Medical history here..."
+                                value={medicalHistory}
+                                onChange={(e) => setMedicalHistory(e.target.value)}
+                            />
+                        </div>
 
-                    <div className="input-block">
-                        <label>Health card number</label>
-                        <TextFieldModel placeholder="Insert Health card number here..." value={healthCardNumber}
-                                        onChange={(e) => setHealthCardNumber(e.target.value)}/>
-                    </div>
-
-                    <div className="input-block">
-                        <label>Medical history</label>
-                        <textarea
-                            placeholder="Insert Medical history here..."
-                            value={medicalHistory}
-                            onChange={(e) => setMedicalHistory(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="input-block">
-                        <label htmlFor="birth-date">Data di nascita</label>
-                        <div className="input-icon-wrapper">
+                        {/* Riga 4: Data di nascita + Genere */}
+                        <div className="input-block">
+                            <label htmlFor="birth-date">Date of Birth</label>
                             <input
                                 id="birth-date"
-                                ref={birthDateRef}
                                 type="date"
                                 className="birth-date-input"
                                 value={birthDate}
                                 onChange={(e) => setBirthDate(e.target.value)}
                             />
-                            <button
-                                type="button"
-                                className="calendar-button"
-                                onClick={() =>
-                                    birthDateRef.current?.showPicker?.() ||
-                                    birthDateRef.current?.focus()
-                                }
-                            >
-                                <i className="bi bi-calendar calendar-icon"></i>
-                            </button>
                         </div>
-                    </div>
 
-
-                    <div className="input-block full-width">
-                        <label htmlFor="gender-selection">Gender</label>
-                        <div id="gender-selection" className="gender-options">
-                            <label className="custom-radio">
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="Male"
-                                    checked={gender === "Male"}
-                                    onChange={() => setGender("Male")}
-                                />
-                                <span className="radio-circle"></span>
-                                Male
-                            </label>
-                            <label className="custom-radio">
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="Female"
-                                    checked={gender === "Female"}
-                                    onChange={() => setGender("Female")}
-                                />
-                                <span className="radio-circle"></span>
-                                Female
-                            </label>
+                        <div className="input-block gender-shift-up">
+                            <label htmlFor="gender-selection">Gender</label>
+                            <div id="gender-selection" className="gender-options gender-options-shift">
+                                <label className="custom-radio">
+                                    <input type="radio" name="gender" value="Male" checked={gender === "Male"} onChange={() => setGender("Male")} />
+                                    <span className="radio-circle"></span> Male
+                                </label>
+                                <label className="custom-radio">
+                                    <input type="radio" name="gender" value="Female" checked={gender === "Female"} onChange={() => setGender("Female")} />
+                                    <span className="radio-circle"></span> Female
+                                </label>
+                            </div>
                         </div>
-                    </div>
-
-
-                </form>
+                    </form>
+                </div>
 
                 <div className="confirm-button-wrapper">
                     <ButtonModel buttonText={"Confirm"} onClick={handleAddPatient}/>

@@ -64,6 +64,8 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 15px;
+    margin-bottom: -10px;
 }
 
 .summary-icon {
@@ -74,7 +76,7 @@ body, html {
 .text-base {
     font-size: 18px;
     font-weight: 500;
-    margin-top: 8px;
+    margin-top: 10px;
     color: #000;
 }
 
@@ -82,7 +84,7 @@ body, html {
     color: #000;
     font-size: 16px;
     font-weight: 500;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .blue {
@@ -95,6 +97,7 @@ body, html {
     color: #1ca31c;
     font-size: 22px;
     font-weight: bold;
+
 }
 
 .red {
@@ -105,4 +108,25 @@ body, html {
 
 body {
     overflow: hidden;
+}
+
+.summary-container {
+    background-color: #79c4f2; /* come il form */
+    border-radius: 20px;
+    padding: 1px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 40%;
+    max-width: 1000px;
+    margin: 60px auto 60px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    text-align: center;
 }

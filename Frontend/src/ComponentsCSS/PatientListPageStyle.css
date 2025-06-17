@@ -26,25 +26,22 @@
 
 /* SCROLLBAR UNIFICATA */
 .scrollable {
-    height: calc(4.7 * 100px); /* altezza di 4.8 card da 100px per mostrare card intere */
+    height: calc(4 * 100px); /* altezza di 4.8 card da 100px per mostrare card intere */
     overflow-y: auto;
     padding-right: 12px;
-    margin: 20px 40px;
+    margin: 20px 40px 20px 40px; /* ← qui abbassato da 20px a 0px il top margin */
     box-sizing: content-box;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
 }
 
-
 .scrollable::-webkit-scrollbar {
     width: 6px;
 }
-
 .scrollable::-webkit-scrollbar-thumb {
     background-color: rgba(0, 51, 68, 0.5);
     border-radius: 10px;
 }
-
 .scrollable::-webkit-scrollbar-track {
     background: transparent;
     margin-block: 5px;
@@ -61,8 +58,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: white;
-/ / #e0f7fa padding: 10 px 24 px;
+    background-color: #e0f7fa;
+    padding: 10px 24px;
     border-radius: 16px;
     border: 1.5px solid #003344;
     flex: 1;
@@ -112,26 +109,16 @@
     margin-top: 4px;
 }
 
-/* ICONA DELETE */
+/* DELETE ICON */
 .delete-icon {
     color: red;
-    font-size: 22px;
+    font-size: 24px;
     cursor: pointer;
     margin-right: 16px;
-    margin-top: -5px;
+    margin-top: 30px;
 }
 
-/* BACK ICON */
-.back-icon {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    font-size: 32px;
-    color: #003344;
-    cursor: pointer;
-}
-
-/* MODALE */
+/* POPUP MODALE */
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -161,10 +148,10 @@
 }
 
 .btn-delete {
+    padding: 6px 16px;
     background-color: red;
     color: white;
     border: none;
-    padding: 6px 16px;
     border-radius: 8px;
     cursor: pointer;
 }
@@ -173,6 +160,44 @@
     padding: 6px 16px;
     border-radius: 8px;
     cursor: pointer;
+}
+
+/* HOME ICON */
+.home-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 32px;
+    color: #003344;
+    cursor: pointer;
+}
+
+.card-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-name {
+    font-weight: bold;
+    font-size: 18px;
+    color: #003344;
+    line-height: 1.2;
+}
+
+.card-birthdate,
+.card-fiscalcode {
+    font-size: 13px;
+    color: #003344;
+    font-weight: normal;
+    margin-top: 6px;
+    line-height: 1.2;
+}
+
+.search-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin: -30px 65px -10px 40px;
 }
 
 .search-input-container {
@@ -188,7 +213,6 @@
     font-size: 15px;
     background-color: white;
     color: #003344;
-    box-sizing: border-box;
 }
 
 .search-icon {
@@ -197,7 +221,8 @@
     left: 14px;
     transform: translateY(-50%);
     font-size: 16px;
-    color: black;
+    color: #888;
     pointer-events: none;
 }
+
 
