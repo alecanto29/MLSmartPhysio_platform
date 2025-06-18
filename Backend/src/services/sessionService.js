@@ -64,7 +64,7 @@ const updateSession = async (newSessionData, doctorID, sessionID) => {
 
     targetSession.notes = newSessionData.notes;
 
-    targetSession.save();
+    await targetSession.save();
     return targetSession;
 }
 
