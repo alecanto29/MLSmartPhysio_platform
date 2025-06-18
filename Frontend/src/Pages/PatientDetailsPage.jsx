@@ -115,20 +115,7 @@ const PatientDetailsPage = () => {
                                 ? <textarea
                                     name="medicalHistory"
                                     value={patient.medicalHistory}
-                                    onChange={(e) => {
-                                        const lineHeight = 20; // Altezza riga in px
-                                        const maxLines = 8;
-
-                                        const textarea = e.target;
-                                        textarea.rows = 1; // Reset temporaneo per misurare scrollHeight
-                                        const currentHeight = textarea.scrollHeight;
-                                        const currentLines = Math.floor(currentHeight / lineHeight);
-
-                                        if (currentLines <= maxLines) {
-                                            setPatient({ ...patient, medicalHistory: textarea.value });
-                                        }
-                                    }}
-                                    rows="8"
+                                    onChange={(e) => setPatient({ ...patient, medicalHistory: e.target.value })}
                                     className="medical-history-textarea"
                                 />
 

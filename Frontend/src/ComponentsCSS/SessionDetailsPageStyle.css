@@ -214,6 +214,37 @@ textarea.medical-history-textarea::-webkit-scrollbar-track {
     background: transparent;
 }
 
+.session-notes-display {
+    font-size: 14px;
+    line-height: 20px;
+    max-height: 150px;                 /* Altezza fissa con scroll */
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 10px;
+    background-color: white;
+    border: none;                      /* Nessun bordo */
+    border-radius: 5px;
+    color: black;
+
+    /* Scrollbar personalizzata */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
+}
+
+.session-notes-display::-webkit-scrollbar {
+    width: 6px;
+}
+.session-notes-display::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 51, 68, 0.5);
+    border-radius: 10px;
+}
+.session-notes-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
 
 /* Responsive */
 @media (max-width: 768px) {

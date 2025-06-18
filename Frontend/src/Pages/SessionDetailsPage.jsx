@@ -110,25 +110,13 @@ const SessionDetailsPage = () => {
                                 <textarea
                                     name="notes"
                                     value={session.notes}
-                                    onChange={(e) => {
-                                        const lineHeight = 20; // Altezza stimata di una riga (in px)
-                                        const maxLines = 8;
-
-                                        const textarea = e.target;
-                                        textarea.rows = 1; // reset temporaneo
-                                        const currentHeight = textarea.scrollHeight;
-
-                                        const currentLines = Math.floor(currentHeight / lineHeight);
-                                        if (currentLines <= maxLines) {
-                                            setSession({ ...session, notes: textarea.value });
-                                        }
-                                    }}
-                                    rows="8"
+                                    onChange={handleChange}
                                     className="session-notes-input"
-                                    style={{ overflowY: "auto", resize: "none" }}
                                 />
                             ) : (
-                                <div className="session-notes-display">{session.notes}</div>
+                                <div className="session-notes-display scrollable-notes">
+                                    {session.notes}
+                                </div>
                             )}
                         </div>
 

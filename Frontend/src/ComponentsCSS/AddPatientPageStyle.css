@@ -75,8 +75,37 @@
 }
 
 .input-block textarea {
-    resize: vertical;
-    min-height: 100px;
+    resize: none;                    /* Blocca resize manuale */
+    height: 100px;                   /* Altezza fissa */
+    overflow-y: auto;                /* Scroll verticale */
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.2em;
+    background-color: white;
+    border: 1px solid #003344;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 16px;
+    color: #003344;
+}
+
+/* Firefox scrollbar */
+.input-block textarea {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 51, 68, 0.5) transparent;
+}
+
+/* Chrome, Edge, Safari scrollbar */
+.input-block textarea::-webkit-scrollbar {
+    width: 6px;
+}
+.input-block textarea::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 51, 68, 0.5);
+    border-radius: 10px;
+}
+.input-block textarea::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* ⬛ GENDER */

@@ -28,6 +28,16 @@ const createNewPatient = async (patientData, doctorId) => {
         throw new Error("Tutti i campi sono obbligatori");
     }
 
+    const birth = new Date(patientData.birthDate);
+    const now = new Date();
+
+    birth.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    if (birth > now) {
+        throw new Error("La data di nascita non può essere nel futuro.");
+    }
+
     const newPatient = new patientModel({
         ...patientData,
         primaryDoctor: doctorId
@@ -67,6 +77,16 @@ const updatePatientInfo = async (patientData, doctorID, patientID) => {
     const patient = await patientModel.findOne({ _id: patientID, primaryDoctor: doctorID });
     if (!patient) {
         throw new Error("Paziente non trovato o non autorizzato");
+    }
+
+    const birth = new Date(patientData.birthDate);
+    const now = new Date();
+
+    birth.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    if (birth > now) {
+        throw new Error("La data di nascita non può essere nel futuro.");
     }
 
     // Aggiorna solo i campi specificati
