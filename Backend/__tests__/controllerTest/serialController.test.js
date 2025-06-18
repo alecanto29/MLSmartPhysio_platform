@@ -32,7 +32,12 @@ describe("serialController", () => {
     });
 
     test("sendMessage con comando normale", async () => {
-        const req = { body: { data: ["Stop\\r"] } };
+        const req = {
+            body: {
+                data: ["Stop\\r"],
+                sessionId: "fakeSessionId"
+            }
+        };
         const res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn()
@@ -48,7 +53,12 @@ describe("serialController", () => {
     });
 
     test("sendMessage con comando Start chiama startReading", async () => {
-        const req = { body: { data: ["Start\\r"] } };
+        const req = {
+            body: {
+                data: ["Start\\r"],
+                sessionId: "fakeSessionId"
+            }
+        };
         const res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn()
@@ -59,13 +69,18 @@ describe("serialController", () => {
         await controller.sendMessage(req, res);
 
         expect(service.sendSequentially).toHaveBeenCalledWith("Start\r");
-        expect(service.startReading).toHaveBeenCalled();
+        expect(service.startReading).toHaveBeenCalledWith("fakeSessionId");
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({ message: "Comando inviato con successo" });
     });
 
     test("sendMessage gestisce errori", async () => {
-        const req = { body: { data: ["Start\\r"] } };
+        const req = {
+            body: {
+                data: ["Start\\r"],
+                sessionId: "fakeSessionId"
+            }
+        };
         const res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn()

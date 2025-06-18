@@ -1,56 +1,66 @@
 const request = require("supertest");
 const express = require("express");
-const router = require("../../src/routes/serialRoutes");
-const controller = require("../../src/controller/serialController");
+const router = require("../../src/routes/sEMGdataRoutes");
+const controller = require("../../src/controller/sEMGdataController");
 
-jest.mock("../../src/controller/serialController");
+jest.mock("../../src/controller/sEMGdataController");
 
 const app = express();
 app.use(express.json());
-app.use("/serial", router);
+app.use("/semg", router);
 
-describe("serialRoutes", () => {
+describe("sEMGdataRoutes", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    test("POST /serial/start chiama controller.startScanning", async () => {
-        controller.startScanning.mockImplementation((req, res) => res.status(200).json({ message: "start ok" }));
+    test("GET /semg chiama controller.getData", async () => {
+        controller.getData.mockImplementation((req, res) => res.status(200).json([{ data: [1, 2, 3, 4, 5, 6, 7, 8] }]));
 
-        const res = await request(app).post("/serial/start");
+        const res = await request(app).get("/semg");
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ message: "start ok" });
-        expect(controller.startScanning).toHaveBeenCalled();
+        expect(res.body.length).toBe(1);
+        expect(controller.getData).toHaveBeenCalled();
     });
 
-    test("POST /serial/stop chiama controller.stopScanning", async () => {
-        controller.stopScanning.mockImplementation((req, res) => res.status(200).json({ message: "stop ok" }));
+    test("GET /semg/channel/0 chiama controller.getDataByChannel", async () => {
+        controller.getDataByChannel.mockImplementation((req, res) => res.status(200).json([100, 101]));
 
-        const res = await request(app).post("/serial/stop");
+        const res = await request(app).get("/semg/channel/0");
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ message: "stop ok" });
-        expect(controller.stopScanning).toHaveBeenCalled();
+        expect(res.body).toEqual([100, 101]);
+        expect(controller.getDataByChannel).toHaveBeenCalled();
     });
 
-    test("POST /serial/send chiama controller.sendMessage", async () => {
-        controller.sendMessage.mockImplementation((req, res) => res.status(200).json({ message: "comando inviato" }));
+    test("DELETE /semg cancella tutti i dati", async () => {
+        controller.deleteAllsEMGdata.mockImplementation((req, res) => res.status(200).json({ message: "ok" }));
 
-        const res = await request(app).post("/serial/send").send({ data: ["Start\\r"] });
+        const res = await request(app).delete("/semg");
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ message: "comando inviato" });
-        expect(controller.sendMessage).toHaveBeenCalled();
+        expect(res.body).toEqual({ message: "ok" });
+        expect(controller.deleteAllsEMGdata).toHaveBeenCalled();
     });
 
-    test("GET /serial/status chiama controller.getStatus", async () => {
-        controller.getStatus.mockImplementation((req, res) => res.status(200).json({ connected: true }));
+    test("GET /semg/export/csv/:sessionID esporta CSV", async () => {
+        const fakeSessionId = "1234567890abcdef12345678";
 
-        const res = await request(app).get("/serial/status");
+        controller.sEMGexportAsCSV.mockImplementation((req, res) => {
+            res.set({
+                "Content-Type": "text/csv",
+                "Content-Disposition": "attachment; filename=semg_data.csv"
+            });
+            res.status(200).send("CSV_DATA");
+        });
+
+        const res = await request(app).get(`/semg/export/csv/${fakeSessionId}`);
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ connected: true });
-        expect(controller.getStatus).toHaveBeenCalled();
+        expect(res.text).toBe("CSV_DATA");
+        expect(res.headers["content-type"]).toContain("text/csv");
+        expect(res.headers["content-disposition"]).toContain("semg_data.csv");
+        expect(controller.sEMGexportAsCSV).toHaveBeenCalled();
     });
 });

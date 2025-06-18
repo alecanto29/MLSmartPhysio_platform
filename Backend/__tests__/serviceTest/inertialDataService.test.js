@@ -10,7 +10,7 @@ describe('inertialDataService', () => {
     });
 
     test('getAllInertialData() - ritorna dati', async () => {
-        const mockData = [{ data: [1, 2, 3, 4, 5, 6, 7, 8] }];
+        const mockData = [{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9] }];
         inertialData.find.mockResolvedValue(mockData);
 
         const result = await inertialDataService.getAllInertialData();
@@ -19,8 +19,8 @@ describe('inertialDataService', () => {
 
     test('getDataByChannel() - ritorna valori per canale', async () => {
         inertialData.find.mockResolvedValue([
-            { data: [10, 20, 30, 40, 50, 60, 70, 80] },
-            { data: [11, 21, 31, 41, 51, 61, 71, 81] },
+            { data: [10, 20, 30, 40, 50, 60, 70, 80, 90] },
+            { data: [11, 21, 31, 41, 51, 61, 71, 81, 91] },
         ]);
 
         const result = await inertialDataService.getDataByChannel(1);
@@ -43,10 +43,13 @@ describe('inertialDataService', () => {
             [1, 2, 3, 4, 5, 6, 7, 8, 9],
             [10, 11, 12], // non valida
         ];
+
         inertialData.insertMany.mockResolvedValue();
-        await inertialDataService.saveInertialData(data);
+
+        await inertialDataService.saveInertialData(data, "fakeSessionId");
+
         expect(inertialData.insertMany).toHaveBeenCalledWith([
-            { data: [1, 2, 3, 4, 5, 6, 7, 8, 9] }
+            { data: [1, 2, 3, 4, 5, 6, 7, 8, 9], sessionId: "fakeSessionId" }
         ]);
     });
 
@@ -60,11 +63,11 @@ describe('inertialDataService', () => {
             lean: () => mockData
         });
 
-        const csv = await inertialDataService.InertialasCSVexport();
+        const csv = await inertialDataService.InertialasCSVexport("fakeSessionId");
 
+        expect(inertialData.find).toHaveBeenCalledWith({ sessionId: "fakeSessionId" });
         expect(csv).toContain('"ch1","ch2","ch3"');
         expect(csv).toContain('"1.1","2.5","3.8"');
+        expect(csv).toContain('"5.7","6.3"'); // check anche della seconda riga
     });
-
-
 });

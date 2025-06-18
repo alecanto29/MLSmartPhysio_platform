@@ -47,9 +47,8 @@ describe("inertialDataController", () => {
         expect(res.body).toEqual({ message: "ok" });
     });
 
-    test("GET /inertial/export/csv - esporta e cancella", async () => {
+    test("GET /inertial/export/csv - esporta solo il CSV", async () => {
         service.InertialasCSVexport.mockResolvedValue("csv_data");
-        service.deleteAllInertialData.mockResolvedValue();
 
         const res = await request(app).get("/inertial/export/csv");
 
@@ -58,6 +57,7 @@ describe("inertialDataController", () => {
         expect(res.headers["content-type"]).toContain("text/csv");
         expect(res.headers["content-disposition"]).toContain("inertial_data.csv");
 
-        expect(service.deleteAllInertialData).toHaveBeenCalled();
+        expect(service.InertialasCSVexport).toHaveBeenCalled(); // ✅ Solo export
     });
+
 });

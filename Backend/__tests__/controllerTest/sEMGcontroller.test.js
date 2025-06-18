@@ -45,11 +45,11 @@ describe("sEMGdataController", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ message: "Dati cancellati correttamente" });
+        expect(service.deleteAllsEMGdata).toHaveBeenCalled(); // ✅ chiamata verificata
     });
 
     test("GET /semg/export/csv restituisce il CSV", async () => {
         service.sEMGasCSVexport.mockResolvedValue("CSV_CONTENT");
-        service.deleteAllsEMGdata.mockResolvedValue();
 
         const res = await request(app).get("/semg/export/csv");
 
@@ -57,6 +57,6 @@ describe("sEMGdataController", () => {
         expect(res.text).toBe("CSV_CONTENT");
         expect(res.headers["content-type"]).toContain("text/csv");
         expect(res.headers["content-disposition"]).toContain("semg_data.csv");
-        expect(service.deleteAllsEMGdata).toHaveBeenCalled();
+        expect(service.sEMGasCSVexport).toHaveBeenCalled();  // ✅ solo export
     });
 });

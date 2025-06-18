@@ -7,7 +7,7 @@ jest.mock("../../src/services/inertialDataService");
 
 const app = express();
 app.use(express.json());
-app.use("/inertial", router); // <- monta le rotte
+app.use("/inertial", router); // monta le rotte
 
 describe("inertialDataRoutes", () => {
     beforeEach(() => {
@@ -15,7 +15,7 @@ describe("inertialDataRoutes", () => {
     });
 
     test("GET /inertial restituisce i dati", async () => {
-        const mockData = [{ data: [1, 2, 3, 4, 5, 6, 7, 8] }];
+        const mockData = [{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9] }];
         service.getAllInertialData.mockResolvedValue(mockData);
 
         const res = await request(app).get("/inertial");
@@ -42,11 +42,13 @@ describe("inertialDataRoutes", () => {
         expect(res.body).toEqual({ message: "ok" });
     });
 
-    test("GET /inertial/export/csv esporta CSV", async () => {
-        service.InertialasCSVexport.mockResolvedValue("CSV_DATA");
-        service.deleteAllInertialData.mockResolvedValue();
+    test("GET /inertial/export/csv/:sessionID esporta CSV", async () => {
+        const fakeSessionId = "1234567890abcdef12345678";
 
-        const res = await request(app).get("/inertial/export/csv");
+        service.InertialasCSVexport.mockResolvedValue("CSV_DATA");
+        service.deleteAllInertialDataBySession.mockResolvedValue();
+
+        const res = await request(app).get(`/inertial/export/csv/${fakeSessionId}`);
 
         expect(res.status).toBe(200);
         expect(res.text).toBe("CSV_DATA");
