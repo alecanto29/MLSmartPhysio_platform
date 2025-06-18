@@ -1,5 +1,6 @@
 const appointmentsModel = require("../models/Appointment");
-
+const doctorModel = require ("../models/Doctor");
+const patientModel = require("../models/Patient");
 
 const getAllAppointments = async (doctorID) => {
     try {
@@ -36,7 +37,6 @@ const takeNewAppointment = async (appointmentData, doctorID) => {
         throw new Error("Tutti i campi sono obbligatori");
     }
 
-    // Parsing sicuro della data e ora
     const [year, month, day] = date.split("-");
     const [hours, minutes] = time.split(":");
 
@@ -63,8 +63,18 @@ const takeNewAppointment = async (appointmentData, doctorID) => {
     });
 
     await newAppointment.save();
+
+    await doctorModel.findByIdAndUpdate(doctorID, {
+        $push: { appointments: newAppointment._id }
+    });
+
+    await patientModel.findByIdAndUpdate(specificPatient, {
+        $push: { appointments: newAppointment._id }
+    });
+
     return newAppointment;
 };
+
 
 
 const deleteOldAppointments = async () => {
@@ -79,10 +89,28 @@ const deleteOldAppointments = async () => {
     }
 };
 
-const deleteAppointmentById = async (doctorID, appointmentsID) =>{
-    const deletedAppointments = await appointmentsModel.deleteOne({doctor: doctorID, _id: appointmentsID});
-    return deletedAppointments;
-}
+const deleteAppointmentById = async (doctorID, appointmentID) => {
+    // Trova l'appuntamento per sapere a quale paziente è associato
+    const appointment = await appointmentsModel.findOne({ _id: appointmentID, doctor: doctorID });
+    if (!appointment) {
+        throw new Error("Appuntamento non trovato o non autorizzato");
+    }
+
+    const patientID = appointment.patient;
+
+    await appointmentsModel.deleteOne({ _id: appointmentID });
+
+    await doctorModel.findByIdAndUpdate(doctorID, {
+        $pull: { appointments: appointmentID }
+    });
+
+    await patientModel.findByIdAndUpdate(patientID, {
+        $pull: { appointments: appointmentID }
+    });
+
+    return { success: true };
+};
+
 
 
 module.exports = {

@@ -1,5 +1,6 @@
 
 const sessionModel = require("../models/Session");
+const patientModel = require("../models/Patient");
 
 
 const getSession = async (doctorID) =>{
@@ -43,6 +44,11 @@ const createSession = async (sessionData, doctorId) => {
     });
 
     await newSession.save();
+
+    await patientModel.findByIdAndUpdate(sessionData.patient, {
+        $push: { sessions: newSession._id }
+    });
+
     return newSession;
 };
 
@@ -63,9 +69,21 @@ const updateSession = async (newSessionData, doctorID, sessionID) => {
 }
 
 
-const deleteSessionById = async (sessionID, doctorID) =>{
-    return await sessionModel.deleteOne({doctor: doctorID, _id: sessionID});
-}
+const deleteSessionById = async (sessionID, doctorID) => {
+    const session = await sessionModel.findOneAndDelete({
+        _id: sessionID,
+        doctor: doctorID
+    });
+
+    if (session) {
+        // Rimuove la sessione anche dal paziente
+        await patientModel.findByIdAndUpdate(session.patient, {
+            $pull: { sessions: sessionID }
+        });
+    }
+
+    return session;
+};
 
 module.exports = {
     getSession,
