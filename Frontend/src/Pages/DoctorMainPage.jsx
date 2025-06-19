@@ -6,6 +6,7 @@ import "../ComponentsCSS/DoctorMainPageStyle.css";
 import Header from "../AtomicComponents/Header.jsx";
 
 
+
 const DoctorMainPage = () => {
     const [patientsNumber, setPatientsNumber] = useState();
     const [criticalPatientsNumber, setCriticalPatientsNumber] = useState();
@@ -115,6 +116,7 @@ const DoctorMainPage = () => {
                 </div>
             </div>
             </div>
+
         </div>
     );
 };

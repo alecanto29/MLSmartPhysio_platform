@@ -2,16 +2,18 @@ const mongoose = require("mongoose");
 const Appointments = require("../../src/models/Appointment");
 
 describe("Appointments Model", () => {
-
     beforeAll(async () => {
-        await mongoose.connect("mongodb://localhost:27017/testdb", {
+        await mongoose.connect("mongodb://localhost:27017/testdb_appointments", {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
     });
 
+    afterEach(async () => {
+        await Appointments.deleteMany({});
+    });
+
     afterAll(async () => {
-        await mongoose.connection.db.dropDatabase(); // pulizia
         await mongoose.disconnect();
     });
 

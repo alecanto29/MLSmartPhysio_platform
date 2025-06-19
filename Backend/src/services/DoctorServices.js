@@ -52,9 +52,9 @@ async function createNewDoctor(doctorData) {
         }
 
         const newDoctor = new Doctor(doctorData);
-        await newDoctor.save();
 
-        return newDoctor;
+        const savedDoctor = await newDoctor.save();
+        return savedDoctor;
     } catch (error) {
         throw new Error("Errore nella creazione del nuovo medico");
     }

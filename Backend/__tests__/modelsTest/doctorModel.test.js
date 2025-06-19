@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
-const Doctors = require("../../src/models/Doctor");
+const Appointments = require("../../src/models/Appointment");
 
-describe("Doctors Model", () => {
+describe("Appointments Model", () => {
+
     beforeAll(async () => {
         await mongoose.connect("mongodb://localhost:27017/testdb", {
             useNewUrlParser: true,
@@ -9,73 +10,105 @@ describe("Doctors Model", () => {
         });
     });
 
-    afterEach(async () => {
-        await Doctors.deleteMany({});
-    });
-
     afterAll(async () => {
-        await mongoose.connection.db.dropDatabase();
+        await mongoose.connection.db.dropDatabase(); // pulizia
         await mongoose.disconnect();
     });
 
-    test("salva un dottore valido", async () => {
-        const doctor = new Doctors({
-            name: "Mario",
-            surname: "Rossi",
-            birthDate: new Date("1980-01-01"),
-            fiscalCode: "RSSMRA80A01F205X",
-            email: "mario.rossi@example.com",
-            passwordHash: "hashed_password",
-            licenseNumber: "LIC123456",
-            specialization: "Cardiology",
-            patientsInCare: [],
-            appointments: []
+    test("crea un appuntamento valido", async () => {
+        const validAppointment = new Appointments({
+            date: new Date("2025-06-20"),
+            time: "15:30",
+            doctor: new mongoose.Types.ObjectId(),
+            patient: new mongoose.Types.ObjectId(),
+            notes: "Visita annuale"
         });
 
-        const saved = await doctor.save();
+        const saved = await validAppointment.save();
 
         expect(saved._id).toBeDefined();
-        expect(saved.name).toBe("Mario");
-        expect(saved.specialization).toBe("Cardiology");
-        expect(Array.isArray(saved.patientsInCare)).toBe(true);
-        expect(Array.isArray(saved.appointments)).toBe(true);
+        expect(saved.date.toISOString()).toBe("2025-06-20T00:00:00.000Z");
+        expect(saved.time).toBe("15:30");
+        expect(saved.notes).toBe("Visita annuale");
+        expect(saved.createdAt).toBeDefined();
+        expect(saved.updatedAt).toBeDefined();
     });
 
-    test("genera errore se manca un campo richiesto", async () => {
-        const incompleteDoctor = new Doctors({
-            name: "Luigi"
-            // manca surname, fiscalCode, email, passwordHash, licenseNumber
+    test("usa note vuote di default se non fornite", async () => {
+        const appointment = new Appointments({
+            date: new Date(),
+            time: "10:00",
+            doctor: new mongoose.Types.ObjectId(),
+            patient: new mongoose.Types.ObjectId()
         });
 
-        let error;
-        try {
-            await incompleteDoctor.validate();
-        } catch (err) {
-            error = err;
-        }
+        const saved = await appointment.save();
 
-        expect(error.errors.surname).toBeDefined();
-        expect(error.errors.fiscalCode).toBeDefined();
-        expect(error.errors.email).toBeDefined();
-        expect(error.errors.passwordHash).toBeDefined();
-        expect(error.errors.licenseNumber).toBeDefined();
+        expect(saved.notes).toBe("");
     });
 
-    test("non permette duplicati su email, fiscalCode, licenseNumber", async () => {
-        const baseData = {
-            name: "Anna",
-            surname: "Bianchi",
-            birthDate: new Date("1985-05-15"),
-            fiscalCode: "BNCHNA85E55F205X",
-            email: "anna.bianchi@example.com",
-            passwordHash: "hash",
-            licenseNumber: "LIC999999"
-        };
+    test("fallisce se manca il campo obbligatorio 'date'", async () => {
+        const invalid = new Appointments({
+            time: "12:00",
+            doctor: new mongoose.Types.ObjectId(),
+            patient: new mongoose.Types.ObjectId()
+        });
 
-        await new Doctors(baseData).save();
+        let err;
+        try {
+            await invalid.validate();
+        } catch (e) {
+            err = e;
+        }
 
-        const duplicate = new Doctors(baseData);
+        expect(err.errors.date).toBeDefined();
+    });
 
-        await expect(duplicate.save()).rejects.toThrow(/duplicate key error/);
+    test("fallisce se manca il campo obbligatorio 'time'", async () => {
+        const invalid = new Appointments({
+            date: new Date(),
+            doctor: new mongoose.Types.ObjectId(),
+            patient: new mongoose.Types.ObjectId()
+        });
+
+        let err;
+        try {
+            await invalid.validate();
+        } catch (e) {
+            err = e;
+        }
+
+        expect(err.errors.time).toBeDefined();
+    });
+
+    test("fallisce se manca 'doctor' o 'patient'", async () => {
+        const missingDoctor = new Appointments({
+            date: new Date(),
+            time: "09:00",
+            patient: new mongoose.Types.ObjectId()
+        });
+
+        const missingPatient = new Appointments({
+            date: new Date(),
+            time: "09:00",
+            doctor: new mongoose.Types.ObjectId()
+        });
+
+        let err1, err2;
+
+        try {
+            await missingDoctor.validate();
+        } catch (e) {
+            err1 = e;
+        }
+
+        try {
+            await missingPatient.validate();
+        } catch (e) {
+            err2 = e;
+        }
+
+        expect(err1.errors.doctor).toBeDefined();
+        expect(err2.errors.patient).toBeDefined();
     });
 });

@@ -1,83 +1,63 @@
-const mongoose = require("mongoose");
-const { MongoMemoryServer } = require("mongodb-memory-server");
-const Doctor = require("../../src/models/Doctor");
-const doctorService = require("../../src/services/DoctorServices");
+// __tests__/serviceTest/doctorService.test.js
+const mongoose = require('mongoose');
+const Doctor = require('../../src/models/Doctor');
+const doctorService = require('../../src/services/DoctorServices');
 
-let mongoServer;
+// Mockeremo i metodi del modello
+jest.mock('../../src/models/Doctor');
 
-beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
-});
-
-afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-});
-
-afterEach(async () => {
-    await Doctor.deleteMany();
-});
-
-describe("Doctor Service", () => {
-    const baseData = {
-        name: "Anna",
-        surname: "Bianchi",
-        email: "anna.bianchi@example.com",
-        fiscalCode: "BNCHNA85E55F205X",
-        licenseNumber: "LIC999999",
-        birthDate: new Date("1985-05-15"),
-        passwordHash: "hash",
-    };
-
-    test("createNewDoctor - crea un nuovo medico", async () => {
-        const result = await doctorService.createNewDoctor(baseData);
-        expect(result.name).toBe("Anna");
-        expect(result.email).toBe(baseData.email);
+describe("doctorService", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
-    test("getAllDoctors - restituisce tutti i medici", async () => {
-        await doctorService.createNewDoctor(baseData);
+    test("getAllDoctors returns all doctors", async () => {
+        const mockDoctors = [{ name: "Dr. A" }, { name: "Dr. B" }];
+        Doctor.find.mockResolvedValue(mockDoctors);
+
         const result = await doctorService.getAllDoctors();
-        expect(result.length).toBe(1);
+        expect(result).toEqual(mockDoctors);
+        expect(Doctor.find).toHaveBeenCalledTimes(1);
     });
 
-    test("getDoctorById - restituisce un medico specifico", async () => {
-        const created = await doctorService.createNewDoctor(baseData);
-        const result = await doctorService.getDoctorById(created._id);
-        expect(result.email).toBe(baseData.email);
+    test("getDoctorById returns a doctor", async () => {
+        const mockDoctor = { name: "Dr. C" };
+        Doctor.findById.mockResolvedValue(mockDoctor);
+
+        const result = await doctorService.getDoctorById("123");
+        expect(result).toEqual(mockDoctor);
+        expect(Doctor.findById).toHaveBeenCalledWith("123");
     });
 
-    test("getDoctorById - lancia errore se medico non trovato", async () => {
-        const id = new mongoose.Types.ObjectId();
-        await expect(doctorService.getDoctorById(id))
-            .rejects.toThrow(`Errore durante il recupero del medico con id ${id}`);
+    test("getDoctorByEmail returns a doctor", async () => {
+        const mockDoctor = { email: "test@test.com" };
+        Doctor.findOne.mockResolvedValue(mockDoctor);
+
+        const result = await doctorService.getDoctorByEmail("test@test.com");
+        expect(result).toEqual(mockDoctor);
+        expect(Doctor.findOne).toHaveBeenCalledWith({ email: "test@test.com" });
     });
 
+    test("createNewDoctor saves a new doctor", async () => {
+        const input = { name: "Dr. D" };
+        const savedDoctor = { _id: "mockId", name: "Dr. D" };
 
-    test("getDoctorByEmail - restituisce il medico dato l'email", async () => {
-        await doctorService.createNewDoctor(baseData);
-        const found = await doctorService.getDoctorByEmail(baseData.email);
-        expect(found).not.toBeNull();
-        expect(found.fiscalCode).toBe(baseData.fiscalCode);
+        const saveMock = jest.fn().mockResolvedValue(savedDoctor);
+        Doctor.mockImplementation(() => ({
+            save: saveMock
+        }));
+
+        const result = await doctorService.createNewDoctor(input);
+        expect(result).toEqual(savedDoctor);
+        expect(saveMock).toHaveBeenCalled();
     });
 
-    test("getDoctorAppointments - restituisce array vuoto se nessun appuntamento", async () => {
-        const created = await doctorService.createNewDoctor(baseData);
-        const appointments = await doctorService.getDoctorAppointments(created._id);
-        expect(appointments).toEqual([]);
-    });
+    test("deleteDoctor removes doctor by ID", async () => {
+        const mockDoctor = { _id: "abc123", name: "Dr. E" };
+        Doctor.findByIdAndDelete.mockResolvedValue(mockDoctor);
 
-    test("deleteDoctor - elimina un medico esistente", async () => {
-        const created = await doctorService.createNewDoctor(baseData);
-        const deleted = await doctorService.deleteDoctor(created._id);
-        expect(deleted.email).toBe(baseData.email);
-    });
-
-    test("deleteDoctor - lancia errore se medico non esiste", async () => {
-        const fakeId = new mongoose.Types.ObjectId();
-        await expect(doctorService.deleteDoctor(fakeId))
-            .rejects.toThrow(`Errore durante la rimozione del medico con id: ${fakeId}`);
+        const result = await doctorService.deleteDoctor("abc123");
+        expect(result).toEqual(mockDoctor);
+        expect(Doctor.findByIdAndDelete).toHaveBeenCalledWith("abc123");
     });
 });

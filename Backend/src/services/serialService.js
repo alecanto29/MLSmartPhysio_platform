@@ -107,7 +107,7 @@ const openConnection = async () => {
 
     //se anceh una delle due non esiste return
     if (!serialPorts.sEMG || !serialPorts.IMU) {
-        console.error("Le porte seriali non sono correttamente disponibili.");
+        console.error("Una o entrambe le board non sono state rilevate.");
         return;
     }
 
@@ -292,6 +292,7 @@ module.exports = {
     closeConnection,
     getConnectionStatus,
     startReading,
+    delay,
     // Export extra per i test
     __setConnected,
     __mockSerialPorts,
