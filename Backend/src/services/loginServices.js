@@ -19,6 +19,16 @@ async function registerNewUser(newUser) {
             throw new Error("Email già registrata");
         }
 
+        const birth = new Date(newUser.birthDate);
+        const now = new Date();
+
+        birth.setHours(0, 0, 0, 0);
+        now.setHours(0, 0, 0, 0);
+
+        if (birth > now) {
+            throw new Error("La data di nascita non può essere nel futuro.");
+        }
+
         const hashedPassword = await hashPassword(newUser.password);
 
         const doctorToSave = {
