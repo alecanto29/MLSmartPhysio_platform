@@ -113,3 +113,79 @@ button:hover {
     margin-top: 20px;
     text-align: center;
 }
+
+/* Language selector dropdown */
+.language-selector {
+    position: absolute;
+    top: 30px;
+    right: 20px;
+    z-index: 100;
+}
+
+.language-button {
+    border: 1px solid #003344;
+    border-radius: 8px;
+    padding: 6px 12px;
+    background-color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;      /* Larghezza fissa per evitare resizing */
+    height: 50px;      /* Altezza fissa */
+}
+
+.language-dropdown {
+    position: absolute;
+    top: 55px;
+    right: -3px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.language-dropdown div {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: black;
+    font-weight: 500;
+}
+
+/* Hover sulla lingua */
+.language-dropdown div:hover {
+    background-color: #f0f0f0;
+}
+
+.flag-icon {
+    width: 40px;
+    height: 30px;
+    margin-right: 8px;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+/* Ingrandisci leggermente bandiera inglese */
+.flag-icon[alt="en"] {
+    transform: scale(1.6);
+}
+
+/* Testo lingua */
+.lang-label {
+    color: #000;
+    font-size: 16px;
+    display: inline;
+}
+
+/* Opzione lingua nel menu */
+.lang-option {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 6px 12px;
+    gap: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}

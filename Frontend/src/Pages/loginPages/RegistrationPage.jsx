@@ -1,12 +1,15 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../../ComponentsCSS/RegistrationPage.css";
 import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
 import TextFieldModel from "../../AtomicComponents/TextFieldModel.jsx";
 import ButtonModel from "../../AtomicComponents/ButtonModel.jsx";
 
 const RegistrationPage = () => {
+    const { t, i18n } = useTranslation();
+
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [fiscalCode, setFiscalCode] = useState("");
@@ -21,18 +24,34 @@ const RegistrationPage = () => {
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
 
+    const [showLangDropdown, setShowLangDropdown] = useState(false);
+
+    const toggleLanguage = (lang) => {
+        i18n.changeLanguage(lang);
+        localStorage.setItem("language", lang);
+        setShowLangDropdown(false);
+    };
+
     const handleRegistration = async () => {
         try {
-            const response = await axios.post("/smartPhysio/auth/register", {
-                name,
-                surname,
-                fiscalCode,
-                specialization,
-                email,
-                password,
-                licenseNumber,
-                birthDate,
-            });
+            const response = await axios.post(
+                "/smartPhysio/auth/register",
+                {
+                    name,
+                    surname,
+                    fiscalCode,
+                    specialization,
+                    email,
+                    password,
+                    licenseNumber,
+                    birthDate,
+                },
+                {
+                    headers: {
+                        "Accept-Language": i18n.language
+                    }
+                }
+            );
 
             const token = response.data.token;
             localStorage.setItem("token", token);
@@ -40,7 +59,7 @@ const RegistrationPage = () => {
             const decoded = JSON.parse(atob(token.split('.')[1]));
             localStorage.setItem("doctorName", `${decoded.name} ${decoded.surname}`);
 
-            setMessage("Registrazione avvenuta con successo");
+            setMessage(t("SUCCESSFULLY_SIGNED_UP"));
             setMessageType("success");
 
             setTimeout(() => {
@@ -55,7 +74,7 @@ const RegistrationPage = () => {
                     ? error.response.data
                     : error.response?.data?.message ||
                     error.response?.data?.error ||
-                    "Errore durante la registrazione";
+                    t("EMAIL_ALREADY_REGISTERED");
 
             setMessage(errorMsg);
         }
@@ -63,10 +82,44 @@ const RegistrationPage = () => {
 
     return (
         <div className="registration-page">
+
+            {/* Selettore lingua in alto a destra */}
+            <div className="fixed-lang-selector">
+                <div
+                    className="reg-language-button"
+                    onClick={() => setShowLangDropdown(!showLangDropdown)}
+                >
+                    <div className="reg-lang-option">
+                        <img
+                            src={`/images/${i18n.language}_icon.png`}
+                            alt={i18n.language}
+                            className="reg-flag-icon"
+                        />
+                        <span className="reg-lang-label">{i18n.language.toUpperCase()}</span>
+                    </div>
+                </div>
+
+                {showLangDropdown && (
+                    <div
+                        className="reg-language-dropdown"
+                        onMouseLeave={() => setShowLangDropdown(false)}
+                    >
+                        <div className="reg-lang-option" onClick={() => toggleLanguage("it")}>
+                            <img src="/images/it_icon.png" alt="it" className="reg-flag-icon" />
+                            <span className="reg-lang-label">IT</span>
+                        </div>
+                        <div className="reg-lang-option" onClick={() => toggleLanguage("en")}>
+                            <img src="/images/en_icon.png" alt="en" className="reg-flag-icon" />
+                            <span className="reg-lang-label">EN</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <div className="registration-container">
                 <div className="registration-left">
                     <img src="/images/app_logo.png" alt="Logo MLSmartPhysio" className="login-logo" />
-                    <button onClick={() => navigate("/login")}>Sign In</button>
+                    <button onClick={() => navigate("/login")}>{t("SIGN_IN_BUTTON")}</button>
                 </div>
 
                 <div className="registration-right">
@@ -75,58 +128,59 @@ const RegistrationPage = () => {
                     </div>
 
                     <div className="form-grid">
+                        {/* Input fields */}
                         <div className="input-block">
-                            <label>Name</label>
+                            <label>{t("NAME")}</label>
                             <TextFieldModel
                                 type="text"
-                                placeholder="Insert your name here..."
+                                placeholder={t("NAME_PLACEHOLDER")}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
                         </div>
 
                         <div className="input-block">
-                            <label>Surname</label>
+                            <label>{t("SURNAME")}</label>
                             <TextFieldModel
                                 type="text"
-                                placeholder="Insert your surname here..."
+                                placeholder={t("SURNAME_PLACEHOLDER")}
                                 value={surname}
                                 onChange={(e) => setSurname(e.target.value)}
                             />
                         </div>
 
                         <div className="input-block">
-                            <label>Fiscal Code</label>
+                            <label>{t("FISCAL_CODE")}</label>
                             <TextFieldModel
                                 type="text"
-                                placeholder="Insert your fiscal code here..."
+                                placeholder={t("FISCAL_CODE_PLACEHOLDER")}
                                 value={fiscalCode}
                                 onChange={(e) => setFiscalCode(e.target.value)}
                             />
                         </div>
 
                         <div className="input-block">
-                            <label>Specialization</label>
+                            <label>{t("SPECIALIZATION")}</label>
                             <TextFieldModel
                                 type="text"
-                                placeholder="Insert your specialization here..."
+                                placeholder={t("SPECIALIZATION_PLACEHOLDER")}
                                 value={specialization}
                                 onChange={(e) => setSpecialization(e.target.value)}
                             />
                         </div>
 
                         <div className="input-block">
-                            <label>Email</label>
+                            <label>{t("EMAIL")}</label>
                             <TextFieldModel
                                 type="email"
-                                placeholder="Insert your email here..."
+                                placeholder={t("EMAIL_PLACEHOLDER")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
 
                         <div className="input-block">
-                            <label htmlFor="birth-date">Birth Date</label>
+                            <label htmlFor="birth-date">{t("BIRTH_DATE")}</label>
                             <div className="input-icon-wrapper">
                                 <input
                                     id="birth-date"
@@ -147,27 +201,27 @@ const RegistrationPage = () => {
                         </div>
 
                         <div className="input-block">
-                            <label>Password</label>
+                            <label>{t("PASSWORD")}</label>
                             <TextFieldModel
                                 type="password"
-                                placeholder="Insert your password here..."
+                                placeholder={t("PASSWORD_PLACEHOLDER")}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
 
                         <div className="input-block">
-                            <label>License Number</label>
+                            <label>{t("LICENSE_NUMBER")}</label>
                             <TextFieldModel
                                 type="text"
-                                placeholder="Insert your license number here..."
+                                placeholder={t("LICENSE_PLACEHOLDER")}
                                 value={licenseNumber}
                                 onChange={(e) => setLicenseNumber(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <ButtonModel className="confirm-button" buttonText={"Confirm"} onClick={handleRegistration} />
+                    <ButtonModel className="confirm-button" buttonText={t("CONFIRM_BUTTON")} onClick={handleRegistration} />
                     <MessageHandlerModel messageInfo={message} type={messageType} onClear={() => setMessage("")} />
                 </div>
             </div>

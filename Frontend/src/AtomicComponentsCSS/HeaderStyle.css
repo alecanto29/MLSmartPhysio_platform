@@ -83,3 +83,19 @@
     background-color: #dc3545;
     color: #fff;
 }
+
+.shared-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.language-select {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+}
+

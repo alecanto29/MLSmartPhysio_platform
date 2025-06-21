@@ -1,3 +1,4 @@
+/* Container principale della pagina */
 .registration-page .registration-container {
     display: flex;
     height: 100vh;
@@ -7,6 +8,7 @@
     overflow: hidden;
 }
 
+/* Colonna sinistra */
 .registration-page .registration-left {
     flex: 1;
     display: flex;
@@ -38,6 +40,7 @@
     background-color: #005566;
 }
 
+/* Colonna destra */
 .registration-page .registration-right {
     flex: 2;
     flex-direction: column;
@@ -45,6 +48,7 @@
     justify-content: start;
 }
 
+/* Icona utente */
 .registration-page .user-icon {
     display: flex;
     justify-content: center;
@@ -58,6 +62,7 @@
     color: #003344;
 }
 
+/* Griglia del form */
 .registration-page .form-grid {
     display: grid;
     grid-template-areas:
@@ -128,6 +133,7 @@
     background-color: #005566;
 }
 
+/* Icona calendario */
 .registration-page .input-icon-wrapper {
     position: relative;
     width: 100%;
@@ -159,4 +165,78 @@
     font-size: 20px;
     color: #003344;
     pointer-events: none;
+}
+
+/* Posizionamento fisso del selettore lingua */
+.fixed-lang-selector {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    z-index: 999;
+}
+
+/* Pulsante principale lingua */
+.reg-language-button {
+    background-color: white;
+    border: 1px solid #666; /* bordo meno spesso */
+    border-radius: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100px;
+    height: 50px;
+    justify-content: center;
+}
+
+/* Dropdown menu */
+.reg-language-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 100px; /* uguale al bottone principale */
+}
+
+/* Ogni opzione nel menu */
+.reg-lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%; /* per farle larghe quanto il contenitore */
+    box-sizing: border-box;
+}
+
+
+/* Bandierine in generale */
+/* Bandierine generiche */
+.reg-flag-icon {
+    width: 40px;
+    height: 30px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.reg-language-button .reg-flag-icon {
+    margin-left: -8px;
+}
+
+/* Solo la bandiera inglese più grande */
+.reg-flag-icon[alt="en"] {
+    transform: scale(1.6);
+}
+
+/* Testo visibile e nero */
+.reg-lang-label {
+    font-weight: 600;
+    font-size: 15px;
+    color: #000;
 }

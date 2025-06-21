@@ -6,6 +6,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const serialService = require("./services/serialService");
 const cors = require("cors");
+const { i18nextMiddleware } = require('../i18n.config');
 
 // Connessione al DB
 dbConnection.connectDB();
@@ -37,9 +38,10 @@ serialService.initializeSocket(io);
 
 //FUNZIONALITA' HTTP
 
+app.use(cors()); // deve essere PRIMA
+app.use(i18nextMiddleware); // deve essere DOPO cors
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 
 // Import delle rotte
 const sEMGdataRoutes = require("../src/routes/sEMGdataRoutes");

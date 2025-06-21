@@ -1,23 +1,23 @@
 const doctorService = require("../services/DoctorServices");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const i18next = require("i18next");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-async function registerNewUser(newUser) {
+async function registerNewUser(newUser, lang) {
     try {
         if (
             !newUser.name || !newUser.surname || !newUser.email ||
             !newUser.password || !newUser.fiscalCode ||
             !newUser.specialization || !newUser.licenseNumber || !newUser.birthDate
         ) {
-            throw new Error("Tutti i campi sono obbligatori");
+            throw new Error(i18next.t("ALL_FIELDS_REQUIRED", { lng: lang }));
         }
 
         const existingDoctor = await doctorService.getDoctorByEmail(newUser.email);
         if (existingDoctor) {
-            throw new Error("Email già registrata");
-        }
+            throw new Error(i18next.t("EMAIL_ALREADY_REGISTERED", { lng: lang }));        }
 
         const birth = new Date(newUser.birthDate);
         const now = new Date();
@@ -26,7 +26,7 @@ async function registerNewUser(newUser) {
         now.setHours(0, 0, 0, 0);
 
         if (birth > now) {
-            throw new Error("La data di nascita non può essere nel futuro.");
+            throw new Error(i18next.t("FUTURE_DATE", { lng: lang }));
         }
 
         const hashedPassword = await hashPassword(newUser.password);
@@ -66,17 +66,17 @@ async function registerNewUser(newUser) {
     }
 }
 
-async function login(email, password) {
+async function login(email, password, lang) {
     try {
         const doctor = await doctorService.getDoctorByEmail(email);
 
         if (!doctor) {
-            throw new Error("Email non trovata");
+            throw new Error(i18next.t("EMAIL_NOT_FOUND", { lng: lang }));
         }
 
         const isMatch = await bcrypt.compare(password, doctor.passwordHash);
         if (!isMatch) {
-            throw new Error("Password errata");
+            throw new Error(i18next.t("WRONG_PASSWORD", { lng: lang }));
         }
 
         const token = jwt.sign(
