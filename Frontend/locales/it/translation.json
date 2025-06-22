@@ -98,5 +98,9 @@
   "UPDATE_SESSION": "Dati sessione aggiornati",
 
   "YES": "Si",
-  "NO": "No"
+  "NO": "No",
+
+  "LOGOUT_MESSAGE": "Vuoi davvero uscire dalla sessione?",
+  "CANCEL_LOGOUT": "Annulla",
+  "LOGOUT_LOGOUT": "Logout"
 }

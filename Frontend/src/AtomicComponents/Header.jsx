@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../AtomicComponentsCSS/HeaderStyle.css";
 
+
 const Header = () => {
     const { i18n } = useTranslation();
     const [showPopup, setShowPopup] = useState(false);
@@ -11,6 +12,7 @@ const Header = () => {
     const doctorName = localStorage.getItem("doctorName") || "Nome Cognome";
 
     const currentLang = i18n.language || "en";
+    const { t } = useTranslation();
 
     const changeLanguage = (lang) => {
         i18n.changeLanguage(lang);
@@ -68,10 +70,10 @@ const Header = () => {
             {showPopup && (
                 <div className="header-logout-overlay" onClick={() => setShowPopup(false)}>
                     <div className="header-logout-popup" onClick={(e) => e.stopPropagation()}>
-                        <p className="header-logout-text">Vuoi davvero effettuare il logout dall'applicazione?</p>
+                        <p className="header-logout-text">{t("LOGOUT_MESSAGE")}</p>
                         <div className="header-logout-buttons">
-                            <button className="header-cancel-btn" onClick={() => setShowPopup(false)}>Annulla</button>
-                            <button className="header-confirm-btn" onClick={handleLogout}>Logout</button>
+                            <button className="header-cancel-btn" onClick={() => setShowPopup(false)}>{t("CANCEL_LOGOUT")}</button>
+                            <button className="header-confirm-btn" onClick={handleLogout}>{t("LOGOUT_LOGOUT")}</button>
                         </div>
                     </div>
                 </div>

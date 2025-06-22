@@ -98,5 +98,10 @@
   "UPDATE_SESSION": "Data session updated",
 
   "YES": "Yes",
-  "NO": "No"
+  "NO": "No",
+
+  "LOGOUT_MESSAGE": "Do you want to get out of the session?",
+  "CANCEL_LOGOUT": "Cancel",
+  "LOGOUT_LOGOUT": "Logout"
+
 }
