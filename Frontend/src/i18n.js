@@ -11,11 +11,15 @@ i18n
         fallbackLng: "en",
         debug: false,
         backend: {
-            loadPath: "/locales/{{lng}}/translation.json"
+            loadPath: "/locales/{{lng}}/translation.json",
+        },
+        detection: {
+            order: ["localStorage", "navigator"],
+            lookupLocalStorage: "language"
         },
         interpolation: {
-            escapeValue: false
-        }
+            escapeValue: false,
+        },
     });
 
 export default i18n;

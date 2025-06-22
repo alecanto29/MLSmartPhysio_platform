@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../AtomicComponents/Header.jsx";
 import "../ComponentsCSS/PatientSessionListPage.css";
 import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
+import i18n from "i18next";
+import {useTranslation} from "react-i18next";
 
 const PatientSessionListPage = () => {
     const [patientsSessions, setPatientsSessions] = useState([]);
@@ -11,7 +13,9 @@ const PatientSessionListPage = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const { id } = useParams();
+
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
@@ -70,7 +74,7 @@ const PatientSessionListPage = () => {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             });
 
-            setMessage("Sessione eliminata con successo");
+            setMessage(t("DELETE_SESSION"));
             setMessageType("success");
 
             setPatientsSessions((prev) => prev.filter((s) => s._id !== sessionId));
@@ -111,7 +115,7 @@ const PatientSessionListPage = () => {
 
             <div className="title-container">
                 <img src="/images/patient_blue.png" alt="Session Icon" className="title-icon" />
-                <h2 className="title-text">Patient Session List</h2>
+                <h2 className="title-text">{t("PATIENT_SESSION_LIST_TITLE")}</h2>
             </div>
 
             <div className="search-wrapper">
@@ -119,7 +123,7 @@ const PatientSessionListPage = () => {
                     <i className="bi bi-search search-icon"></i>
                     <input
                         type="text"
-                        placeholder="Search by session number or date..."
+                        placeholder={t("SEARCH_BAR_CONTENT_SESSION")}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -129,7 +133,7 @@ const PatientSessionListPage = () => {
             <div className="scrollable">
                 {filteredSessions.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#003344", fontWeight: "bold", padding: "20px" }}>
-                        No session found
+                        {t("NOT_FOUND_SESSION")}
                     </div>
                 ) : (
                     <ul className="session-list">
@@ -146,7 +150,7 @@ const PatientSessionListPage = () => {
                                     <div className="card-left">
                                         <img src="/images/session_list.png" alt="Session" />
                                         <span className="card-name">
-                                            Session {session.sessionNumber} - {new Date(session.date).toLocaleDateString("it-IT")}
+                                            {t("SESSION")} {session.sessionNumber} - {new Date(session.date).toLocaleDateString("it-IT")}
                                         </span>
                                     </div>
 
@@ -160,17 +164,17 @@ const PatientSessionListPage = () => {
                                             }
                                         >
                                             <img src="/images/patient_details.png" alt="Details" />
-                                            <span>Session details</span>
+                                            <span>{t("SESSION_DETAILS_ICON")}</span>
                                         </div>
 
                                         <div className="card-action" onClick={() => navigate(`/session/analysis`)}>
                                             <img src="/images/session_analysis.png" alt="Analysis" />
-                                            <span>Session analysis</span>
+                                            <span>{t("SESSION_ANALYSIS")}</span>
                                         </div>
 
                                         <div className="card-action" onClick={() => handleDownloadAllBySession(session._id)}>
                                             <img src="/images/download.png" alt="Download" />
-                                            <span>Download session</span>
+                                            <span>{t("DOWNLOAD_SESSION")}</span>
                                         </div>
                                     </div>
                                 </li>
@@ -187,8 +191,8 @@ const PatientSessionListPage = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup-content">
-                        <h3>Conferma eliminazione</h3>
-                        <p>Sei sicuro di voler eliminare questa sessione?</p>
+                        <h3>{t("DELETE_POPUP_TITLE")}</h3>
+                        <p>{t("SESSION_DELETE_POPUP_MESSAGE")}</p>
                         <div className="popup-buttons">
                             <button
                                 className="btn-delete"
@@ -198,9 +202,9 @@ const PatientSessionListPage = () => {
                                     setSessionToDelete(null);
                                 }}
                             >
-                                Elimina
+                                {t("DELETE_POPUP_DELETE")}
                             </button>
-                            <button className="btn-close" onClick={() => setShowPopup(false)}>Annulla</button>
+                            <button className="btn-close" onClick={() => setShowPopup(false)}>{t("DELETE_POPUP_CLOSE")}</button>
                         </div>
                     </div>
                 </div>

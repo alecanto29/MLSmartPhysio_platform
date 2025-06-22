@@ -32,7 +32,8 @@ const getAllCriticPatients = async (req, res) => {
 
 const createNewPatient = async (req, res) => {
     try {
-        const newPatient = await patientService.createNewPatient(req.body, req.user.id);
+        const lang = req.language || 'en';
+        const newPatient = await patientService.createNewPatient(req.body, req.user.id, lang);
         res.status(201).json(newPatient);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -53,10 +54,12 @@ const deleteNewPatient = async (req, res) => {
 
 const updatePatientInfo = async (req, res) => {
     try {
+        const lang = req.language || 'en';
         const updatedPatient = await patientService.updatePatientInfo(
             req.body,
             req.user.id,
-            req.params.id
+            req.params.id,
+            lang
         );
         res.status(200).json(updatedPatient);
     } catch (error) {

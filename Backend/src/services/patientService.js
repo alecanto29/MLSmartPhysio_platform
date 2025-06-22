@@ -2,6 +2,7 @@ const patientModel = require("../models/Patient");
 const bcrypt = require("bcrypt");
 const appointmentsModel = require("../models/Appointment");
 const doctorModel = require("../models/Doctor");
+const i18next = require("i18next");
 
 // Tutti i pazienti del medico loggato
 const getAllPatients = async (doctorId) => {
@@ -19,13 +20,13 @@ const getAllCriticPatients = async (doctorId) => {
 };
 
 // Creazione di un nuovo paziente assegnato al medico loggato
-const createNewPatient = async (patientData, doctorId) => {
+const createNewPatient = async (patientData, doctorId, lang) => {
     if (
         !patientData.name || !patientData.surname || !patientData.fiscalCode ||
         !patientData.healthCardNumber || !patientData.gender ||
         !patientData.birthDate || !patientData.medicalHistory
     ) {
-        throw new Error("Tutti i campi sono obbligatori");
+        throw new Error(i18next.t("ALL_FIELDS_REQUIRED", { lng: lang }));
     }
 
     const birth = new Date(patientData.birthDate);
@@ -35,7 +36,7 @@ const createNewPatient = async (patientData, doctorId) => {
     now.setHours(0, 0, 0, 0);
 
     if (birth > now) {
-        throw new Error("La data di nascita non può essere nel futuro.");
+        throw new Error(i18next.t("FUTURE_DATE", { lng: lang }));
     }
 
     const newPatient = new patientModel({
@@ -49,6 +50,7 @@ const createNewPatient = async (patientData, doctorId) => {
         doctorId,
         { $addToSet: { patientsInCare: newPatient._id } }, // $addToSet evita duplicati
         { new: true }
+
     );
 
     return newPatient;
@@ -72,11 +74,19 @@ const deleteNewPatient = async (patientId, doctorId) => {
 };
 
 
-const updatePatientInfo = async (patientData, doctorID, patientID) => {
+const updatePatientInfo = async (patientData, doctorID, patientID, lang) => {
     // Verifica che il paziente appartenga al medico
     const patient = await patientModel.findOne({ _id: patientID, primaryDoctor: doctorID });
     if (!patient) {
         throw new Error("Paziente non trovato o non autorizzato");
+    }
+
+    if (
+        !patientData.name || !patientData.surname || !patientData.fiscalCode ||
+        !patientData.healthCardNumber || !patientData.gender ||
+        !patientData.birthDate || !patientData.medicalHistory
+    ) {
+        throw new Error(i18next.t("ALL_FIELDS_REQUIRED", { lng: lang }));
     }
 
     const birth = new Date(patientData.birthDate);
@@ -86,7 +96,7 @@ const updatePatientInfo = async (patientData, doctorID, patientID) => {
     now.setHours(0, 0, 0, 0);
 
     if (birth > now) {
-        throw new Error("La data di nascita non può essere nel futuro.");
+        throw new Error(i18next.t("FUTURE_DATE", { lng: lang }));
     }
 
     // Aggiorna solo i campi specificati

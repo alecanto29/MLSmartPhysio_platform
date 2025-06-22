@@ -30,7 +30,8 @@ const getAllAppointmentsTime = async (req, res) => {
 
 const takeNewAppointment = async (req, res) =>{
     try{
-        const newAppointments = await appointmentsService.takeNewAppointment(req.body, req.user.id);
+        const lang = req.language || 'en';
+        const newAppointments = await appointmentsService.takeNewAppointment(req.body, req.user.id, lang);
         res.status(200).json(newAppointments);
     }catch(error){
         res.status(500).json({ error: error.message });

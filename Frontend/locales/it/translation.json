@@ -30,11 +30,16 @@
 
   "ADD_NEW_PATIENCE_TITLE": "Aggiungi nuovo paziente",
   "CONFIRM PATIENT": "Paziente creato con successo",
-  "HEALTH CARD NUMBER": "Numero Tessera Sanitaria",
+  "HEALTH_CARD_NUMBER": "Numero Tessera Sanitaria",
+  "HEALTH_CARD_NUMBER_PLACEHOLDER": "Inserisci il numero di tessera sanitaria",
   "MEDICAL_HISTORY": "Anamnesi",
+  "MEDICAL_HISTORY_PLACEHOLDER": "Inserisci l'anamnesi",
+
   "GENDER": "Genere",
   "MALE": "Maschio",
   "FEMALE": "Femmina",
+
+  "NOT_FOUND_PATIENT": "Nessun paziente trovato",
 
   "APPOINTMENTS_TITLE": "Lista Appuntamenti",
   "TAKE_NEW_APPOINTMENT_BUTTON": "Prenota nuovo appuntamento",
@@ -47,6 +52,7 @@
   "APPOINTMENT_POPUP_CONFIRM": "Conferma",
   "APPOINTMENT_POPUP_CANCEL": "Annulla",
   "APPOINTMENT_POPUP_MESSAGE": "Appuntamento prenotato con successo",
+  "DELETED_APPOINTMENTS": "Appuntamento eliminato con successo",
 
   "ADD_NEW_PATIENT_MAIN_ICON": "Aggiungi Nuovo Paziente",
   "PATIENT_LIST_MAIN_ICON": "Lista Pazienti",
@@ -64,6 +70,7 @@
   "DELETE_POPUP_MESSAGE": "Sei sicuro di voler eliminare questo paziente?",
   "DELETE_POPUP_DELETE": "Elimina",
   "DELETE_POPUP_CLOSE": "Chiudi",
+  "DELETE_PATIENT": "Paziente eliminato con successo",
 
   "PATIENT_DETAILS_TITLE": "Dettagli Paziente",
   "IS_PRIORITY": "È Prioritario",
@@ -74,5 +81,22 @@
   "SESSION_DETAILS_ICON": "Dettagli sessione",
   "SESSION_ANALYSIS": "Analisi Sessione",
   "DOWNLOAD_SESSION": "Scarica Sessione",
-  "SESSION_DELETE_POPUP_MESSAGE": "Sei sicuro di voler eliminare questa sessione?"
+  "SESSION_DELETE_POPUP_MESSAGE": "Sei sicuro di voler eliminare questa sessione?",
+  "DELETE_SESSION": "Sessione cancellata con successo",
+  "NOT_FOUND_SESSION": "Nessuna sessione trovata",
+  "SESSION": "Sessione",
+  "SESSIO_DETAILS_TITLE": "Dettagli Sessione",
+  "PATIENT": "Paziente",
+  "DOCTOR": "Dottore",
+  "DATE": "Data",
+  "NOTE": "Note",
+
+
+  "APPOINTMENTS_DETAILS": "Dettagli Appuntamento",
+  "APPOINTMENT_POPUP_PATIENT": "Paziente",
+  "UPDATE_PATIENT": "Dati paziente aggiornati",
+  "UPDATE_SESSION": "Dati sessione aggiornati",
+
+  "YES": "Si",
+  "NO": "No"
 }

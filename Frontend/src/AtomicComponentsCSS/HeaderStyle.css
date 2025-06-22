@@ -1,4 +1,5 @@
-.shared-header {
+/* --- Contenitore header --- */
+.header-container {
     position: absolute;
     top: 0;
     left: 0;
@@ -11,12 +12,22 @@
     z-index: 1000;
 }
 
-.shared-logo {
+/* --- Logo --- */
+.header-logo {
     height: 70px;
     object-fit: contain;
 }
 
-.shared-user-info {
+/* --- Azioni utente e lingua --- */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-direction: column;
+}
+
+/* --- Info utente --- */
+.header-user-info {
     display: flex;
     align-items: center;
     font-size: 14px;
@@ -26,14 +37,93 @@
     cursor: pointer;
 }
 
-.shared-user-icon {
+.header-user-icon {
     font-size: 35px;
     color: #000;
 }
 
-/* --- Popup Logout --- */
+/* --- Dropdown lingua --- */
+.header-language-dropdown {
+    position: relative;
+    margin-top: -65px;
+    right: 180px;
+}
 
-.logout-popup-overlay {
+/* Bottone principale con bandiera e lingua attuale */
+.header-language-button {
+    cursor: pointer;
+    background-color: white;
+    border-radius: 10px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    width: 100px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.header-language-button:hover {
+    background-color: #f8f8f8;
+}
+
+/* Dropdown menu */
+.header-language-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+    padding: 5px 0;
+    width: 100px;
+}
+
+/* Singola opzione lingua */
+.header-lang-option {
+    color: black; /* testo nero */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.header-flag-icon[alt="en"] {
+    transform: scale(1.5);
+}
+
+.header-lang-option:hover {
+    background-color: #f0f0f0;
+}
+
+/* Icona bandiera */
+.header-flag-icon {
+    width: 40px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Etichetta lingua */
+.header-lang-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Rendi il testo della lingua selezionata nero */
+.header-language-button .header-lang-label {
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
+
+/* --- Popup Logout --- */
+.header-logout-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -46,56 +136,40 @@
     z-index: 2000;
 }
 
-.logout-popup {
-    background-color: #fff;
+.header-logout-popup {
+    background-color: white;
     padding: 25px 30px;
     border-radius: 10px;
-    text-align: center;
     min-width: 250px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.logout-popup-text {
+.header-logout-text {
     margin-bottom: 20px;
-    font-weight: 500;
     color: black;
+    font-weight: 500;
 }
 
-.logout-popup-buttons {
+.header-logout-buttons {
     display: flex;
     justify-content: space-around;
     margin-top: 15px;
 }
 
-.cancel-button,
-.confirm-button {
+.header-cancel-btn,
+.header-confirm-btn {
     padding: 8px 16px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
 }
 
-.cancel-button {
+.header-cancel-btn {
     background-color: #ccc;
 }
 
-.confirm-button {
+.header-confirm-btn {
     background-color: #dc3545;
-    color: #fff;
+    color: white;
 }
-
-.shared-user-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.language-select {
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    cursor: pointer;
-}
-

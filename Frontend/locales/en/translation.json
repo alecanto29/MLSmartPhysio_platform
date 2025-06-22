@@ -30,16 +30,21 @@
 
   "ADD_NEW_PATIENCE_TITLE": "Add New Patient",
   "CONFIRM PATIENT": "Patient successfully created",
-  "HEALTH CARD NUMBER": "Health Card Number",
+  "HEALTH_CARD_NUMBER": "Health Card Number",
+  "HEALTH_CARD_NUMBER_PLACEHOLDER": "Enter health card number",
   "MEDICAL_HISTORY": "Medical History",
+  "MEDICAL_HISTORY_PLACEHOLDER": "Enter medical history",
+
   "GENDER": "Gender",
   "MALE": "Male",
   "FEMALE": "Female",
 
+  "NOT_FOUND_PATIENT": "No patients found",
+
   "APPOINTMENTS_TITLE": "Appointment List",
-  "TAKE_NEW_APPOINTMENT_BUTTON": "Book New Appointment",
+  "TAKE_NEW_APPOINTMENT_BUTTON": "Take New Appointment",
   "TAKE_APPOINTMENT_TITLE": "Patient List",
-  "TAKE_NEW_APPOINTMENT_ICON": "Book New Appointment",
+  "TAKE_NEW_APPOINTMENT_ICON": "Take New Appointment",
   "APPOINTMENT_POPUP_TITLE": "New Appointment",
   "APPOINTMENT_POPUP_DATE": "Date",
   "APPOINTMENT_POPUP_TIME": "Time",
@@ -47,6 +52,7 @@
   "APPOINTMENT_POPUP_CONFIRM": "Confirm",
   "APPOINTMENT_POPUP_CANCEL": "Cancel",
   "APPOINTMENT_POPUP_MESSAGE": "Appointment successfully booked",
+  "DELETED_APPOINTMENTS": "Appointments cancellation succes",
 
   "ADD_NEW_PATIENT_MAIN_ICON": "Add New Patient",
   "PATIENT_LIST_MAIN_ICON": "Patient List",
@@ -60,10 +66,11 @@
   "PATIENT_DETAILS_ICON": "Patient Details",
   "REGISTER_SESSION_ICON": "Register Session",
   "SESSION_LIST": "Session List",
-  "DELETE_POPUP_TITLE": "Delete Confirmation",
+  "DELETE_POPUP_TITLE": "Confirm deletion",
   "DELETE_POPUP_MESSAGE": "Are you sure you want to delete this patient?",
   "DELETE_POPUP_DELETE": "Delete",
   "DELETE_POPUP_CLOSE": "Close",
+  "DELETE_PATIENT": "Patient cancellation succes",
 
   "PATIENT_DETAILS_TITLE": "Patient Details",
   "IS_PRIORITY": "Is Priority",
@@ -74,5 +81,22 @@
   "SESSION_DETAILS_ICON": "Session Details",
   "SESSION_ANALYSIS": "Session Analysis",
   "DOWNLOAD_SESSION": "Download Session",
-  "SESSION_DELETE_POPUP_MESSAGE": "Are you sure you want to delete this session?"
+  "SESSION_DELETE_POPUP_MESSAGE": "Are you sure you want to delete this session?",
+  "DELETE_SESSION": "Session cancellation succes",
+  "NOT_FOUND_SESSION": "No sessions found",
+  "SESSION": "Session",
+  "SESSIO_DETAILS_TITLE": "Session Details",
+  "PATIENT": "Patient",
+  "DOCTOR": "Doctor",
+  "DATE": "Date",
+  "NOTE": "Notes",
+
+
+  "APPOINTMENTS_DETAILS": "Appointments Details",
+  "APPOINTMENT_POPUP_PATIENT": "Patient",
+  "UPDATE_PATIENT": "Data patience updated",
+  "UPDATE_SESSION": "Data session updated",
+
+  "YES": "Yes",
+  "NO": "No"
 }

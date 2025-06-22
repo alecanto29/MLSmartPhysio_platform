@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../AtomicComponentsCSS/HeaderStyle.css";
 
 const Header = () => {
+    const { i18n } = useTranslation();
     const [showPopup, setShowPopup] = useState(false);
-    const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const navigate = useNavigate();
     const doctorName = localStorage.getItem("doctorName") || "Nome Cognome";
 
-    useEffect(() => {
-        localStorage.setItem("language", language);
-    }, [language]);
+    const currentLang = i18n.language || "en";
+
+    const changeLanguage = (lang) => {
+        i18n.changeLanguage(lang);
+        localStorage.setItem("language", lang);
+        setDropdownOpen(false);
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -23,45 +28,50 @@ const Header = () => {
         setDropdownOpen(!dropdownOpen);
     };
 
-    const selectLanguage = (lang) => {
-        setLanguage(lang);
-        setDropdownOpen(false);
-    };
-
     return (
         <>
-            <div className="shared-header">
-                <img src="/images/app_logo.png" alt="Logo" className="shared-logo" />
+            <div className="header-container">
+                <img src="/images/app_logo.png" alt="Logo" className="header-logo" />
 
-                <div className="shared-user-actions">
-                    <div className="custom-language-dropdown">
-                        <div className="selected-language" onClick={toggleDropdown}>
-                            {language === "it" ? "🇮🇹 Italiano" : "🇬🇧 English"}
-                        </div>
-                        {dropdownOpen && (
-                            <div className="language-options">
-                                <div onClick={() => selectLanguage("it")}>🇮🇹 Italiano</div>
-                                <div onClick={() => selectLanguage("en")}>🇬🇧 English</div>
-                            </div>
-                        )}
+                <div className="header-actions">
+                    <div className="header-user-info" onClick={() => setShowPopup(true)}>
+                        <span>{doctorName}</span>
+                        <i className="bi bi-person-circle header-user-icon"></i>
                     </div>
 
-                    <div className="shared-user-info" onClick={() => setShowPopup(true)}>
-                        <span>{doctorName}</span>
-                        <i className="bi bi-person-circle shared-user-icon"></i>
+                    <div className="header-language-dropdown">
+                        <div className="header-language-button" onClick={toggleDropdown}>
+                            <img
+                                src={currentLang === "it" ? "/images/it_icon.png" : "/images/en_icon.png"}
+                                alt={currentLang}
+                                className={`header-flag-icon ${currentLang === "en" ? "flag-scale" : ""}`}
+                            />
+                            <span className="header-lang-label">{currentLang.toUpperCase()}</span>
+                        </div>
+
+                        {dropdownOpen && (
+                            <div className="header-language-menu">
+                                <div className="header-lang-option" onClick={() => changeLanguage("it")}>
+                                    <img src="/images/it_icon.png" alt="it" className="header-flag-icon" />
+                                    <span className={currentLang === "it" ? "active-language" : ""}>IT</span>
+                                </div>
+                                <div className="header-lang-option" onClick={() => changeLanguage("en")}>
+                                    <img src="/images/en_icon.png" alt="en" className="header-flag-icon" />
+                                    <span className={currentLang === "en" ? "active-language" : ""}>EN</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
             {showPopup && (
-                <div className="logout-popup-overlay" onClick={() => setShowPopup(false)}>
-                    <div className="logout-popup" onClick={(e) => e.stopPropagation()}>
-                        <p className="logout-popup-text">
-                            Vuoi davvero effettuare il logout dall'applicazione?
-                        </p>
-                        <div className="logout-popup-buttons">
-                            <button className="cancel-button" onClick={() => setShowPopup(false)}>Annulla</button>
-                            <button className="confirm-button" onClick={handleLogout}>Logout</button>
+                <div className="header-logout-overlay" onClick={() => setShowPopup(false)}>
+                    <div className="header-logout-popup" onClick={(e) => e.stopPropagation()}>
+                        <p className="header-logout-text">Vuoi davvero effettuare il logout dall'applicazione?</p>
+                        <div className="header-logout-buttons">
+                            <button className="header-cancel-btn" onClick={() => setShowPopup(false)}>Annulla</button>
+                            <button className="header-confirm-btn" onClick={handleLogout}>Logout</button>
                         </div>
                     </div>
                 </div>

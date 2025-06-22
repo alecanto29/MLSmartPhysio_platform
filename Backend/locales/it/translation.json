@@ -32,6 +32,8 @@
   "CONFIRM PATIENT": "Paziente creato con successo",
   "HEALTH CARD NUMBER": "Numero Tessera Sanitaria",
   "MEDICAL_HISTORY": "Anamnesi",
+  "MEDICAL_HISTORY_PLACEHOLDER": "Inserisci l'anamnesi",
+
   "GENDER": "Genere",
   "MALE": "Maschio",
   "FEMALE": "Femmina",
@@ -47,6 +49,7 @@
   "APPOINTMENT_POPUP_CONFIRM": "Conferma",
   "APPOINTMENT_POPUP_CANCEL": "Annulla",
   "APPOINTMENT_POPUP_MESSAGE": "Appuntamento prenotato con successo",
+  "NOT_OLD_DATA": "Inserire una data valida",
 
   "ADD_NEW_PATIENT_MAIN_ICON": "Aggiungi Nuovo Paziente",
   "PATIENT_LIST_MAIN_ICON": "Lista Pazienti",

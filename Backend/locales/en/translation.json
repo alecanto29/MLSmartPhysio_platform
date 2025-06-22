@@ -32,12 +32,13 @@
   "CONFIRM PATIENT": "Patient successfully created",
   "HEALTH CARD NUMBER": "Health Card Number",
   "MEDICAL_HISTORY": "Medical History",
+  "MEDICAL_HISTORY_PLACEHOLDER": "Enter medical history",
   "GENDER": "Gender",
   "MALE": "Male",
   "FEMALE": "Female",
 
   "APPOINTMENTS_TITLE": "Appointment List",
-  "TAKE_NEW_APPOINTMENT_BUTTON": "Book New Appointment",
+  "TAKE_NEW_APPOINTMENT_BUTTON": "Take New Appointment",
   "TAKE_APPOINTMENT_TITLE": "Patient List",
   "TAKE_NEW_APPOINTMENT_ICON": "Book New Appointment",
   "APPOINTMENT_POPUP_TITLE": "New Appointment",
@@ -47,6 +48,7 @@
   "APPOINTMENT_POPUP_CONFIRM": "Confirm",
   "APPOINTMENT_POPUP_CANCEL": "Cancel",
   "APPOINTMENT_POPUP_MESSAGE": "Appointment successfully booked",
+  "NOT_OLD_DATA": "Choose a valid data",
 
   "ADD_NEW_PATIENT_MAIN_ICON": "Add New Patient",
   "PATIENT_LIST_MAIN_ICON": "Patient List",

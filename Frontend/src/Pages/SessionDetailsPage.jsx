@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import "../ComponentsCSS/SessionDetailsPageStyle.css";
 import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
 import Header from "../AtomicComponents/Header.jsx";
-import { useLocation } from "react-router-dom";
-
+import i18n from "i18next";
+import { useTranslation } from "react-i18next";
 
 const SessionDetailsPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const { t } = useTranslation();
 
     const [session, setSession] = useState(null);
+    const [editedNotes, setEditedNotes] = useState(""); // NOTE separate
     const [isEditMode, setIsEditMode] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
-
-    const location = useLocation();
     const [patientId, setPatientId] = useState(location.state?.patientId);
 
     useEffect(() => {
@@ -30,6 +31,7 @@ const SessionDetailsPage = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSession(response.data);
+            setEditedNotes(response.data.notes); // copia iniziale
         } catch (error) {
             console.error("Errore durante il recupero dei dati della sessione");
         }
@@ -38,13 +40,17 @@ const SessionDetailsPage = () => {
     const updateSessionDetails = async () => {
         try {
             const token = localStorage.getItem("token");
-            const payload = { notes: session.notes };
+            const payload = { notes: editedNotes }; // invia solo le note modificate
 
             await axios.put(`/smartPhysio/sessions/${id}`, payload, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Accept-Language": i18n.language,
+                },
             });
 
-            setMessage("Sessione modificata con successo");
+            setSession({ ...session, notes: editedNotes }); // aggiorna visivamente
+            setMessage(t("UPDATE_SESSION"));
             setMessageType("success");
             setIsEditMode(false);
         } catch (error) {
@@ -58,11 +64,6 @@ const SessionDetailsPage = () => {
                     "Errore durante la modifica";
             setMessage(errorMsg);
         }
-    };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setSession({ ...session, [name]: value });
     };
 
     useEffect(() => {
@@ -79,7 +80,7 @@ const SessionDetailsPage = () => {
 
             <div className="session-title-section">
                 <img src="/images/session_list.png" alt="icon" className="session-title-icon" />
-                <h2 className="session-title-text">Session Details</h2>
+                <h2 className="session-title-text">{t("SESSIO_DETAILS_TITLE")}</h2>
             </div>
 
             <div className="session-box">
@@ -90,27 +91,27 @@ const SessionDetailsPage = () => {
                 <div className="session-info-grid">
                     <div className="session-left">
                         <div className="session-field">
-                            <strong>Patient:</strong>
+                            <strong>{t("PATIENT")}:</strong>
                             <span>{session.patient.name} {session.patient.surname}</span>
                         </div>
                         <div className="session-field">
-                            <strong>Doctor:</strong>
+                            <strong>{t("DOCTOR")}:</strong>
                             <span>{session.doctor.name} {session.doctor.surname}</span>
                         </div>
                         <div className="session-field">
-                            <strong>Date:</strong>
+                            <strong>{t("DATE")}:</strong>
                             <span>{new Date(session.date).toLocaleDateString()}</span>
                         </div>
                     </div>
 
                     <div className="session-right">
                         <div className="session-field">
-                            <strong>Notes:</strong>
+                            <strong>{t("NOTE")}:</strong>
                             {isEditMode ? (
                                 <textarea
                                     name="notes"
-                                    value={session.notes}
-                                    onChange={handleChange}
+                                    value={editedNotes}
+                                    onChange={(e) => setEditedNotes(e.target.value)}
                                     className="session-notes-input"
                                 />
                             ) : (
@@ -123,14 +124,12 @@ const SessionDetailsPage = () => {
                         {isEditMode && (
                             <div className="session-save-section">
                                 <button className="session-save-button" onClick={updateSessionDetails}>
-                                    Save Changes
+                                    {t("SAVE_CHANGES_BUTTON")}
                                 </button>
                             </div>
                         )}
                     </div>
                 </div>
-
-
             </div>
 
             <div

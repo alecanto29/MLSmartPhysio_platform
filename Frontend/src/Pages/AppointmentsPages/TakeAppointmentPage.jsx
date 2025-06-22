@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import "../../ComponentsCSS/TakeAppointmentPageStyle.css";
 import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
 import Header from "../../AtomicComponents/Header.jsx";
+import i18n from "i18next";
 
 const TakeAppointmentPage = () => {
     const [patients, setPatients] = useState([]);
@@ -16,6 +18,7 @@ const TakeAppointmentPage = () => {
     const [messageType, setMessageType] = useState("success");
     const [searchTerm, setSearchTerm] = useState("");
 
+    const { t } = useTranslation();
     const dateRef = useRef(null);
     const navigate = useNavigate();
 
@@ -47,9 +50,12 @@ const TakeAppointmentPage = () => {
             await axios.post(
                 "/smartPhysio/appointments/newAppointments",
                 { date, time, notes, specificPatient },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Accept-Language": i18n.language
+                    } }
             );
-            setMessage("Appuntamento creato con successo");
+            setMessage(t("APPOINTMENT_POPUP_MESSAGE"));
             setMessageType("success");
             setShowPopup(false);
             setDate("");
@@ -63,7 +69,7 @@ const TakeAppointmentPage = () => {
                     ? error.response.data
                     : error.response?.data?.message ||
                     error.response?.data?.error ||
-                    "Errore durante la registrazione";
+                    t("appointment.error");
             setMessage(errorMsg);
         }
     };
@@ -77,7 +83,7 @@ const TakeAppointmentPage = () => {
             <Header />
             <div className="title-container">
                 <img src="/images/calendar.png" alt="Calendar" className="calendar-icon" />
-                <h2>Patient List</h2>
+                <h2>{t("PATIENT_LIST_MAIN_ICON")}</h2>
             </div>
 
             <div className="search-wrapper">
@@ -85,7 +91,7 @@ const TakeAppointmentPage = () => {
                     <i className="bi bi-search search-icon"></i>
                     <input
                         type="text"
-                        placeholder="Search by name, surname, fiscal code..."
+                        placeholder={t("SEARCH_BAR_CONTENT_PATIENTS")}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -95,7 +101,7 @@ const TakeAppointmentPage = () => {
             <div className="patient-list-container">
                 {filteredPatients.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#003344", fontWeight: "bold", padding: "20px" }}>
-                        No patient found
+                        {t("NOT_FOUND_PATIENT")}
                     </div>
                 ) : (
                     <ul className="patient-list">
@@ -111,7 +117,7 @@ const TakeAppointmentPage = () => {
                                 </div>
                                 <div className="patient-right" onClick={() => openPopup(p._id)}>
                                     <img src="/images/calendar_v2.png" alt="Calendar icon" className="calendar-mini" />
-                                    <span className="take-label">Take new appointment</span>
+                                    <span className="take-label">{t("TAKE_NEW_APPOINTMENT_ICON")}</span>
                                 </div>
                             </li>
                         ))}
@@ -122,10 +128,10 @@ const TakeAppointmentPage = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup-content">
-                        <h3>New Appointment</h3>
+                        <h3>{t("APPOINTMENT_POPUP_TITLE")}</h3>
                         <form onSubmit={handleSubmit}>
                             <label className="date-label-with-button">
-                                Date:
+                                {t("APPOINTMENT_POPUP_DATE")}:
                                 <div className="date-input-wrapper">
                                     <input
                                         type="date"
@@ -146,16 +152,16 @@ const TakeAppointmentPage = () => {
                                 </div>
                             </label>
                             <label>
-                                Time:
+                                {t("APPOINTMENT_POPUP_TIME")}:
                                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
                             </label>
                             <label>
-                                Notes:
+                                {t("APPOINTMENT_POPUP_NOTES")}:
                                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
                             </label>
                             <div className="popup-buttons">
-                                <button type="submit">Save</button>
-                                <button type="button" onClick={() => setShowPopup(false)}>Cancel</button>
+                                <button type="submit">{t("APPOINTMENT_POPUP_CONFIRM")}</button>
+                                <button type="button" onClick={() => setShowPopup(false)}>{t("APPOINTMENT_POPUP_CANCEL")}</button>
                             </div>
                         </form>
                     </div>

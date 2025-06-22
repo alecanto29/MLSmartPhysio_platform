@@ -1,6 +1,7 @@
 const appointmentsModel = require("../models/Appointment");
 const doctorModel = require ("../models/Doctor");
 const patientModel = require("../models/Patient");
+const i18next = require("i18next");
 
 const getAllAppointments = async (doctorID) => {
     try {
@@ -30,11 +31,11 @@ const getAllAppointmentsTime = async (doctorID) => {
     }
 };
 
-const takeNewAppointment = async (appointmentData, doctorID) => {
+const takeNewAppointment = async (appointmentData, doctorID, lang) => {
     const { date, time, notes, specificPatient } = appointmentData;
 
     if (!date || !time || !notes) {
-        throw new Error("Tutti i campi sono obbligatori");
+        throw new Error(i18next.t("ALL_FIELDS_REQUIRED", { lng: lang }));
     }
 
     const [year, month, day] = date.split("-");
@@ -51,7 +52,7 @@ const takeNewAppointment = async (appointmentData, doctorID) => {
     const now = new Date();
 
     if (appointmentDateTime.getTime() < now.getTime()) {
-        throw new Error("Impostare una data e ora valida");
+        throw new Error(i18next.t("NOT_OLD_DATA", { lng: lang }));
     }
 
     const newAppointment = new appointmentsModel({

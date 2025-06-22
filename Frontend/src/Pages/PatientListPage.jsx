@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
 import Header from "../AtomicComponents/Header.jsx";
 import "../ComponentsCSS/PatientListPageStyle.css";
+import i18n from "i18next";
+import {useTranslation} from "react-i18next";
 
 const PatientListPage = () => {
     const [patients, setPatients] = useState([]);
@@ -15,6 +17,7 @@ const PatientListPage = () => {
     const [messageType, setMessageType] = useState("success");
 
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleAllPatient = async () => {
         try {
@@ -82,7 +85,7 @@ const PatientListPage = () => {
                 },
             });
 
-            setMessage("Paziente eliminato con successo");
+            setMessage(t("DELETE_PATIENT"));
             setMessageType("success");
 
             setPatients((prev) => prev.filter((p) => p._id !== specificPatient));
@@ -125,7 +128,7 @@ const PatientListPage = () => {
 
             <div className="title-container">
                 <img src="/images/patient_blue.png" alt="Icon" className="title-icon" />
-                <h2 className="title-text">Patient List</h2>
+                <h2 className="title-text">{t("PATIENT_LIST_TITLE")}</h2>
             </div>
 
             {/* Input di ricerca */}
@@ -134,7 +137,7 @@ const PatientListPage = () => {
                     <i className="bi bi-search search-icon"></i>
                     <input
                         type="text"
-                        placeholder="Search by name, surname..."
+                        placeholder={t("SEARCH_BAR_CONTENT_PATIENTS")}
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
                     />
@@ -164,15 +167,15 @@ const PatientListPage = () => {
                                     <div className="card-right">
                                         <div className="card-action" onClick={() => navigate(`/patient-details/${p._id}`)}>
                                             <img src="/images/patient_details.png" alt="details" />
-                                            <span>Patient details</span>
+                                            <span>{t("PATIENT_DETAILS_ICON")}</span>
                                         </div>
                                         <div className="card-action" onClick={() => createSession(p._id)}>
                                             <img src="/images/session_registration.png" alt="register" />
-                                            <span>Register session</span>
+                                            <span>{t("REGISTER_SESSION_ICON")}</span>
                                         </div>
                                         <div className="card-action" onClick={() => navigate(`/patient-session/${p._id}`)}>
                                             <img src="/images/session_list.png" alt="list" />
-                                            <span>Session list</span>
+                                            <span>{t("SESSION_LIST")}</span>
                                         </div>
                                     </div>
                                 </li>
@@ -185,11 +188,11 @@ const PatientListPage = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup-content">
-                        <h3>Confirm Deletion</h3>
-                        <p>Are you sure you want to delete this patient?</p>
+                        <h3>{t("DELETE_POPUP_TITLE")}</h3>
+                        <p>{t("DELETE_POPUP_MESSAGE")}</p>
                         <div className="popup-buttons">
-                            <button className="btn-delete" onClick={confirmDelete}>Delete</button>
-                            <button className="btn-close" onClick={() => setShowPopup(false)}>Close</button>
+                            <button className="btn-delete" onClick={confirmDelete}>{t("DELETE_POPUP_DELETE")}</button>
+                            <button className="btn-close" onClick={() => setShowPopup(false)}>{t("DELETE_POPUP_CLOSE")}</button>
                         </div>
                     </div>
                 </div>

@@ -4,8 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import TextInfoModel from "../AtomicComponents/TextInfoModel.jsx";
 import "../ComponentsCSS/DoctorMainPageStyle.css";
 import Header from "../AtomicComponents/Header.jsx";
-
-
+import { useTranslation } from "react-i18next";
 
 const DoctorMainPage = () => {
     const [patientsNumber, setPatientsNumber] = useState();
@@ -14,7 +13,7 @@ const DoctorMainPage = () => {
 
     const navigate = useNavigate();
     const location = useLocation();
-
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetchPatientsNumber();
@@ -46,7 +45,7 @@ const DoctorMainPage = () => {
             });
 
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Azzeri ore/minuti/secondi
+            today.setHours(0, 0, 0, 0);
 
             const todaysApp = response.data.filter(app => {
                 const appDate = new Date(app.date);
@@ -74,7 +73,6 @@ const DoctorMainPage = () => {
         }
     };
 
-
     return (
         <div className="main-dashboard">
             <Header />
@@ -82,41 +80,37 @@ const DoctorMainPage = () => {
             <div className="actions-row">
                 <div onClick={() => navigate("/add-patient")} className="icon-box">
                     <img src="/images/add_patient.png" alt="Add" className="img-icon" />
-                    <p>Add New Patient</p>
+                    <p>{t("ADD_NEW_PATIENT_MAIN_ICON")}</p>
                 </div>
                 <div onClick={() => navigate("/patients-list")} className="icon-box">
                     <img src="/images/patients_list.png" alt="List" className="img-icon" />
-                    <p>Patient List</p>
+                    <p>{t("PATIENT_LIST_MAIN_ICON")}</p>
                 </div>
                 <div onClick={() => navigate("/appointments")} className="icon-box">
                     <img src="/images/calendar.png" alt="Appointments" className="img-icon" />
-                    <p>Appointments</p>
+                    <p>{t("APPOINTMENTS_MAIN_ICON")}</p>
                 </div>
             </div>
 
             <div className="summary-container">
-            <div className="summary-row">
-                <div className="summary-box">
-                    <img src="/images/dashBoard_calendar.png" alt="Appointments Today" className="summary-icon" />
-
-                    <TextInfoModel textInfo={"Total appointments today"} className="dashboard-label" />
-                    <TextInfoModel textInfo={appointmentsNumber} className="blue" />
-                </div>
-                <div className="summary-box">
-                    <img src="/images/green_patient.png" alt="Active Patients" className="summary-icon" />
-                    <TextInfoModel textInfo={"Active patients"} className="dashboard-label" />
-
-                    <TextInfoModel textInfo={patientsNumber} className="green" />
-                </div>
-                <div className="summary-box">
-                    <img src="/images/red_patient.png" alt="High Risk" className="summary-icon" />
-                    <TextInfoModel textInfo={"Priority Patients"} className="dashboard-label" />
-
-                    <TextInfoModel textInfo={criticalPatientsNumber} className="red" />
+                <div className="summary-row">
+                    <div className="summary-box">
+                        <img src="/images/dashBoard_calendar.png" alt="Appointments Today" className="summary-icon" />
+                        <TextInfoModel textInfo={t("MAIN_TOTAL_APPOINTMENTS_TODAY")} className="dashboard-label" />
+                        <TextInfoModel textInfo={appointmentsNumber} className="blue" />
+                    </div>
+                    <div className="summary-box">
+                        <img src="/images/green_patient.png" alt="Active Patients" className="summary-icon" />
+                        <TextInfoModel textInfo={t("MAIN_ACTIVE_PATIENT")} className="dashboard-label" />
+                        <TextInfoModel textInfo={patientsNumber} className="green" />
+                    </div>
+                    <div className="summary-box">
+                        <img src="/images/red_patient.png" alt="High Risk" className="summary-icon" />
+                        <TextInfoModel textInfo={t("MAIN_PRIORITY_PATIENT")} className="dashboard-label" />
+                        <TextInfoModel textInfo={criticalPatientsNumber} className="red" />
+                    </div>
                 </div>
             </div>
-            </div>
-
         </div>
     );
 };

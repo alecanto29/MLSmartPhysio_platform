@@ -8,6 +8,8 @@ import { Paper, Typography, Button, IconButton, GlobalStyles } from '@mui/materi
 import Header from "../../AtomicComponents/Header.jsx";
 import MessageHandlerModel from "../../AtomicComponents/MessageHandlerModel.jsx";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 const AppointmentCalendar = () => {
     const [events, setEvents] = useState([]);
@@ -16,7 +18,7 @@ const AppointmentCalendar = () => {
     const navigate = useNavigate();
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
-
+    const { t } = useTranslation();
     useEffect(() => {
         fetchAppointments();
     }, []);
@@ -60,10 +62,12 @@ const AppointmentCalendar = () => {
         try {
             await axios.delete("smartPhysio/appointments/" + id, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    "Accept-Language": i18n.language
                 }
             });
-            setMessage("Appuntamento eliminato con successo");
+
+            setMessage(t("DELETED_APPOINTMENTS"));
             setMessageType("success");
 
             setEvents(prev => prev.filter(e => e.id !== id));
@@ -188,7 +192,8 @@ const AppointmentCalendar = () => {
                     color="#003344"
                     style={{ fontSize: '1.8rem' }}
                 >
-                    Appointments List
+                    {t("APPOINTMENTS_TITLE")}
+
                 </Typography>
             </div>
 
@@ -247,7 +252,8 @@ const AppointmentCalendar = () => {
                         }
                     }}
                 >
-                    Take new appointment
+
+                    {t("TAKE_NEW_APPOINTMENT_BUTTON")}
                 </Button>
             </Paper>
 
@@ -282,12 +288,12 @@ const AppointmentCalendar = () => {
                     }}
                 >
                     <Typography variant="h6" gutterBottom>
-                        Appointment Details
+                        {t("APPOINTMENTS_DETAILS")}
                     </Typography>
-                    <Typography><strong>Date:</strong> {selectedEvent.extendedProps.date}</Typography>
-                    <Typography><strong>Time:</strong> {selectedEvent.extendedProps.time}</Typography>
-                    <Typography><strong>Patient:</strong> {selectedEvent.extendedProps.patient?.name} {selectedEvent.extendedProps.patient?.surname}</Typography>
-                    <Typography><strong>Notes:</strong> {selectedEvent.extendedProps.notes || "—"}</Typography>
+                    <Typography><strong>{t("APPOINTMENT_POPUP_DATE")}:</strong> {selectedEvent.extendedProps.date}</Typography>
+                    <Typography><strong>{t("APPOINTMENT_POPUP_TIME")}:</strong> {selectedEvent.extendedProps.time}</Typography>
+                    <Typography><strong>{t("APPOINTMENT_POPUP_PATIENT")}:</strong> {selectedEvent.extendedProps.patient?.name} {selectedEvent.extendedProps.patient?.surname}</Typography>
+                    <Typography><strong>{t("APPOINTMENT_POPUP_NOTES")}:</strong> {selectedEvent.extendedProps.notes || "—"}</Typography>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
                         <Button onClick={() => setIsDialogOpen(false)} variant="outlined">
