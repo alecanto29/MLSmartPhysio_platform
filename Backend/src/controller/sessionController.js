@@ -63,6 +63,27 @@ const updateSession = async (req, res) => {
     }
 };
 
+const exportSessionCSV = async (req, res) => {
+    try {
+        console.log("dentro la chiamataaaa");
+        const result = await sessionService.exportSessionCSV(req.params.sessionId);
+        res.status(200).json(result);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+
+const deleteSessionCSV = async (req, res) => {
+    try{
+        await sessionService.deleteSessionCSV(req.params.sessionId);
+        res.status(200);
+    }catch (error){
+        res.status(500).json({error: error.message});
+    }
+}
+
+
+
 
 module.exports = {
     getSession,
@@ -70,5 +91,7 @@ module.exports = {
     createSession,
     deleteSessionById,
     getPatientSessionById,
-    updateSession
+    updateSession,
+    exportSessionCSV,
+    deleteSessionCSV
 };

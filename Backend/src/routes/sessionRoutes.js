@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+
 const sessionController = require("../controller/sessionController");
 const auth = require("../middleware/auth");
 
@@ -10,6 +11,21 @@ router.get("/patient/:id", auth, sessionController.getPatientSessionById); //tut
 router.post("/", auth, sessionController.createSession);         // creazione nuova sessione
 router.delete("/:sessionId", auth, sessionController.deleteSessionById); // eliminazione
 router.put("/:sessionId", auth, sessionController.updateSession); // update di una sessione specifica
+router.post("/export/:sessionId", sessionController.exportSessionCSV);
+router.delete("/clean/:sessionId", sessionController.deleteSessionCSV);
+
+const path = require("path");
+const fs = require("fs");
+
+router.get("/rawcsv/:sessionId", (req, res) => {
+    const filePath = path.join(__dirname, "../../../tmp", `session_${req.params.sessionId}_data.csv`);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send("CSV non trovato");
+    }
+
+    res.sendFile(filePath);
+});
 
 
 module.exports = router;

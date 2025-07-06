@@ -167,7 +167,7 @@ const PatientSessionListPage = () => {
                                             <span>{t("SESSION_DETAILS_ICON")}</span>
                                         </div>
 
-                                        <div className="card-action" onClick={() => navigate(`/session/analysis`)}>
+                                        <div className="card-action" onClick={() => navigate(`/session/analysis/${session._id}`)}>
                                             <img src="/images/session_analysis.png" alt="Analysis" />
                                             <span>{t("SESSION_ANALYSIS")}</span>
                                         </div>

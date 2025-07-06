@@ -29,7 +29,7 @@ const App = () => {
                 <Route path="/patient-details/:id" element={<PatientDetailsPage />} />
                 <Route path="/session/:id" element={<ConnectionGateModel />} />
                 <Route path="/patient-session/:id" element={<PatientSessionListPage />} />
-                <Route path="/session/analysis" element={<SessionAnalysisPage />} />
+                <Route path="/session/analysis/:sessionId" element={<SessionAnalysisPage />} />
                 <Route path="/session/details/:id" element={<SessionDetailsPage />} />
             </Routes>
         </Router>

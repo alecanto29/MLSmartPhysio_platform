@@ -1,0 +1,350 @@
+/* ======================== */
+/* 0. SCROLL INTERO PAGINA  */
+/* ======================== */
+
+.session-analysis-container {
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.scrollable-content {
+    position: fixed;
+    top: 180px; /* lascia spazio per header + titolo */
+    left: 200px; /* inizia dopo la sidebar */
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding-right: 2rem;
+    padding-left: 2rem;
+    scrollbar-color: #778899 #e0e0e0; /* colore tipo img 2 */
+    scrollbar-width: thin; /* stile sottile */
+}
+
+/* Stile più personalizzato su Webkit */
+.scrollable-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+    background-color: #778899;
+    border-radius: 10px;
+}
+
+/* ======================== */
+/* 1. HEADER FISSO + TITOLO */
+/* ======================== */
+
+.session-title-fixed {
+    position: fixed;
+    top: 110px; /* lascia spazio all'Header */
+    left: 15%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    z-index: 1000;
+    background-color: #cceeff;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.session-title-fixed h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f1f1f;
+}
+
+.session-icon {
+    font-size: 2rem;
+    color: #ffc107;
+}
+
+/* ========================= */
+/* 2. CONTENUTO PRINCIPALE   */
+/* ========================= */
+
+.session-analysis-content {
+    margin-top: 50px; /* spazio sufficiente per il titolo fisso */
+    margin-left: -190px;
+    padding-right: 2rem;
+    padding-bottom: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ========================= */
+/* 3. ACCORDION & SECTIONS   */
+/* ========================= */
+
+.accordion-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 10rem;
+    justify-content: center;
+    transition: all 0.3s ease;
+    min-height: 150px; /* spazio iniziale per layout in riga */
+}
+
+.accordion-wrapper.expanded {
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    align-items: stretch;
+    min-height: unset; /* disattiva min-height per layout in colonna */
+}
+
+.accordion-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+}
+
+.accordion-button {
+    background-color: #e9f8ff;
+    border: 1px solid #0078A8;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 250px;
+
+}
+
+
+
+.accordion-button.active {
+    background-color: #e8f8ff;
+    border: 2px solid #0078A8;
+}
+
+.accordion-content {
+    margin-top: 1rem;
+    background-color: #e8f8ff;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 2px solid #b0e6ff;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+
+/* Contenitore principale pulito e verticale */
+/* Contenitore verticale per tutte le sezioni */
+.cleaning-structured,
+.normalization-structured,
+.filtering-structured {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* Titoli "Metodi", "Parametri" */
+.section-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: -0.5rem;
+    color: #000;
+}
+
+/* Layout a griglia 2 colonne per i metodi */
+.cleaning-methods,
+.normalization-methods,
+.filtering-methods {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* Layout a riga con wrap per i parametri */
+.cleaning-params,
+.filtering-params {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Label uniforme (checkbox e numeri) */
+.cleaning-methods label,
+.normalization-methods label,
+.filtering-methods label,
+.cleaning-params label,
+.filtering-params label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    color: #000;
+    min-width: 250px;
+}
+
+/* Label per input numerici (opzionale per parametri numerici) */
+.number-label input[type="number"] {
+    margin-left: 1rem;
+    width: 60px;
+}
+
+
+
+
+
+
+
+/* ========================= */
+/* 4. SEZIONI INTERNI        */
+/* ========================= */
+
+.section-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-content label {
+    background-color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    min-width: 250px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #000;
+}
+.section-content label:has(input[type="number"]) {
+    flex-direction: row; /* mostra prima testo, poi input */
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+.section-content input[type="number"] {
+    width: 60px;
+    padding: 0.3rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    color: #000;
+    background-color: #fff;
+}
+
+
+.filter-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    justify-items: center; /* centra le caselle */
+}
+
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.start-button {
+    margin-top: -10px;
+    background-color: transparent;
+    border: none;
+    font-size: 1.4rem;
+    color: green;
+    cursor: pointer;
+    padding: 0;
+    transform: translateY(2px);
+    outline: none;
+}
+
+.accordion-button {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.start-button:hover,
+.start-button:focus,
+.start-button:active {
+    background-color: transparent;
+    outline: none;
+    box-shadow: none;
+}
+
+/* ========================= */
+/* 5. GRAFICI EMG            */
+/* ========================= */
+
+.graph-section {
+    margin-top: 3rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.graph-title {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #000;
+}
+
+.graph-container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 1rem;
+    background-color: #f2fbff;
+    border-radius: 10px;
+    border: 2px solid #0078A8; /* ✅ bordo blu */
+    margin-bottom: 2rem;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.graph-container canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.graph-container h4 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+
+

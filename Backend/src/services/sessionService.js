@@ -1,6 +1,12 @@
 
 const sessionModel = require("../models/Session");
 const patientModel = require("../models/Patient");
+const sEMGdata = require('../models/sEMGdataModel');
+
+
+const fs = require('fs');
+const path = require('path');
+const { Parser } = require('json2csv');
 
 
 const getSession = async (doctorID) =>{
@@ -85,11 +91,61 @@ const deleteSessionById = async (sessionID, doctorID) => {
     return session;
 };
 
+const exportSessionCSV = async (sessionID) => {
+    try {
+        console.log(`[EXPORT CSV] Avvio esportazione per sessione: ${sessionID}`);
+
+        const data = await sEMGdata.find({ sessionId: sessionID }).lean();
+        console.log(`[EXPORT CSV] Numero dati sEMG trovati: ${data.length}`);
+
+        if (!data || data.length === 0) {
+            console.warn(`[EXPORT CSV] Nessun dato sEMG trovato per la sessione ${sessionID}`);
+            throw new Error("Nessun dato sEMG disponibile per questa sessione");
+        }
+
+        const flatData = data.map((doc, i) => {
+            const obj = {};
+            doc.data.forEach((val, idx) => {
+                obj[`ch${idx + 1}`] = val;
+            });
+            return obj;
+        });
+        console.log(`[EXPORT CSV] Dati flatten trasformati per il CSV (prima riga):`, flatData[0]);
+
+        const parser = new Parser();
+        const csv = parser.parse(flatData);
+        console.log(`[EXPORT CSV] CSV generato, lunghezza caratteri: ${csv.length}`);
+
+        const fileName = `session_${sessionID}_data.csv`;
+        const filePath = path.join(__dirname, '../../../tmp', fileName);
+        console.log(`[EXPORT CSV] Scrivo CSV su file: ${filePath}`);
+
+        fs.writeFileSync(filePath, csv);
+
+        console.log(`[EXPORT CSV] Esportazione completata con successo`);
+        return filePath;
+
+    } catch (err) {
+        console.error(`[EXPORT CSV] Errore: ${err.message}`);
+        throw new Error(`Errore nell'esportazione CSV: ${err.message}`);
+    }
+};
+
+
+const deleteSessionCSV = (sessionID) => {
+    const filePath = path.join(__dirname, '../../../tmp', `session_${sessionID}_data.csv`);
+    if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+    }
+};
+
 module.exports = {
     getSession,
     getSessionByID,
     createSession,
     deleteSessionById,
     getPatientSessionById,
-    updateSession
+    updateSession,
+    exportSessionCSV,
+    deleteSessionCSV
 }

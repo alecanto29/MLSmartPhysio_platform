@@ -52,6 +52,9 @@ const patientRoutes = require ("../src/routes/patienceRoutes");
 const doctorRoutes = require ("../src/routes/doctorRoutes");
 const appointmentsRoutes = require ("../src/routes/appointmentsRoutes");
 const sessionsRoutes = require ("../src/routes/sessionRoutes");
+const cleaningRoutes = require ("../src/routes/Analysis_routes/cleaningDataRoutes");
+const normalizeRoutes = require ("../src/routes/Analysis_routes/normalizationDataRoutes");
+const filterRoutes = require ("../src/routes/Analysis_routes/filteringDataRoutes");
 
 app.use("/smartPhysio/semg", sEMGdataRoutes);
 app.use("/smartPhysio/inertial", inertialDataRoutes);
@@ -61,6 +64,9 @@ app.use("/smartPhysio/patient", patientRoutes);
 app.use("/smartPhysio/doctor", doctorRoutes);
 app.use("/smartPhysio/appointments", appointmentsRoutes);
 app.use("/smartPhysio/sessions", sessionsRoutes);
+app.use("/smartPhysio/clean", cleaningRoutes);
+//app.use("/smartPhysio/normalize", normalizeRoutes);
+//app.use("/smartPhysio/filter", filterRoutes);
 
 // Porta server
 const PORT = process.env.PORT || 5000;
