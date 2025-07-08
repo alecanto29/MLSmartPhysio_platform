@@ -31,7 +31,7 @@ const SessionAnalysisPage = () => {
 
     const [cleaningOptions, setCleaningOptions] = useState({
         methods: { mean: true, ffill: false, median: false, bfill: false },
-        params: { isNaN: true, isOutliers: true }
+        params: { isNaN: true, isOutliers: true, outliers_adv: true }
     });
 
     const [normalizationOptions, setNormalizationOptions] = useState({
@@ -40,9 +40,21 @@ const SessionAnalysisPage = () => {
     });
 
     const [filteringOptions, setFilteringOptions] = useState({
-        methods: { lowpass: false, highpass: false, bandstop: false },
-        params: { cutoff: 19, high: "", low: "", order: 1 }
+        methods: { low: false, high: false, notch: false },
+        params: {
+            low: { cutoff: "", order: "" },
+            high: { cutoff: "", order: "" },
+            notch: { cutoff: "", order: "" }
+        }
     });
+
+    const [yAxisRange, setYAxisRange] = useState({ min: 0, max: 4 });
+
+    const [chartKey, setChartKey] = useState(Date.now());
+
+    useEffect(() => {
+        setChartKey(Date.now());
+    }, [yAxisRange, channels]);
 
     useEffect(() => {
         const oldSessionId = previousSessionIdRef.current;
@@ -116,7 +128,8 @@ const SessionAnalysisPage = () => {
                     await axios.post(`/smartPhysio/clean/${method}`, {
                         sessionId,
                         isNaN: params.isNaN,
-                        isOutliers: params.isOutliers
+                        isOutliers: params.isOutliers,
+                        outliers_adv: params.outliers_adv
                     });
 
                     console.log(`✅ Pulizia con ${method} completata`);
@@ -134,14 +147,18 @@ const SessionAnalysisPage = () => {
     };
 
     const handleNormalizationExecution = async () => {
-        const csvPath = `/tmp/session_${sessionId}_data.csv`;
         const { meanMax, standard } = normalizationOptions;
 
         try {
-            if (meanMax)
-                await axios.post(`/smartPhysio/normalize/meanMax`, { csvPath });
-            if (standard)
-                await axios.post(`/smartPhysio/normalize/standard`, { csvPath });
+            if (meanMax) {
+                await axios.post(`/smartPhysio/normalize/minmax`, { sessionId });
+                setYAxisRange({ min: 0, max: 1 });  // Aggiorna qui
+                console.log('yAxisRange', yAxisRange);
+            }
+            if (standard) {
+                await axios.post(`/smartPhysio/normalize/standard`, { sessionId });
+                setYAxisRange({ min: -3, max: 3 }); // o un range adeguato
+            }
 
             console.log("✅ Normalizzazione completata");
         } catch (err) {
@@ -149,19 +166,19 @@ const SessionAnalysisPage = () => {
         }
 
         await new Promise(resolve => setTimeout(resolve, 700));
-        await fetchParsedCSV(); // ⬅️ aggiorna i grafici
+        await fetchParsedCSV();
     };
 
     const handleFilteringExecution = async () => {
         const { methods, params } = filteringOptions;
-        const csvPath = `/tmp/session_${sessionId}_data.csv`;
 
         for (const method in methods) {
             if (methods[method]) {
                 try {
                     await axios.post(`/smartPhysio/filter/${method}`, {
-                        csvPath,
-                        ...params
+                        sessionId,
+                        cutoff: params[method].cutoff,
+                        order: params[method].order
                     });
                     console.log(`✅ Filtro ${method} applicato`);
                 } catch (err) {
@@ -203,7 +220,7 @@ const SessionAnalysisPage = () => {
             const maxTickX = Math.floor(lastSample / stepX) *stepX;
             const paddingX = stepX / 5;
             const maxX = lastSample;
-            const maxY = Math.ceil(4096 / stepY) * stepY;
+
 
 // Genera solo i tick desiderati
             const tickValuesX = [];
@@ -236,14 +253,17 @@ const SessionAnalysisPage = () => {
                         }
                     },
                     y: {
-                        min: 0,
-                        max: maxY,
+                        min: yAxisRange.min,
+                        max: yAxisRange.max,
+                        grace: '0%', // opzionale: evita margine extra
                         title: {
                             display: true,
                             text: "Amplitude"
                         },
                         ticks: {
-                            stepSize: stepY
+                            autoSkip: false,
+                            maxTicksLimit: 5,
+                            callback: (value) => Number(value.toFixed(2)) // mostrerà es. 0.00, 0.25, 0.50, ecc.
                         }
                     }
                 }
@@ -253,7 +273,7 @@ const SessionAnalysisPage = () => {
             return (
                 <div key={i} className="graph-container">
                     <h4>Channel {i + 1}</h4>
-                    <Line key={`channel-${i}-${Date.now()}`} data={chartData} options={options} />
+                    <Line key={`channel-${i}-${chartKey}`} data={chartData} options={options} />
                 </div>
             );
         });
@@ -287,9 +307,13 @@ const SessionAnalysisPage = () => {
                         </div>
                         <div className="section-title">Parametri:</div>
                         <div className="cleaning-params">
-                            {["isNaN", "isOutliers"].map((key) => (
+                            {["isNaN", "isOutliers", "outliers_adv"].map((key) => (
                                 <label key={key}>
-                                    {key === "isNaN" ? "NaN Values" : "Outliers value"}
+                                    {key === "isNaN"
+                                        ? "NaN Values"
+                                        : key === "isOutliers"
+                                            ? "Outliers"
+                                            : "Advanced Outliers"}
                                     <input
                                         type="checkbox"
                                         checked={cleaningOptions.params[key]}
@@ -332,49 +356,75 @@ const SessionAnalysisPage = () => {
 
             case "filtering":
                 return (
-                    <div className="section-content filtering-structured">
-                        <div className="section-title">Metodi:</div>
-                        <div className="filtering-methods">
-                            {["lowpass", "highpass", "bandstop"].map((type) => (
-                                <label key={type}>
-                                    {type.replace(/^\w/, (c) => c.toUpperCase()).replace("pass", "-pass filter")}
+                    <div className="section-content filtering-structured filtering-grid-rows">
+                        <div className="filtering-row filtering-header">
+                            <strong>Metodi: </strong>
+                            <strong>Parametri:</strong>
+
+                        </div>
+
+                        {[
+                            { key: "low", label: "Low-pass filter", p1: "Cutoff", p2: "Filter Order", k1: "cutoff", k2: "order" },
+                            { key: "high", label: "High-pass filter", p1: "Cutoff", p2: "Filter Order", k1: "cutoff", k2: "order" },
+                            { key: "notch", label: "Notch filter", p1: "Cutoff", p2: "Quality order", k1: "cutoff", k2: "order" },
+                        ].map(({ key, label, p1, p2, k1, k2 }) => (
+                            <div key={key} className="filtering-row">
+                                <label className="filtering-method-checkbox">
+                                    {label}
                                     <input
                                         type="checkbox"
-                                        checked={filteringOptions.methods[type]}
+                                        checked={filteringOptions.methods[key]}
                                         onChange={() =>
                                             setFilteringOptions((prev) => ({
                                                 ...prev,
-                                                methods: { ...prev.methods, [type]: !prev.methods[type] }
+                                                methods: { ...prev.methods, [key]: !prev.methods[key] }
                                             }))
                                         }
                                     />
                                 </label>
-                            ))}
-                        </div>
-
-                        <div className="section-title">Parametri:</div>
-                        <div className="filtering-params">
-                            {["cutoff", "high", "low", "order"].map((key) => (
-                                <label key={key} className="number-label">
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}:
+                                <label>
+                                    {p1}:
                                     <input
                                         type="number"
-                                        value={filteringOptions.params[key]}
+                                        value={filteringOptions.params[key][k1]}
                                         onChange={(e) =>
                                             setFilteringOptions((prev) => ({
                                                 ...prev,
                                                 params: {
                                                     ...prev.params,
-                                                    [key]: key === "order" || key === "cutoff" ? Number(e.target.value) : e.target.value
+                                                    [key]: {
+                                                        ...prev.params[key],
+                                                        [k1]: Number(e.target.value)
+                                                    }
                                                 }
                                             }))
                                         }
                                     />
                                 </label>
-                            ))}
-                        </div>
+                                <label>
+                                    {p2}:
+                                    <input
+                                        type="number"
+                                        value={filteringOptions.params[key][k2]}
+                                        onChange={(e) =>
+                                            setFilteringOptions((prev) => ({
+                                                ...prev,
+                                                params: {
+                                                    ...prev.params,
+                                                    [key]: {
+                                                        ...prev.params[key],
+                                                        [k2]: Number(e.target.value)
+                                                    }
+                                                }
+                                            }))
+                                        }
+                                    />
+                                </label>
+                            </div>
+                        ))}
                     </div>
                 );
+
 
             default:
                 return null;

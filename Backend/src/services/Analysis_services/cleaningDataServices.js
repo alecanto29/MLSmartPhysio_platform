@@ -4,14 +4,15 @@ const path = require('path');
 const scriptPath = path.join(__dirname, '../../scripts_analysis/dataCleaningScripts.py');
 const pythonExec = 'python'; // oppure 'python3' a seconda del tuo ambiente
 
-function callPythonCleaning(csvPath, method, isNaN, isOutliers) {
+function callPythonCleaning(csvPath, method, isNaN, isOutliers, outliers_adv) {
     return new Promise((resolve, reject) => {
         const process = spawn(pythonExec, [
             scriptPath,
             csvPath,
             method,
             isNaN.toString(),
-            isOutliers.toString()
+            isOutliers.toString(),
+            outliers_adv.toString()
         ]);
 
         let result = '';
@@ -46,20 +47,20 @@ function callPythonCleaning(csvPath, method, isNaN, isOutliers) {
 
 // METODI DEDICATI PER OGNI STRATEGIA
 
-function cleanWithMean(csvPath, isNaN, isOutliers) {
-    return callPythonCleaning(csvPath, 'mean', isNaN, isOutliers);
+function cleanWithMean(csvPath, isNaN, isOutliers, outliers_adv) {
+    return callPythonCleaning(csvPath, 'mean', isNaN, isOutliers, outliers_adv);
 }
 
-function cleanWithMedian(csvPath, isNaN, isOutliers) {
-    return callPythonCleaning(csvPath, 'median', isNaN, isOutliers);
+function cleanWithMedian(csvPath, isNaN, isOutliers, outliers_adv) {
+    return callPythonCleaning(csvPath, 'median', isNaN, isOutliers, outliers_adv);
 }
 
-function cleanWithForwardFill(csvPath, isNaN, isOutliers) {
-    return callPythonCleaning(csvPath, 'ffill', isNaN, isOutliers);
+function cleanWithForwardFill(csvPath, isNaN, isOutliers, outliers_adv) {
+    return callPythonCleaning(csvPath, 'ffill', isNaN, isOutliers, outliers_adv);
 }
 
-function cleanWithBackwardFill(csvPath, isNaN, isOutliers) {
-    return callPythonCleaning(csvPath, 'bfill', isNaN, isOutliers);
+function cleanWithBackwardFill(csvPath, isNaN, isOutliers, outliers_adv) {
+    return callPythonCleaning(csvPath, 'bfill', isNaN, isOutliers, outliers_adv);
 }
 
 module.exports = {

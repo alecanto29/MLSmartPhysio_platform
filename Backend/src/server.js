@@ -65,8 +65,8 @@ app.use("/smartPhysio/doctor", doctorRoutes);
 app.use("/smartPhysio/appointments", appointmentsRoutes);
 app.use("/smartPhysio/sessions", sessionsRoutes);
 app.use("/smartPhysio/clean", cleaningRoutes);
-//app.use("/smartPhysio/normalize", normalizeRoutes);
-//app.use("/smartPhysio/filter", filterRoutes);
+app.use("/smartPhysio/normalize", normalizeRoutes);
+app.use("/smartPhysio/filter", filterRoutes);
 
 // Porta server
 const PORT = process.env.PORT || 5000;

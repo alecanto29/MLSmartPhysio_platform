@@ -10,9 +10,10 @@ function parseBool(value) {
 
 const cleanWithMean = async (req, res) => {
     try {
-        const { sessionId, isNaN, isOutliers } = req.body;
+        const { sessionId, isNaN, isOutliers, outliers_adv } = req.body;
 
-        console.log("chiamata pulizia con mean: param isNaN: " + isNaN + "ouliers: " + isOutliers);
+        console.log("chiamata pulizia con mean: param isNaN: " + isNaN + " ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
+
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
 
@@ -21,7 +22,7 @@ const cleanWithMean = async (req, res) => {
             return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
         }
 
-        const result = await cleaningService.cleanWithMean(csvPath, isNaN, isOutliers);
+        const result = await cleaningService.cleanWithMean(csvPath, isNaN, isOutliers, outliers_adv);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -30,9 +31,9 @@ const cleanWithMean = async (req, res) => {
 
 const cleanWithMedian = async (req, res) => {
     try {
-        const { sessionId, isNaN, isOutliers } = req.body;
+        const { sessionId, isNaN, isOutliers, outliers_adv } = req.body;
 
-        console.log("chiamata pulizia con median: param isNaN: " + isNaN + "ouliers: " + isOutliers);
+        console.log("chiamata pulizia con median: param isNaN: " + isNaN + "ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
 
@@ -40,7 +41,7 @@ const cleanWithMedian = async (req, res) => {
             return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
         }
 
-        const result = await cleaningService.cleanWithMedian(csvPath, parseBool(isNaN), parseBool(isOutliers));
+        const result = await cleaningService.cleanWithMedian(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv));
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -49,8 +50,8 @@ const cleanWithMedian = async (req, res) => {
 
 const cleanWithForwardFill = async (req, res) => {
     try {
-        const { sessionId, isNaN, isOutliers } = req.body;
-        console.log("chiamata pulizia con ffill: param isNaN: " + isNaN + "ouliers: " + isOutliers);
+        const { sessionId, isNaN, isOutliers, outliers_adv } = req.body;
+        console.log("chiamata pulizia con ffill: param isNaN: " + isNaN + "ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
 
@@ -58,7 +59,7 @@ const cleanWithForwardFill = async (req, res) => {
             return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
         }
 
-        const result = await cleaningService.cleanWithForwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers));
+        const result = await cleaningService.cleanWithForwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv));
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -67,8 +68,8 @@ const cleanWithForwardFill = async (req, res) => {
 
 const cleanWithBackwardFill = async (req, res) => {
     try {
-        const { sessionId, isNaN, isOutliers } = req.body;
-        console.log("chiamata pulizia con bfill: param isNaN: " + isNaN + "ouliers: " + isOutliers);
+        const { sessionId, isNaN, isOutliers, outliers_adv } = req.body;
+        console.log("chiamata pulizia con bfill: param isNaN: " + isNaN + "ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
 
@@ -76,7 +77,7 @@ const cleanWithBackwardFill = async (req, res) => {
             return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
         }
 
-        const result = await cleaningService.cleanWithBackwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers));
+        const result = await cleaningService.cleanWithBackwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv));
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });

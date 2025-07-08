@@ -106,7 +106,7 @@ const exportSessionCSV = async (sessionID) => {
         const flatData = data.map((doc, i) => {
             const obj = {};
             doc.data.forEach((val, idx) => {
-                obj[`ch${idx + 1}`] = val;
+                obj[`ch${idx + 1}`] = (val/4096)*3.3;
             });
             return obj;
         });
