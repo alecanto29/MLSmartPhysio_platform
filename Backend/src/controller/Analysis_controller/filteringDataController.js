@@ -10,12 +10,12 @@ function parseBool(value) {
 
 const lowPassFilter = async (req, res) => {
     try {
-        const { sessionId, cutoff, order} = req.body;
+        const { sessionId, cutoff, order, dataType} = req.body;
 
         console.log("chiamata pulizia con low filter: param cutoff: " + cutoff + " order: " + order);
 
         const rootPath = path.resolve(__dirname, '../../../../');
-        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
+        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
 
         if (!fs.existsSync(csvPath)) {
@@ -31,12 +31,12 @@ const lowPassFilter = async (req, res) => {
 
 const highPassFilter = async (req, res) => {
     try {
-        const { sessionId, cutoff, order} = req.body;
+        const { sessionId, cutoff, order, dataType} = req.body;
 
         console.log("chiamata pulizia con high filter: param cutoff: " + cutoff + " order: " + order);
 
         const rootPath = path.resolve(__dirname, '../../../../');
-        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
+        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
             return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
@@ -51,12 +51,12 @@ const highPassFilter = async (req, res) => {
 
 const notchFilter = async (req, res) => {
     try {
-        const { sessionId, cutoff, order} = req.body;
+        const { sessionId, cutoff, order, dataType} = req.body;
 
         console.log("chiamata pulizia con notch filter: param cutoff: " + cutoff + " order: " + order);
 
         const rootPath = path.resolve(__dirname, '../../../../');
-        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
+        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
             return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });

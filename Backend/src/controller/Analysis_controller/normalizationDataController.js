@@ -4,12 +4,12 @@ const fs = require('fs');
 
 const minmaxNormalization = async (req, res) => {
     try {
-        const { sessionId } = req.body;
+        const { sessionId, dataType } = req.body;
 
         console.log("chiamata normalizzazione min-max");
 
         const rootPath = path.resolve(__dirname, '../../../../');
-        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
+        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
 
         if (!fs.existsSync(csvPath)) {
@@ -25,12 +25,12 @@ const minmaxNormalization = async (req, res) => {
 
 const standardNormalization = async (req, res) => {
     try {
-        const { sessionId } = req.body;
+        const { sessionId, dataType } = req.body;
 
         console.log("chiamata normalizzazione standard");
 
         const rootPath = path.resolve(__dirname, '../../../../');
-        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_data.csv`);
+        const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
 
         if (!fs.existsSync(csvPath)) {

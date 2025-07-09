@@ -28,6 +28,7 @@ const SessionAnalysisPage = () => {
     const { sessionId } = useParams();
     const previousSessionIdRef = useRef(null);
     const [channels, setChannels] = useState([]);
+    const [dataType, setDataType] = useState("sEMG"); // valore iniziale
 
     const [cleaningOptions, setCleaningOptions] = useState({
         methods: { mean: true, ffill: false, median: false, bfill: false },
@@ -66,9 +67,9 @@ const SessionAnalysisPage = () => {
         };
     }, [sessionId]);
 
-    const fetchParsedCSV = async () => {
+    const fetchParsedCSV = async (type = dataType) => {
         try {
-            const res = await axios.get(`/smartPhysio/sessions/rawcsv/${sessionId}`, {
+            const res = await axios.get(`/smartPhysio/sessions/rawcsv/${sessionId}?dataType=${type}`, {
                 responseType: "blob"
             });
             const text = await res.data.text();
@@ -78,10 +79,11 @@ const SessionAnalysisPage = () => {
                 dynamicTyping: true,
                 complete: (results) => {
                     const data = results.data;
-                    const chData = Array.from({ length: 8 }, () => []);
+                    const numChannels = type === "sEMG" ? 8 : 9;
+                    const chData = Array.from({ length: numChannels }, () => []);
 
                     data.forEach((row) => {
-                        for (let i = 0; i < 8; i++) {
+                        for (let i = 0; i < numChannels; i++) {
                             const val = row[`ch${i + 1}`];
                             if (!isNaN(val)) {
                                 chData[i].push(val);
@@ -98,12 +100,11 @@ const SessionAnalysisPage = () => {
         }
     };
 
-    const exportAndFetch = async () => {
+    const exportAndFetch = async (type = dataType) => {
         try {
-            await axios.post(`/smartPhysio/sessions/export/${sessionId}`);
+            await axios.post(`/smartPhysio/sessions/export/${sessionId}`, { dataType: type });
             console.log("✅ CSV esportato per sessione:", sessionId);
-
-            await fetchParsedCSV();
+            await fetchParsedCSV(type);
         } catch (error) {
             console.error("❌ Errore in export o fetch CSV:", error.message);
         }
@@ -138,6 +139,7 @@ const SessionAnalysisPage = () => {
                 try {
                     await axios.post(`/smartPhysio/clean/${method}`, {
                         sessionId,
+                        dataType,
                         isNaN: params.isNaN,
                         isOutliers: params.isOutliers,
                         outliers_adv: params.outliers_adv
@@ -162,12 +164,12 @@ const SessionAnalysisPage = () => {
 
         try {
             if (meanMax) {
-                await axios.post(`/smartPhysio/normalize/minmax`, { sessionId });
+                await axios.post(`/smartPhysio/normalize/minmax`, { sessionId, dataType });
                 setYAxisRange({ min: 0, max: 1 });  // Aggiorna qui
                 console.log('yAxisRange', yAxisRange);
             }
             if (standard) {
-                await axios.post(`/smartPhysio/normalize/standard`, { sessionId });
+                await axios.post(`/smartPhysio/normalize/standard`, { sessionId, dataType });
                 setYAxisRange({ min: -3, max: 3 }); // o un range adeguato
             }
 
@@ -188,6 +190,7 @@ const SessionAnalysisPage = () => {
                 try {
                     await axios.post(`/smartPhysio/filter/${method}`, {
                         sessionId,
+                        dataType,
                         cutoff: params[method].cutoff,
                         order: params[method].order
                     });
@@ -214,7 +217,15 @@ const SessionAnalysisPage = () => {
             const originalLength = data.length;
             const maxPoints = 5000;
             const factor = Math.ceil(originalLength / maxPoints);
-            const yData = downsampleMinMax(data, factor);
+            let yData = downsampleMinMax(data, factor);
+
+            // 🔧 Fix se tutti i valori sono uguali (flat line)
+            const uniqueY = new Set(yData);
+            if (uniqueY.size === 1) {
+                const val = yData[0];
+                yData = [val - 0.001, val + 0.001]; // aggiungi due punti finti per forzare il rendering
+            }
+
             const xData = Array.from({ length: yData.length }, (_, i) => i * factor);
 
             return (
@@ -241,9 +252,16 @@ const SessionAnalysisPage = () => {
                             },
                             yaxis: {
                                 title: 'Amplitude',
-                                range: [yAxisRange.min, yAxisRange.max],
+                                range: (() => {
+                                    if (dataType === "sEMG" || dataType === "IMU") {
+                                        return [yAxisRange.min, yAxisRange.max];
+                                    }
+                                    const min = Math.min(...yData);
+                                    const max = Math.max(...yData);
+                                    return min === max ? [min - 1, max + 1] : [min, max];
+                                })(),
                                 showgrid: false,
-                            },
+                            }
                         }}
                         config={{
                             displayModeBar: false,
@@ -422,6 +440,17 @@ const SessionAnalysisPage = () => {
             <div className="session-title-fixed">
                 <i className="bi bi-search-heart session-icon"></i>
                 <h1>Session Analysis</h1>
+                <select
+                    value={dataType}
+                    onChange={(e) => {
+                        setDataType(e.target.value);
+                        exportAndFetch(e.target.value); // forza il refetch
+                    }}
+                    className="data-type-select"
+                >
+                    <option value="sEMG">sEMG</option>
+                    <option value="IMU">IMU</option>
+                </select>
             </div>
             <div className="scrollable-content">
                 <div className="session-analysis-content">
@@ -456,8 +485,11 @@ const SessionAnalysisPage = () => {
                     </div>
 
                     {/* GRAFICI EMG */}
-                    <div className="graph-section">
-                        <h3 className="graph-title">EMG Signal Visualization (8 Channels)</h3>
+                    <h3 className="graph-title">
+                        {dataType === "sEMG" ? "sEMG Signal Visualization (8 Channels)" : "IMU Signal Visualization (9 Channels)"}
+                    </h3>
+
+                    <div className="charts-wrapper">
                         {renderCharts()}
                     </div>
                 </div>

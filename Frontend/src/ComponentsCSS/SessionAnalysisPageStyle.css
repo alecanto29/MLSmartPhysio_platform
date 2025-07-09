@@ -389,3 +389,14 @@
 .filtering-header strong {
     padding: 0.5rem 1rem;
 }
+
+.data-type-select {
+    margin-left: 1rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #0078A8;
+    background-color: white;
+    font-size: 1rem;
+    color: #0078A8;
+    font-weight: bold;
+}

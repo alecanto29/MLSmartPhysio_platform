@@ -18,9 +18,17 @@ const path = require("path");
 const fs = require("fs");
 
 router.get("/rawcsv/:sessionId", (req, res) => {
-    const filePath = path.join(__dirname, "../../../tmp", `session_${req.params.sessionId}_data.csv`);
+    const { sessionId } = req.params;
+    const { dataType } = req.query;
+
+    if (!dataType || !["sEMG", "IMU"].includes(dataType)) {
+        return res.status(400).send("'dataType' mancante o non valido (usa 'sEMG' o 'IMU')");
+    }
+
+    const filePath = path.join(__dirname, "../../../tmp", `session_${sessionId}_${dataType}data.csv`);
 
     if (!fs.existsSync(filePath)) {
+        console.warn(`CSV non trovato: ${filePath}`);
         return res.status(404).send("CSV non trovato");
     }
 

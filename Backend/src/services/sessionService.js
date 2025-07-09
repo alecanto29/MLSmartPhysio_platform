@@ -2,6 +2,7 @@
 const sessionModel = require("../models/Session");
 const patientModel = require("../models/Patient");
 const sEMGdata = require('../models/sEMGdataModel');
+const inertialData = require('../models/inertialDataModel');
 
 
 const fs = require('fs');
@@ -95,35 +96,48 @@ const exportSessionCSV = async (sessionID) => {
     try {
         console.log(`[EXPORT CSV] Avvio esportazione per sessione: ${sessionID}`);
 
-        const data = await sEMGdata.find({ sessionId: sessionID }).lean();
-        console.log(`[EXPORT CSV] Numero dati sEMG trovati: ${data.length}`);
+        const SEMGdata = await sEMGdata.find({ sessionId: sessionID }).lean();
+        const IMUdata = await inertialData.find({ sessionId: sessionID }).lean();
 
-        if (!data || data.length === 0) {
-            console.warn(`[EXPORT CSV] Nessun dato sEMG trovato per la sessione ${sessionID}`);
-            throw new Error("Nessun dato sEMG disponibile per questa sessione");
+        console.log(`[EXPORT CSV] Numero dati sEMG trovati: ${SEMGdata.length}`);
+        console.log(`[EXPORT CSV] Numero dati IMU trovati: ${IMUdata.length}`);
+
+        if (!SEMGdata || !IMUdata || SEMGdata.length === 0 || IMUdata.length === 0) {
+            console.warn(`[EXPORT CSV] Nessun dato disponibile per la sessione ${sessionID}`);
+            throw new Error("Dati sEMG o IMU mancanti per questa sessione");
         }
 
-        const flatData = data.map((doc, i) => {
+        const flatDataSEMG = SEMGdata.map(doc => {
             const obj = {};
             doc.data.forEach((val, idx) => {
-                obj[`ch${idx + 1}`] = (val/4096)*3.3;
+                obj[`ch${idx + 1}`] = (val / 4096) * 3.3;
             });
             return obj;
         });
-        console.log(`[EXPORT CSV] Dati flatten trasformati per il CSV (prima riga):`, flatData[0]);
+
+        const flatDataIMU = IMUdata.map(doc => {
+            const obj = {};
+            doc.data.forEach((val, idx) => {
+                obj[`ch${idx + 1}`] = (val);
+            });
+            return obj;
+        });
 
         const parser = new Parser();
-        const csv = parser.parse(flatData);
-        console.log(`[EXPORT CSV] CSV generato, lunghezza caratteri: ${csv.length}`);
+        const csvsEMG = parser.parse(flatDataSEMG);
+        const csvIMU = parser.parse(flatDataIMU);
 
-        const fileName = `session_${sessionID}_data.csv`;
-        const filePath = path.join(__dirname, '../../../tmp', fileName);
-        console.log(`[EXPORT CSV] Scrivo CSV su file: ${filePath}`);
+        const fileNamesEMG = `session_${sessionID}_sEMGdata.csv`;
+        const fileNameIMU = `session_${sessionID}_IMUdata.csv`;
 
-        fs.writeFileSync(filePath, csv);
+        const filePathsEMG = path.join(__dirname, '../../../tmp', fileNamesEMG);
+        const filePathsIMU = path.join(__dirname, '../../../tmp', fileNameIMU);
+
+        fs.writeFileSync(filePathsEMG, csvsEMG);
+        fs.writeFileSync(filePathsIMU, csvIMU);
 
         console.log(`[EXPORT CSV] Esportazione completata con successo`);
-        return filePath;
+        return { filePathsEMG, filePathsIMU };
 
     } catch (err) {
         console.error(`[EXPORT CSV] Errore: ${err.message}`);
@@ -133,10 +147,11 @@ const exportSessionCSV = async (sessionID) => {
 
 
 const deleteSessionCSV = (sessionID) => {
-    const filePath = path.join(__dirname, '../../../tmp', `session_${sessionID}_data.csv`);
-    if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-    }
+    const filePathsEMG = path.join(__dirname, '../../../tmp', `session_${sessionID}_sEMGdata.csv`);
+    const filePathIMU = path.join(__dirname, '../../../tmp', `session_${sessionID}_IMUdata.csv`);
+
+    if (fs.existsSync(filePathsEMG)) fs.unlinkSync(filePathsEMG);
+    if (fs.existsSync(filePathIMU)) fs.unlinkSync(filePathIMU);
 };
 
 module.exports = {
