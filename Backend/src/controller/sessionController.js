@@ -82,6 +82,16 @@ const deleteSessionCSV = async (req, res) => {
     }
 }
 
+const downloadSessionCSV = async (req, res) => {
+    try {
+        const filePath = await sessionService.downloadSessionCSV(req.params.sessionId, req.params.dataType);
+        res.download(filePath);
+    } catch (err) {
+        res.status(500).json({error: err.message});
+    }
+};
+
+
 
 
 
@@ -93,5 +103,6 @@ module.exports = {
     getPatientSessionById,
     updateSession,
     exportSessionCSV,
-    deleteSessionCSV
+    deleteSessionCSV,
+    downloadSessionCSV
 };

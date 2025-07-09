@@ -154,6 +154,23 @@ const deleteSessionCSV = (sessionID) => {
     if (fs.existsSync(filePathIMU)) fs.unlinkSync(filePathIMU);
 };
 
+const downloadSessionCSV = (sessionId, dataType) => {
+    const validTypes = ['sEMG', 'IMU'];
+    if (!validTypes.includes(dataType)) {
+        throw new Error("Tipo di dato non valido. Usa 'sEMG' o 'IMU'.");
+    }
+
+    const fileName = `session_${sessionId}_${dataType}data.csv`;
+    const filePath = path.join(__dirname, '../../../tmp', fileName);
+
+    if (!fs.existsSync(filePath)) {
+        throw new Error("Il file richiesto non esiste. Devi prima esportarlo.");
+    }
+
+    return filePath;
+};
+
+
 module.exports = {
     getSession,
     getSessionByID,
@@ -162,5 +179,6 @@ module.exports = {
     getPatientSessionById,
     updateSession,
     exportSessionCSV,
-    deleteSessionCSV
+    deleteSessionCSV,
+    downloadSessionCSV
 }

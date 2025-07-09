@@ -13,9 +13,11 @@ router.delete("/:sessionId", auth, sessionController.deleteSessionById); // elim
 router.put("/:sessionId", auth, sessionController.updateSession); // update di una sessione specifica
 router.post("/export/:sessionId", sessionController.exportSessionCSV);
 router.delete("/clean/:sessionId", sessionController.deleteSessionCSV);
+router.get('/download/:sessionId/:dataType', sessionController.downloadSessionCSV);
 
 const path = require("path");
 const fs = require("fs");
+const {serialize} = require("mongodb");
 
 router.get("/rawcsv/:sessionId", (req, res) => {
     const { sessionId } = req.params;

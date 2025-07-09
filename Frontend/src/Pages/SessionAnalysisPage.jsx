@@ -1,10 +1,12 @@
+// SessionAnalysisPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import Header from "../../src/AtomicComponents/Header";
 import "../ComponentsCSS/SessionAnalysisPageStyle.css";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import Papa from "papaparse";
-import Plot from 'react-plotly.js';
+import { useLocation, useNavigate } from "react-router-dom";
+import Plot from "react-plotly.js";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,31 +15,37 @@ import {
     LineElement,
     Title,
     Tooltip,
-    Legend
-} from 'chart.js';
+    Legend,
+} from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const SessionAnalysisPage = () => {
+    const { sessionId } = useParams();
+    const previousSessionIdRef = useRef(null);
+    const [dataType, setDataType] = useState("sEMG");
+    const [channels, setChannels] = useState([]);
+    const [cachedChannels, setCachedChannels] = useState({ sEMG: null, IMU: null });
+
     const [openSections, setOpenSections] = useState({
         cleaning: false,
         normalization: false,
         filtering: false,
     });
 
-    const { sessionId } = useParams();
-    const previousSessionIdRef = useRef(null);
-    const [channels, setChannels] = useState([]);
-    const [dataType, setDataType] = useState("sEMG"); // valore iniziale
-
     const [cleaningOptions, setCleaningOptions] = useState({
         methods: { mean: true, ffill: false, median: false, bfill: false },
-        params: { isNaN: true, isOutliers: true, outliers_adv: true }
+        params: { isNaN: true, isOutliers: true, outliers_adv: true },
     });
 
     const [normalizationOptions, setNormalizationOptions] = useState({
         meanMax: false,
-        standard: false
+        standard: false,
+    });
+
+    const [normalizationStatus, setNormalizationStatus] = useState({
+        sEMG: false,
+        IMU: false,
     });
 
     const [filteringOptions, setFilteringOptions] = useState({
@@ -45,11 +53,24 @@ const SessionAnalysisPage = () => {
         params: {
             low: { cutoff: "", order: "" },
             high: { cutoff: "", order: "" },
-            notch: { cutoff: "", order: "" }
-        }
+            notch: { cutoff: "", order: "" },
+        },
     });
 
-    const [yAxisRange, setYAxisRange] = useState({ min: 0, max: 4 });
+    const [yAxisRangeMap, setYAxisRangeMap] = useState({
+        sEMG: { min: 0, max: 4 },
+        IMU: { min: -20, max: 20 },
+    });
+
+    const yAxisRange = yAxisRangeMap[dataType];
+
+    const setYAxisRange = (newRange) => {
+        setYAxisRangeMap((prev) => ({ ...prev, [dataType]: newRange }));
+    };
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const patientId = location.state?.patientId;
 
     const [chartKey, setChartKey] = useState(Date.now());
 
@@ -67,13 +88,28 @@ const SessionAnalysisPage = () => {
         };
     }, [sessionId]);
 
+    useEffect(() => {
+        if (cachedChannels[dataType]) {
+            console.log(`📦 Caricamento da cache per ${dataType}`);
+            setChannels(cachedChannels[dataType].map((arr) => [...arr]));
+        } else {
+            fetchParsedCSV(dataType);
+        }
+    }, [dataType]);
+
+    useEffect(() => {
+        if (normalizationStatus[dataType]) return;
+
+        if (dataType === "sEMG") setYAxisRange({ min: 0, max: 4 });
+        else setYAxisRange({ min: -20, max: 20 });
+    }, [dataType, normalizationStatus]);
+
     const fetchParsedCSV = async (type = dataType) => {
         try {
             const res = await axios.get(`/smartPhysio/sessions/rawcsv/${sessionId}?dataType=${type}`, {
-                responseType: "blob"
+                responseType: "blob",
             });
             const text = await res.data.text();
-
             Papa.parse(text, {
                 header: true,
                 dynamicTyping: true,
@@ -81,18 +117,15 @@ const SessionAnalysisPage = () => {
                     const data = results.data;
                     const numChannels = type === "sEMG" ? 8 : 9;
                     const chData = Array.from({ length: numChannels }, () => []);
-
                     data.forEach((row) => {
                         for (let i = 0; i < numChannels; i++) {
                             const val = row[`ch${i + 1}`];
-                            if (!isNaN(val)) {
-                                chData[i].push(val);
-                            }
+                            if (!isNaN(val)) chData[i].push(val);
                         }
                     });
-
                     console.log("📊 Dati canali aggiornati:", chData);
-                    setChannels(chData.map(arr => [...arr]));
+                    setChannels(chData.map((arr) => [...arr]));
+                    setCachedChannels((prev) => ({ ...prev, [type]: chData.map((arr) => [...arr]) }));
                 },
             });
         } catch (error) {
@@ -120,20 +153,8 @@ const SessionAnalysisPage = () => {
         }
     };
 
-    const downsampleMinMax = (array, factor = 50) => {
-        const result = [];
-        for (let i = 0; i < array.length; i += factor) {
-            const chunk = array.slice(i, i + factor);
-            const min = Math.min(...chunk);
-            const max = Math.max(...chunk);
-            result.push(min, max); // Preserva picchi
-        }
-        return result;
-    };
-
     const handleCleaningExecution = async () => {
         const { methods, params } = cleaningOptions;
-
         for (const method in methods) {
             if (methods[method]) {
                 try {
@@ -142,49 +163,41 @@ const SessionAnalysisPage = () => {
                         dataType,
                         isNaN: params.isNaN,
                         isOutliers: params.isOutliers,
-                        outliers_adv: params.outliers_adv
+                        outliers_adv: params.outliers_adv,
                     });
-
                     console.log(`✅ Pulizia con ${method} completata`);
                 } catch (error) {
-                    console.error(`❌ Errore durante la pulizia con ${method}:`, {
-                        message: error.message,
-                        response: error.response?.data || "Nessuna risposta dal server"
-                    });
+                    console.error(`❌ Errore durante la pulizia con ${method}:`, error.message);
                 }
             }
         }
-
-        await new Promise(resolve => setTimeout(resolve, 700));
-        await fetchParsedCSV(); // ⬅️ aggiorna i grafici
+        await new Promise((res) => setTimeout(res, 700));
+        await fetchParsedCSV();
     };
 
     const handleNormalizationExecution = async () => {
         const { meanMax, standard } = normalizationOptions;
-
         try {
             if (meanMax) {
                 await axios.post(`/smartPhysio/normalize/minmax`, { sessionId, dataType });
-                setYAxisRange({ min: 0, max: 1 });  // Aggiorna qui
-                console.log('yAxisRange', yAxisRange);
+                setYAxisRange({ min: 0, max: 1 });
+                setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
             }
             if (standard) {
                 await axios.post(`/smartPhysio/normalize/standard`, { sessionId, dataType });
-                setYAxisRange({ min: -3, max: 3 }); // o un range adeguato
+                setYAxisRange({ min: -3, max: 3 });
+                setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
             }
-
             console.log("✅ Normalizzazione completata");
         } catch (err) {
             console.error("❌ Errore Normalization:", err.message);
         }
-
-        await new Promise(resolve => setTimeout(resolve, 700));
+        await new Promise((res) => setTimeout(res, 700));
         await fetchParsedCSV();
     };
 
     const handleFilteringExecution = async () => {
         const { methods, params } = filteringOptions;
-
         for (const method in methods) {
             if (methods[method]) {
                 try {
@@ -192,7 +205,7 @@ const SessionAnalysisPage = () => {
                         sessionId,
                         dataType,
                         cutoff: params[method].cutoff,
-                        order: params[method].order
+                        order: params[method].order,
                     });
                     console.log(`✅ Filtro ${method} applicato`);
                 } catch (err) {
@@ -200,34 +213,36 @@ const SessionAnalysisPage = () => {
                 }
             }
         }
+        await new Promise((res) => setTimeout(res, 700));
+        await fetchParsedCSV();
+    };
 
-        await new Promise(resolve => setTimeout(resolve, 700));
-        await fetchParsedCSV(); // ⬅️ aggiorna i grafici
+    const handleDownloadAnalysis = async () => {
+        try {
+            const response = await axios.get(`/smartPhysio/sessions/download/${sessionId}/${dataType}`, {
+                responseType: "blob",
+            });
+            const blob = new Blob([response.data], { type: "text/csv" });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `${sessionId}_${dataType}_analysis.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error(`Errore download ${dataType} csv:`, error.message);
+        }
     };
 
     const toggleSection = (section) => {
-        setOpenSections((prev) => ({
-            ...prev,
-            [section]: !prev[section],
-        }));
+        setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
-    const renderCharts = () => {
-        return channels.map((data, i) => {
-            const originalLength = data.length;
-            const maxPoints = 5000;
-            const factor = Math.ceil(originalLength / maxPoints);
-            let yData = downsampleMinMax(data, factor);
-
-            // 🔧 Fix se tutti i valori sono uguali (flat line)
-            const uniqueY = new Set(yData);
-            if (uniqueY.size === 1) {
-                const val = yData[0];
-                yData = [val - 0.001, val + 0.001]; // aggiungi due punti finti per forzare il rendering
-            }
-
-            const xData = Array.from({ length: yData.length }, (_, i) => i * factor);
-
+    const renderCharts = () =>
+        channels.map((data, i) => {
+            const yData = data;
+            const xData = Array.from({ length: yData.length }, (_, i) => i);
             return (
                 <div key={i} className="graph-container">
                     <h4>Channel {i + 1}</h4>
@@ -236,42 +251,36 @@ const SessionAnalysisPage = () => {
                             {
                                 x: xData,
                                 y: yData,
-                                type: 'scattergl',
-                                mode: 'lines',
-                                line: { color: 'rgba(54, 162, 235, 1)', width: 1 },
-                            }
+                                type: "scattergl",
+                                mode: "lines",
+                                line: { color: "rgba(54, 162, 235, 1)", width: 1 },
+                            },
                         ]}
                         layout={{
                             width: 1100,
                             height: 300,
                             margin: { l: 50, r: 30, b: 40, t: 30 },
-                            title: '',
-                            xaxis: {
-                                title: 'Sample',
+                            title: "",
+                            xaxis: { title: "Sample", showgrid: false },
+                            yaxis: {
+                                title: "Amplitude",
+                                range:
+                                    dataType === "sEMG"
+                                        ? [yAxisRange.min, yAxisRange.max]
+                                        : (() => {
+                                            const min = Math.min(...yData);
+                                            const max = Math.max(...yData);
+                                            const padding = (max - min) * 0.1 || 1;
+                                            return [min - padding, max + padding];
+                                        })(),
                                 showgrid: false,
                             },
-                            yaxis: {
-                                title: 'Amplitude',
-                                range: (() => {
-                                    if (dataType === "sEMG" || dataType === "IMU") {
-                                        return [yAxisRange.min, yAxisRange.max];
-                                    }
-                                    const min = Math.min(...yData);
-                                    const max = Math.max(...yData);
-                                    return min === max ? [min - 1, max + 1] : [min, max];
-                                })(),
-                                showgrid: false,
-                            }
                         }}
-                        config={{
-                            displayModeBar: false,
-                            responsive: true
-                        }}
+                        config={{ displayModeBar: false, responsive: true }}
                     />
                 </div>
             );
         });
-    };
 
 
     const renderSectionContent = (section) => {
@@ -438,20 +447,58 @@ const SessionAnalysisPage = () => {
         <div className="session-analysis-container">
             <Header />
             <div className="session-title-fixed">
-                <i className="bi bi-search-heart session-icon"></i>
-                <h1>Session Analysis</h1>
-                <select
-                    value={dataType}
-                    onChange={(e) => {
-                        setDataType(e.target.value);
-                        exportAndFetch(e.target.value); // forza il refetch
-                    }}
-                    className="data-type-select"
-                >
-                    <option value="sEMG">sEMG</option>
-                    <option value="IMU">IMU</option>
-                </select>
+                <div className="session-title-left">
+                    <i className="bi bi-search-heart session-icon"></i>
+                    <h1>Session Analysis</h1>
+                </div>
+                <div className="session-title-right">
+
+                    <button className="spectrum-button">
+                        Spectrum analysis
+                    </button>
+
+                    <button onClick={handleDownloadAnalysis} className="download-button">
+                        Download CSV
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setCachedChannels((prev) => ({
+                                ...prev,
+                                [dataType]: null,
+                            }));
+
+                            setYAxisRangeMap((prev) => ({
+                                ...prev,
+                                [dataType]:
+                                    dataType === "sEMG"
+                                        ? { min: 0, max: 4 }
+                                        : { min: -20, max: 20 },
+                            }));
+
+                            setNormalizationStatus((prev) => ({
+                                ...prev,
+                                [dataType]: false,
+                            }));
+
+                            exportAndFetch(dataType);
+                        }}
+                        className="reset-button"
+                    >
+                        Reset {dataType}
+                    </button>
+
+                    <select
+                        value={dataType}
+                        onChange={(e) => setDataType(e.target.value)}
+                        className="data-type-select"
+                    >
+                        <option value="sEMG">sEMG data</option>
+                        <option value="IMU">IMU data</option>
+                    </select>
+                </div>
             </div>
+
             <div className="scrollable-content">
                 <div className="session-analysis-content">
                     <div className={`accordion-wrapper ${isAnyOpen ? "expanded" : ""}`}>
@@ -468,17 +515,25 @@ const SessionAnalysisPage = () => {
                                         </button>
                                     )}
                                     <button
-                                        className={`accordion-button ${openSections[section.key] ? "active" : ""}`}
+                                        className={`accordion-button ${
+                                            openSections[section.key] ? "active" : ""
+                                        }`}
                                         onClick={() => toggleSection(section.key)}
                                     >
                                         {section.label}
                                         <i
-                                            className={`bi ${openSections[section.key] ? "bi-caret-down-fill" : "bi-caret-right-fill"}`}
+                                            className={`bi ${
+                                                openSections[section.key]
+                                                    ? "bi-caret-down-fill"
+                                                    : "bi-caret-right-fill"
+                                            }`}
                                         ></i>
                                     </button>
                                 </div>
                                 {openSections[section.key] && (
-                                    <div className="accordion-content">{renderSectionContent(section.key)}</div>
+                                    <div className="accordion-content">
+                                        {renderSectionContent(section.key)}
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -486,16 +541,24 @@ const SessionAnalysisPage = () => {
 
                     {/* GRAFICI EMG */}
                     <h3 className="graph-title">
-                        {dataType === "sEMG" ? "sEMG Signal Visualization (8 Channels)" : "IMU Signal Visualization (9 Channels)"}
+                        {dataType === "sEMG"
+                            ? "sEMG Signal Visualization (8 Channels)"
+                            : "IMU Signal Visualization (9 Channels)"}
                     </h3>
 
-                    <div className="charts-wrapper">
-                        {renderCharts()}
-                    </div>
+                    <div className="charts-wrapper">{renderCharts()}</div>
                 </div>
+            </div>
+
+            <div
+                className="back-icon-container"
+                onClick={() => navigate(`/patient-session/${patientId}`)}
+            >
+                <i className="bi bi-arrow-left"></i>
             </div>
         </div>
     );
+
 };
 
 export default SessionAnalysisPage;

@@ -167,7 +167,14 @@ const PatientSessionListPage = () => {
                                             <span>{t("SESSION_DETAILS_ICON")}</span>
                                         </div>
 
-                                        <div className="card-action" onClick={() => navigate(`/session/analysis/${session._id}`)}>
+                                        <div
+                                            className="card-action"
+                                            onClick={() =>
+                                                navigate(`/session/analysis/${session._id}`, {
+                                                    state: { patientId: id } // id viene da useParams()
+                                                })
+                                            }
+                                        >
                                             <img src="/images/session_analysis.png" alt="Analysis" />
                                             <span>{t("SESSION_ANALYSIS")}</span>
                                         </div>

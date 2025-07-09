@@ -41,19 +41,51 @@
 
 .session-title-fixed {
     position: fixed;
-    top: 110px; /* lascia spazio all'Header */
-    left: 15%;
+    top: 110px;
+    left: 50%;
     transform: translateX(-50%);
+    width: 90%;
+    max-width: 1600px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
+    justify-content: space-between; /* spinge il select a destra */
     z-index: 1000;
     background-color: #cceeff;
     padding: 1rem 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+.session-title-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.session-title-left h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f1f1f;
+    margin: 0;
+}
+
+.session-title-right {
+    display: flex;
+    align-items: center;
+}
+
+.data-type-select {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #0078A8;
+    background-color: white;
+    font-size: 1rem;
+    color: #0078A8;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+}
+
 
 .session-title-fixed h1 {
     font-size: 2rem;
@@ -400,3 +432,49 @@
     color: #0078A8;
     font-weight: bold;
 }
+
+.reset-button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    background-color: #dc3545; /* rosso */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.reset-button:hover {
+    background-color: #c82333;
+}
+
+.download-button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    background-color: #0078A8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.spectrum-button {
+    padding: 6px 12px;
+    background-color: rebeccapurple; /* blu come altri pulsanti */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background-color 0.2s ease-in-out;
+    margin-left: 10px; /* opzionale: spazio tra pulsanti */
+}
+
+.spectrum-button:hover {
+    background-color: purple; /* blu più scuro al passaggio */
+}
+
+
+
