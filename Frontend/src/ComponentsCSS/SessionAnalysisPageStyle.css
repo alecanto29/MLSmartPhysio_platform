@@ -334,10 +334,7 @@
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
-.graph-container canvas {
-    width: 100% !important;
-    height: 300px !important;
-}
+
 
 .graph-container h4 {
     text-align: center;

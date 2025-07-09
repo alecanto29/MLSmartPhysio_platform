@@ -4,7 +4,7 @@ import "../ComponentsCSS/SessionAnalysisPageStyle.css";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import Papa from "papaparse";
-import { Line } from "react-chartjs-2";
+import Plot from 'react-plotly.js';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -119,6 +119,17 @@ const SessionAnalysisPage = () => {
         }
     };
 
+    const downsampleMinMax = (array, factor = 50) => {
+        const result = [];
+        for (let i = 0; i < array.length; i += factor) {
+            const chunk = array.slice(i, i + factor);
+            const min = Math.min(...chunk);
+            const max = Math.max(...chunk);
+            result.push(min, max); // Preserva picchi
+        }
+        return result;
+    };
+
     const handleCleaningExecution = async () => {
         const { methods, params } = cleaningOptions;
 
@@ -200,84 +211,50 @@ const SessionAnalysisPage = () => {
 
     const renderCharts = () => {
         return channels.map((data, i) => {
-            const chartData = {
-                datasets: [
-                    {
-                        label: `Channel ${i + 1}`,
-                        data: data.map((y, x) => ({ x, y })),
-                        borderColor: "rgba(54, 162, 235, 1)",
-                        borderWidth: 1,
-                        pointRadius: 0,
-                        fill: false
-                    }
-                ]
-            };
-
-            const stepX = 2500;
-            const stepY = 500;
-
-            const lastSample = data.length - 1;
-            const maxTickX = Math.floor(lastSample / stepX) *stepX;
-            const paddingX = stepX / 5;
-            const maxX = lastSample;
-
-
-// Genera solo i tick desiderati
-            const tickValuesX = [];
-            for (let i = 0; i <= maxTickX; i += stepX) {
-                tickValuesX.push(i);
-            }
-
-            const options = {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    title: { display: false }
-                },
-                scales: {
-                    x: {
-                        type: 'linear',
-                        min: 0,
-                        max: maxX,
-                        title: {
-                            display: true,
-                            text: "Sample"
-                        },
-                        ticks: {
-                            callback: (value) => {
-                                // Mostra solo 0, 2500, 5000, 7500, ecc.
-                                return value % stepX === 0 ? value : '';
-                            },
-                            stepSize: 250, // valore piccolo per assicurare che generi abbastanza tick da filtrare
-                            autoSkip: false
-                        }
-                    },
-                    y: {
-                        min: yAxisRange.min,
-                        max: yAxisRange.max,
-                        grace: '0%', // opzionale: evita margine extra
-                        title: {
-                            display: true,
-                            text: "Amplitude"
-                        },
-                        ticks: {
-                            autoSkip: false,
-                            maxTicksLimit: 5,
-                            callback: (value) => Number(value.toFixed(2)) // mostrerà es. 0.00, 0.25, 0.50, ecc.
-                        }
-                    }
-                }
-            };
-
+            const originalLength = data.length;
+            const maxPoints = 5000;
+            const factor = Math.ceil(originalLength / maxPoints);
+            const yData = downsampleMinMax(data, factor);
+            const xData = Array.from({ length: yData.length }, (_, i) => i * factor);
 
             return (
                 <div key={i} className="graph-container">
                     <h4>Channel {i + 1}</h4>
-                    <Line key={`channel-${i}-${chartKey}`} data={chartData} options={options} />
+                    <Plot
+                        data={[
+                            {
+                                x: xData,
+                                y: yData,
+                                type: 'scattergl',
+                                mode: 'lines',
+                                line: { color: 'rgba(54, 162, 235, 1)', width: 1 },
+                            }
+                        ]}
+                        layout={{
+                            width: 1100,
+                            height: 300,
+                            margin: { l: 50, r: 30, b: 40, t: 30 },
+                            title: '',
+                            xaxis: {
+                                title: 'Sample',
+                                showgrid: false,
+                            },
+                            yaxis: {
+                                title: 'Amplitude',
+                                range: [yAxisRange.min, yAxisRange.max],
+                                showgrid: false,
+                            },
+                        }}
+                        config={{
+                            displayModeBar: false,
+                            responsive: true
+                        }}
+                    />
                 </div>
             );
         });
     };
+
 
     const renderSectionContent = (section) => {
         switch (section) {
