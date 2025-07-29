@@ -2,7 +2,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const scriptPath = path.join(__dirname, '../../scripts_analysis/dataFilteringScripts.py');
-const pythonExec = 'python'; // oppure 'python3' a seconda del tuo ambiente
+const pythonExec = 'python';
 
 function callPythonFilter(csvPath, method, cut_off_frequency, filter_order, outliers_adv) {
     return new Promise((resolve, reject) => {

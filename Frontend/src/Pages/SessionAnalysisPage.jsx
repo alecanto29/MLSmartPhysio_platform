@@ -17,6 +17,9 @@ import {
     Tooltip,
     Legend,
 } from "chart.js";
+import i18n from "i18next";
+import { useTranslation } from "react-i18next";
+import DropDownButtonModel from "../AtomicComponents/DropDownButtonModel";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -26,6 +29,7 @@ const SessionAnalysisPage = () => {
     const [dataType, setDataType] = useState("sEMG");
     const [channels, setChannels] = useState([]);
     const [cachedChannels, setCachedChannels] = useState({ sEMG: null, IMU: null });
+    const { t } = useTranslation();
 
     const [openSections, setOpenSections] = useState({
         cleaning: false,
@@ -123,23 +127,23 @@ const SessionAnalysisPage = () => {
                             if (!isNaN(val)) chData[i].push(val);
                         }
                     });
-                    console.log("📊 Dati canali aggiornati:", chData);
+                    console.log("Dati canali aggiornati:", chData);
                     setChannels(chData.map((arr) => [...arr]));
                     setCachedChannels((prev) => ({ ...prev, [type]: chData.map((arr) => [...arr]) }));
                 },
             });
         } catch (error) {
-            console.error("❌ Errore nel fetch del CSV:", error.message);
+            console.error("Errore nel fetch del CSV:", error.message);
         }
     };
 
     const exportAndFetch = async (type = dataType) => {
         try {
             await axios.post(`/smartPhysio/sessions/export/${sessionId}`, { dataType: type });
-            console.log("✅ CSV esportato per sessione:", sessionId);
+            console.log("CSV esportato per sessione:", sessionId);
             await fetchParsedCSV(type);
         } catch (error) {
-            console.error("❌ Errore in export o fetch CSV:", error.message);
+            console.error("Errore in export o fetch CSV:", error.message);
         }
     };
 
@@ -165,9 +169,9 @@ const SessionAnalysisPage = () => {
                         isOutliers: params.isOutliers,
                         outliers_adv: params.outliers_adv,
                     });
-                    console.log(`✅ Pulizia con ${method} completata`);
+                    console.log(`Pulizia con ${method} completata`);
                 } catch (error) {
-                    console.error(`❌ Errore durante la pulizia con ${method}:`, error.message);
+                    console.error(`Errore durante la pulizia con ${method}:`, error.message);
                 }
             }
         }
@@ -188,9 +192,9 @@ const SessionAnalysisPage = () => {
                 setYAxisRange({ min: -3, max: 3 });
                 setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
             }
-            console.log("✅ Normalizzazione completata");
+            console.log("Normalizzazione completata");
         } catch (err) {
-            console.error("❌ Errore Normalization:", err.message);
+            console.error("Errore Normalization:", err.message);
         }
         await new Promise((res) => setTimeout(res, 700));
         await fetchParsedCSV();
@@ -207,9 +211,9 @@ const SessionAnalysisPage = () => {
                         cutoff: params[method].cutoff,
                         order: params[method].order,
                     });
-                    console.log(`✅ Filtro ${method} applicato`);
+                    console.log(`Filtro ${method} applicato`);
                 } catch (err) {
-                    console.error(`❌ Errore filtro ${method}:`, err.message);
+                    console.error(`Errore filtro ${method}:`, err.message);
                 }
             }
         }
@@ -245,7 +249,7 @@ const SessionAnalysisPage = () => {
             const xData = Array.from({ length: yData.length }, (_, i) => i);
             return (
                 <div key={i} className="graph-container">
-                    <h4>Channel {i + 1}</h4>
+                    <h4>{t("CHANNEL")} {i + 1}</h4>
                     <Plot
                         data={[
                             {
@@ -288,14 +292,14 @@ const SessionAnalysisPage = () => {
             case "cleaning":
                 return (
                     <div className="section-content cleaning-structured">
-                        <div className="section-title">Metodi:</div>
+                        <div className="section-title">{t("METHODS")}:</div>
                         <div className="cleaning-methods">
                             {["mean", "ffill", "median", "bfill"].map((key) => (
                                 <label key={key}>
-                                    {key === "mean" ? "Mean replacement" :
-                                        key === "ffill" ? "Linear interpolation - previous value" :
-                                            key === "median" ? "Median replacement" :
-                                                "Linear interpolation - next value"}
+                                    {key === "mean" ? t("CLEANING_MEDIAN") :
+                                        key === "ffill" ? t("CLEANING_LINEAR_PREVIUOS") :
+                                            key === "median" ? t("CLEANING_MEDIAN") :
+                                                t("CLEANING_LINEAR_NEXT")}
                                     <input
                                         type="checkbox"
                                         checked={cleaningOptions.methods[key]}
@@ -309,15 +313,15 @@ const SessionAnalysisPage = () => {
                                 </label>
                             ))}
                         </div>
-                        <div className="section-title">Parametri:</div>
+                        <div className="section-title">{t("PARAMETERS")}:</div>
                         <div className="cleaning-params">
                             {["isNaN", "isOutliers", "outliers_adv"].map((key) => (
                                 <label key={key}>
                                     {key === "isNaN"
-                                        ? "NaN Values"
+                                        ? t("CLEANING_NAN_VALUES")
                                         : key === "isOutliers"
-                                            ? "Outliers"
-                                            : "Advanced Outliers"}
+                                            ? t("CLEANING_OUTLIERS")
+                                            : t("CLEANING_OUTLIERS_ADVANCED")}
                                     <input
                                         type="checkbox"
                                         checked={cleaningOptions.params[key]}
@@ -337,11 +341,11 @@ const SessionAnalysisPage = () => {
             case "normalization":
                 return (
                     <div className="section-content normalization-structured">
-                        <div className="section-title">Metodi:</div>
+                        <div className="section-title">{t("METHODS")}:</div>
                         <div className="normalization-methods">
                             {["meanMax", "standard"].map((key) => (
                                 <label key={key}>
-                                    {key === "meanMax" ? "Mean - Max Scaling" : "Standard Scaling"}
+                                    {key === "meanMax" ? t("NORMALIZATION_MIN_MAX_SCALING") : t("NORMALIZATION_STANDARD_SCALING")}
                                     <input
                                         type="checkbox"
                                         checked={normalizationOptions[key]}
@@ -362,15 +366,15 @@ const SessionAnalysisPage = () => {
                 return (
                     <div className="section-content filtering-structured filtering-grid-rows">
                         <div className="filtering-row filtering-header">
-                            <strong>Metodi: </strong>
-                            <strong>Parametri:</strong>
+                            <strong>{t("METHODS")}: </strong>
+                            <strong>{t("PARAMETERS")}:</strong>
 
                         </div>
 
                         {[
-                            { key: "low", label: "Low-pass filter", p1: "Cutoff", p2: "Filter Order", k1: "cutoff", k2: "order" },
-                            { key: "high", label: "High-pass filter", p1: "Cutoff", p2: "Filter Order", k1: "cutoff", k2: "order" },
-                            { key: "notch", label: "Notch filter", p1: "Cutoff", p2: "Quality order", k1: "cutoff", k2: "order" },
+                            { key: "low", label: t("FILTERING_LOW_PASS"), p1: t("CUTOFF"), p2: t("FILTER_ORDER"), k1: "cutoff", k2: "order" },
+                            { key: "high", label: t("FILTERING_HIGH_PASS"), p1: t("CUTOFF"), p2: t("FILTER_ORDER"), k1: "cutoff", k2: "order" },
+                            { key: "notch", label: t("FILTERING_NOTCH"), p1: t("CUTOFF"), p2: t("FILTER_QUALITY"), k1: "cutoff", k2: "order" },
                         ].map(({ key, label, p1, p2, k1, k2 }) => (
                             <div key={key} className="filtering-row">
                                 <label className="filtering-method-checkbox">
@@ -436,117 +440,115 @@ const SessionAnalysisPage = () => {
     };
 
     const sections = [
-        { key: "cleaning", label: "Data cleaning", action: handleCleaningExecution },
-        { key: "normalization", label: "Normalization", action: handleNormalizationExecution },
-        { key: "filtering", label: "Data Filtering", action: handleFilteringExecution }
+        { key: "cleaning", label: t("CLEANING_DROP_MENU"), action: handleCleaningExecution },
+        { key: "normalization", label: t("NORMALIZATION_DROP_MENU"), action: handleNormalizationExecution },
+        { key: "filtering", label: t("FILTERING_DROP_MENU"), action: handleFilteringExecution }
     ];
 
     const isAnyOpen = Object.values(openSections).some(Boolean);
 
     return (
+
         <div className="session-analysis-container">
             <Header />
             <div className="session-title-fixed">
                 <div className="session-title-left">
                     <i className="bi bi-search-heart session-icon"></i>
-                    <h1>Session Analysis</h1>
+                    <h1>{t("SESSION_ANALYSIS_TITLE")}</h1>
                 </div>
                 <div className="session-title-right">
-
-                    <button className="spectrum-button">
-                        Spectrum analysis
-                    </button>
-
-                    <button onClick={handleDownloadAnalysis} className="download-button">
-                        Download CSV
-                    </button>
-
-                    <button
-                        onClick={() => {
-                            setCachedChannels((prev) => ({
-                                ...prev,
-                                [dataType]: null,
-                            }));
-
-                            setYAxisRangeMap((prev) => ({
-                                ...prev,
-                                [dataType]:
-                                    dataType === "sEMG"
+                    <DropDownButtonModel
+                        buttonText={t("ANALYSIS_MENU")}
+                        items={[
+                            t("SPECTRUM_ANALYSIS_BUTTON"),
+                            t("DOWNLOAD_CSV_BUTTON"),
+                            t("RESET_CSV_BUTTON")
+                        ]}
+                        onItemClick={(item) => {
+                            if (item === t("SPECTRUM_ANALYSIS_BUTTON")) {
+                                // TODO: implementa la logica di Spectrum analysis
+                                console.log("Spectrum analysis triggered");
+                            } else if (item === t("DOWNLOAD_CSV_BUTTON")) {
+                                handleDownloadAnalysis();
+                            } else if (item === t("RESET_CSV_BUTTON")) {
+                                setCachedChannels((prev) => ({ ...prev, [dataType]: null }));
+                                setYAxisRangeMap((prev) => ({
+                                    ...prev,
+                                    [dataType]: dataType === "sEMG"
                                         ? { min: 0, max: 4 }
-                                        : { min: -20, max: 20 },
-                            }));
-
-                            setNormalizationStatus((prev) => ({
-                                ...prev,
-                                [dataType]: false,
-                            }));
-
-                            exportAndFetch(dataType);
+                                        : { min: -20, max: 20 }
+                                }));
+                                setNormalizationStatus((prev) => ({ ...prev, [dataType]: false }));
+                                exportAndFetch(dataType);
+                            }
                         }}
-                        className="reset-button"
-                    >
-                        Reset {dataType}
-                    </button>
+                        className="session-options-dropdown"
+                    />
 
-                    <select
-                        value={dataType}
-                        onChange={(e) => setDataType(e.target.value)}
-                        className="data-type-select"
-                    >
-                        <option value="sEMG">sEMG data</option>
-                        <option value="IMU">IMU data</option>
-                    </select>
+                    <DropDownButtonModel
+                        buttonText={
+                            [{ label: t("SEMG_DATA"), value: "sEMG" }, { label: t("IMU_DATA"), value: "IMU" }]
+                                .find((i) => i.value === dataType)?.label ?? "Select"
+                        }
+                        items={[
+                            { label: t("SEMG_DATA"), value: "sEMG" },
+                            { label: t("IMU_DATA"), value: "IMU" }
+                        ]}
+                        onItemClick={(item) => setDataType(item.value)}
+                        className="session-data-dropdown"
+                    />
+
                 </div>
             </div>
 
             <div className="scrollable-content">
                 <div className="session-analysis-content">
-                    <div className={`accordion-wrapper ${isAnyOpen ? "expanded" : ""}`}>
-                        {sections.map((section) => (
-                            <div key={section.key} className="accordion-section">
-                                <div className="accordion-header">
-                                    {openSections[section.key] && (
+
+                    <div className="menu-container">
+                        <div className={`accordion-wrapper ${isAnyOpen ? "expanded" : ""}`}>
+                            {sections.map((section) => (
+                                <div key={section.key} className="accordion-section">
+                                    <div className="accordion-header">
+                                        {openSections[section.key] && (
+                                            <button
+                                                className="start-button"
+                                                onClick={section.action}
+                                                title={`Esegui ${section.label}`}
+                                            >
+                                                ▶
+                                            </button>
+                                        )}
                                         <button
-                                            className="start-button"
-                                            onClick={section.action}
-                                            title={`Esegui ${section.label}`}
+                                            className={`accordion-button ${openSections[section.key] ? "active" : ""}`}
+                                            onClick={() => toggleSection(section.key)}
                                         >
-                                            ▶
+                                            {section.label}
+                                            <i
+                                                className={`bi ${
+                                                    openSections[section.key]
+                                                        ? "bi-caret-down-fill"
+                                                        : "bi-caret-right-fill"
+                                                }`}
+                                            ></i>
                                         </button>
-                                    )}
-                                    <button
-                                        className={`accordion-button ${
-                                            openSections[section.key] ? "active" : ""
-                                        }`}
-                                        onClick={() => toggleSection(section.key)}
-                                    >
-                                        {section.label}
-                                        <i
-                                            className={`bi ${
-                                                openSections[section.key]
-                                                    ? "bi-caret-down-fill"
-                                                    : "bi-caret-right-fill"
-                                            }`}
-                                        ></i>
-                                    </button>
-                                </div>
-                                {openSections[section.key] && (
-                                    <div className="accordion-content">
-                                        {renderSectionContent(section.key)}
                                     </div>
-                                )}
-                            </div>
-                        ))}
+                                    {openSections[section.key] && (
+                                        <div className="accordion-content">
+                                            {renderSectionContent(section.key)}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* GRAFICI EMG */}
-                    <h3 className="graph-title">
-                        {dataType === "sEMG"
-                            ? "sEMG Signal Visualization (8 Channels)"
-                            : "IMU Signal Visualization (9 Channels)"}
-                    </h3>
+                    <div className="charts-container">
+                        <h3 className={`graph-title ${isAnyOpen ? "expanded" : "collapsed"}`}>
+                            {dataType === "sEMG" ? t("GRAPH_TITLE_SEMG") : t("GRAPH_TITLE_IMU")}
+                        </h3>
+                        <div className="charts-wrapper">{renderCharts()}</div>
+                    </div>
 
-                    <div className="charts-wrapper">{renderCharts()}</div>
                 </div>
             </div>
 
@@ -557,6 +559,7 @@ const SessionAnalysisPage = () => {
                 <i className="bi bi-arrow-left"></i>
             </div>
         </div>
+
     );
 
 };

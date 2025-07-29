@@ -10,12 +10,11 @@
 .scrollable-content {
     position: fixed;
     top: 180px; /* lascia spazio per header + titolo */
-    left: 200px; /* inizia dopo la sidebar */
+    left: 135px; /* inizia dopo la sidebar */
     right: 0;
     bottom: 0;
     overflow-y: auto;
-    padding-right: 2rem;
-    padding-left: 2rem;
+
     scrollbar-color: #778899 #e0e0e0; /* colore tipo img 2 */
     scrollbar-width: thin; /* stile sottile */
 }
@@ -50,9 +49,10 @@
     align-items: center;
     justify-content: space-between; /* spinge il select a destra */
     z-index: 1000;
-    background-color: #cceeff;
+    background-color: #e9f8ff;
     padding: 1rem 2rem;
     border-radius: 8px;
+    border: 2px solid #0078A8;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -103,13 +103,14 @@
 /* ========================= */
 
 .session-analysis-content {
-    margin-top: 50px; /* spazio sufficiente per il titolo fisso */
-    margin-left: -190px;
+    margin-top: 80px; /* spazio sufficiente per il titolo fisso */
+    margin-left: -50px;
     padding-right: 2rem;
     padding-bottom: 4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 100%;
 }
 
 /* ========================= */
@@ -142,21 +143,23 @@
 
 }
 
+
 .accordion-button {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background-color: #e9f8ff;
-    border: 1px solid #0078A8;
-    border-radius: 8px;
+    border: 2px solid #0078A8;
+    border-radius: 10px;
     padding: 1rem 1.5rem;
     font-size: 1.1rem;
     font-weight: bold;
     color: #000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     cursor: pointer;
+    text-align: left;
     transition: background-color 0.2s;
     min-width: 250px;
-
 }
 
 
@@ -175,6 +178,18 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
+
+.data-actions-select {
+    margin-left: 10px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #0078A8;
+    background-color: white;
+    font-size: 1rem;
+    color: red;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 
@@ -305,7 +320,7 @@
     margin-top: -10px;
     background-color: transparent;
     border: none;
-    font-size: 1.4rem;
+    font-size: 2rem;
     color: green;
     cursor: pointer;
     padding: 0;
@@ -313,20 +328,11 @@
     outline: none;
 }
 
-.accordion-button {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: rgba(255, 255, 255, 0.3);
-    border: none;
-    font-size: 1.1rem;
-    font-weight: bold;
-    padding: 10px 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    text-align: left;
+.start-button:hover{
+    color: lawngreen;
 }
+
+
 
 .start-button:hover,
 .start-button:focus,
@@ -349,10 +355,21 @@
 }
 
 .graph-title {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-left: -40px;
+    font-size: 2rem;
     color: #000;
+    transition: margin-top 0.3s ease;
+    margin-bottom: 2rem; /* AUMENTATO da 20px a 2rem */
+}
+
+.graph-title.collapsed {
+    margin-top: -40px;
+    margin-bottom: 2rem; /* spazio sotto */
+}
+
+.graph-title.expanded {
+    margin-top: 2rem;
+    margin-bottom: 2rem; /* uguale anche qui per coerenza */
 }
 
 .graph-container {
@@ -457,6 +474,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .spectrum-button {
@@ -475,6 +493,162 @@
 .spectrum-button:hover {
     background-color: purple; /* blu più scuro al passaggio */
 }
+
+.custom-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.dropdown-toggle {
+    background-color: #0078A8; /* colore di base */
+    color: white;
+    border: 2px solid #0078A8;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-toggle:hover,
+.custom-dropdown.open .dropdown-toggle {
+    background-color: #005f8d; /* blu più scuro su hover o se aperto */
+    border-color: #005f8d;
+}
+
+.dropdown-toggle i {
+    margin-left: 6px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    margin-top: 0.5rem;
+    border-radius: 6px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    min-width: 180px;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+.session-options-dropdown .dropdown-menu {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    overflow: hidden;
+}
+
+/* 1. Spectrum analysis - Viola più morbido */
+.session-options-dropdown .dropdown-item:nth-child(1) {
+    background-color: rgba(102, 51, 153, 0.7); /* rebeccapurple trasparente */
+    color: white;
+    font-weight: bold;
+}
+.session-options-dropdown .dropdown-item:nth-child(1):hover {
+    background-color: rgba(102, 51, 153, 0.9); /* più intensa al hover */
+}
+
+/* 2. Download CSV - già corretto */
+.session-options-dropdown .dropdown-item:nth-child(2) {
+    background-color: #b0e6ff;
+    color: #0078A8;
+    font-weight: bold;
+}
+.session-options-dropdown .dropdown-item:nth-child(2):hover {
+    background-color: #a1ddf9;
+}
+
+/* 3. Reset CSV - Rosso meno aggressivo */
+.session-options-dropdown .dropdown-item:nth-child(3) {
+    background-color: rgba(220, 53, 69, 0.7); /* rosso con opacità */
+    color: white;
+    font-weight: bold;
+}
+.session-options-dropdown .dropdown-item:nth-child(3):hover {
+    background-color: rgba(220, 53, 69, 0.9); /* più marcato al hover */
+}
+
+.session-data-dropdown .dropdown-menu {
+    background-color: white;
+    border: 1px solid #e8f8ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.session-data-dropdown .dropdown-item {
+    background-color: #e8f8ff;
+    color: #0078A8;
+    font-weight: bold;
+}
+
+.session-data-dropdown .dropdown-item:hover {
+    background-color: #a1ddf9; /* un po' più scuro o più chiaro per l'hover */
+}
+
+.session-title-right .session-data-dropdown .dropdown-toggle {
+    min-width: unset;
+    width: fit-content;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Menu compatto, centrato al contenuto */
+.session-title-right .session-data-dropdown .dropdown-menu {
+    min-width: unset;
+    width: max-content; /* migliore di fit-content per uniformità */
+    padding: 0;
+    background-color: white;
+    border: 1px solid #e8f8ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Voci del menu: larghezza piena del contenitore */
+.session-title-right .session-data-dropdown .dropdown-item {
+    width: 100%;                  /* riempie il contenitore */
+    box-sizing: border-box;       /* include padding nel width */
+    padding: 0.4rem 1rem;
+    white-space: nowrap;
+    background-color: #e8f8ff;
+    color: #0078A8;
+    font-weight: bold;
+}
+
+.session-title-right .session-data-dropdown .dropdown-item:hover {
+    background-color: #a1ddf9;
+}
+
+
+.session-title-fixed {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.session-title-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* questo lo spinge verso destra */
+    gap: 1rem;
+    transform: translateX(50px); /* 👈 sposta manualmente ancora più a destra */
+}
+
+
+
 
 
 

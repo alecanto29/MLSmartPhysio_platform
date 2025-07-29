@@ -102,6 +102,42 @@
 
   "LOGOUT_MESSAGE": "Do you want to get out of the session?",
   "CANCEL_LOGOUT": "Cancel",
-  "LOGOUT_LOGOUT": "Logout"
+  "LOGOUT_LOGOUT": "Logout",
+
+  "SESSION_ANALYSIS_TITLE": "Session analysis",
+  "SPECTRUM_ANALYSIS_BUTTON": "Spectrum analysis",
+  "DOWNLOAD_CSV_BUTTON": "Download csv",
+  "RESET_CSV_BUTTON": "Reset csv",
+  "CLEANING_DROP_MENU": "Data Cleaning",
+  "NORMALIZATION_DROP_MENU": "Data Normalization",
+  "FILTERING_DROP_MENU": "Data Filtering",
+  "GRAPH_TITLE_SEMG": "sEMG Signals Visualization",
+  "GRAPH_TITLE_IMU": "IMU Signals Visualization",
+  "CHANNEL": "Channel",
+  "SEMG_DATA": "sEMG Data",
+  "IMU_DATA": "IMU Data",
+
+  "METHODS": "Methods",
+  "PARAMETERS": "Parameters",
+
+  "CLEANING_MEAN": "Mean replacement",
+  "CLEANING_MEDIAN": "Median replacement",
+  "CLEANING_LINEAR_PREVIUOS": "Linear interpolation - previous value",
+  "CLEANING_LINEAR_NEXT": "Linear interpolation - next value",
+  "CLEANING_NAN_VALUES": "NaN Values",
+  "CLEANING_OUTLIERS": "Outliers",
+  "CLEANING_OUTLIERS_ADVANCED": "Advanced Outliers",
+
+  "NORMALIZATION_MIN_MAX_SCALING": "Min-Max Scaling",
+  "NORMALIZATION_STANDARD_SCALING": "Standard Scaling",
+
+  "FILTERING_LOW_PASS": "Low-pass filter",
+  "FILTERING_HIGH_PASS": "High-pass filter",
+  "FILTERING_NOTCH": "Notch filter",
+  "CUTOFF": "Cutoff",
+  "FILTER_ORDER": "Filter Order",
+  "FILTER_QUALITY": "Quality order",
+
+  "ANALYSIS_MENU": "Session Options"
 
 }

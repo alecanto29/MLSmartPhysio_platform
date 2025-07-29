@@ -27,18 +27,21 @@ const DropDownButtonModel = ({ buttonText, items = [], onItemClick = () => {}, c
 
             {open && (
                 <div className="dropdown-menu">
-                    {items.map((item, idx) => (
-                        <div
-                            key={idx}
-                            className="dropdown-item"
-                            onClick={() => {
-                                onItemClick(item);
-                                setOpen(false);
-                            }}
-                        >
-                            {item}
-                        </div>
-                    ))}
+                    {items.map((item, idx) => {
+                        const label = typeof item === "object" ? item.label : item;
+                        return (
+                            <div
+                                key={idx}
+                                className="dropdown-item"
+                                onClick={() => {
+                                    onItemClick(item);
+                                    setOpen(false);
+                                }}
+                            >
+                                {label}
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>
