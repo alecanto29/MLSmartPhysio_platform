@@ -19,7 +19,7 @@ const cleanWithMean = async (req, res) => {
 
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await cleaningService.cleanWithMean(csvPath, isNaN, isOutliers, outliers_adv, dataType);
@@ -38,7 +38,7 @@ const cleanWithMedian = async (req, res) => {
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await cleaningService.cleanWithMedian(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv), dataType);
@@ -56,7 +56,7 @@ const cleanWithForwardFill = async (req, res) => {
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await cleaningService.cleanWithForwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv), dataType);
@@ -74,7 +74,7 @@ const cleanWithBackwardFill = async (req, res) => {
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await cleaningService.cleanWithBackwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv), dataType);

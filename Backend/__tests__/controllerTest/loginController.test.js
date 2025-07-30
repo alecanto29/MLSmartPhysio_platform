@@ -8,6 +8,12 @@ jest.mock("../../src/services/loginServices");
 const app = express();
 app.use(express.json());
 
+// Simula lingua come middleware (di default inglese)
+app.use((req, res, next) => {
+    req.language = "en";
+    next();
+});
+
 // Rotte simulate
 app.post("/auth/register", loginController.registerNewUser);
 app.post("/auth/login", loginController.login);
@@ -27,7 +33,7 @@ describe("loginController", () => {
 
         expect(res.status).toBe(201);
         expect(res.body).toEqual(registeredUser);
-        expect(loginService.registerNewUser).toHaveBeenCalledWith(newUser);
+        expect(loginService.registerNewUser).toHaveBeenCalledWith(newUser, "en");
     });
 
     test("POST /auth/register - errore durante la registrazione", async () => {
@@ -38,7 +44,7 @@ describe("loginController", () => {
 
         expect(res.status).toBe(400);
         expect(res.body).toEqual({ error: "Email non valida" });
-        expect(loginService.registerNewUser).toHaveBeenCalledWith(newUser);
+        expect(loginService.registerNewUser).toHaveBeenCalledWith(newUser, "en");
     });
 
     test("POST /auth/login - login riuscito", async () => {
@@ -51,7 +57,7 @@ describe("loginController", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(loginResult);
-        expect(loginService.login).toHaveBeenCalledWith(credentials.email, credentials.password);
+        expect(loginService.login).toHaveBeenCalledWith(credentials.email, credentials.password, "en");
     });
 
     test("POST /auth/login - login fallito", async () => {
@@ -62,6 +68,6 @@ describe("loginController", () => {
 
         expect(res.status).toBe(401);
         expect(res.body).toEqual({ error: "Credenziali non valide" });
-        expect(loginService.login).toHaveBeenCalledWith(credentials.email, credentials.password);
+        expect(loginService.login).toHaveBeenCalledWith(credentials.email, credentials.password, "en");
     });
 });

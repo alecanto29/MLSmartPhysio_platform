@@ -43,10 +43,14 @@ const createNewPatient = async (req, res) => {
 const deleteNewPatient = async (req, res) => {
     try {
         const deletedPatient = await patientService.deleteNewPatient(req.params.id, req.user.id);
-        if (!deletedPatient) {
-            return res.status(404).json({ error: "Paziente non trovato o non autorizzato" });
+
+        // Corretto: verifica che deletedCount sia 1
+        if (!deletedPatient || deletedPatient.deletedCount === 0) {
+            return res.status(404).json({ error: "Paziente non trovato o già eliminato" });
         }
-        res.status(200).json(deletedPatient);
+
+        // Restituisce un messaggio coerente
+        res.status(200).json({ message: "Paziente eliminato con successo" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -73,5 +77,5 @@ module.exports = {
     getAllCriticPatients,
     createNewPatient,
     deleteNewPatient,
-    updatePatientInfo
+    updatePatientInfo,
 };

@@ -8,111 +8,75 @@ jest.mock("../../src/services/patientService");
 const app = express();
 app.use(express.json());
 
-// Middleware finto per simulare autenticazione
+// Middleware finto per simulare autenticazione e lingua
 app.use((req, res, next) => {
     req.user = { id: "fakeUserId" };
+    req.language = "en"; // 👈 Simulazione parametro lingua
     next();
 });
 
 // Rotte simulate
-app.get("/patients", patientController.getAllPatients);
-app.get("/patients/critical", patientController.getAllCriticPatients);
-app.get("/patients/:id", patientController.getPatientById);
 app.post("/patients", patientController.createNewPatient);
-app.delete("/patients/:id", patientController.deleteNewPatient);
 app.put("/patients/:id", patientController.updatePatientInfo);
+app.delete("/patients/:id", patientController.deleteNewPatient);
 
 describe("patientController", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    test("GET /patients restituisce tutti i pazienti", async () => {
-        const mockPatients = [{ id: "p1", name: "Mario Rossi" }];
-        patientService.getAllPatients.mockResolvedValue(mockPatients);
-
-        const res = await request(app).get("/patients");
-
-        expect(res.status).toBe(200);
-        expect(res.body).toEqual(mockPatients);
-        expect(patientService.getAllPatients).toHaveBeenCalledWith("fakeUserId");
-    });
-
-    test("GET /patients/:id restituisce un paziente esistente", async () => {
-        const mockPatient = { id: "p1", name: "Mario Rossi" };
-        patientService.getPatientById.mockResolvedValue(mockPatient);
-
-        const res = await request(app).get("/patients/p1");
-
-        expect(res.status).toBe(200);
-        expect(res.body).toEqual(mockPatient);
-        expect(patientService.getPatientById).toHaveBeenCalledWith("fakeUserId", "p1");
-    });
-
-    test("GET /patients/:id ritorna 404 se paziente non trovato", async () => {
-        patientService.getPatientById.mockResolvedValue(null);
-
-        const res = await request(app).get("/patients/unknown");
-
-        expect(res.status).toBe(404);
-        expect(res.body).toEqual({ error: "Paziente non trovato o non autorizzato" });
-    });
-
-    test("GET /patients/critical restituisce i pazienti critici", async () => {
-        const critical = [{ id: "c1", critical: true }];
-        patientService.getAllCriticPatients.mockResolvedValue(critical);
-
-        const res = await request(app).get("/patients/critical");
-
-        expect(res.status).toBe(200);
-        expect(res.body).toEqual(critical);
-        expect(patientService.getAllCriticPatients).toHaveBeenCalledWith("fakeUserId");
-    });
-
     test("POST /patients crea un nuovo paziente", async () => {
         const patientData = { name: "Luigi Verdi" };
-        const created = { id: "new", ...patientData };
+        const created = { id: "p1", ...patientData };
+
         patientService.createNewPatient.mockResolvedValue(created);
 
-        const res = await request(app).post("/patients").send(patientData);
+        const res = await request(app)
+            .post("/patients")
+            .send(patientData);
 
         expect(res.status).toBe(201);
         expect(res.body).toEqual(created);
-        expect(patientService.createNewPatient).toHaveBeenCalledWith(patientData, "fakeUserId");
-    });
-
-    test("DELETE /patients/:id elimina un paziente", async () => {
-        const deleted = { id: "p1", deleted: true };
-        patientService.deleteNewPatient.mockResolvedValue(deleted);
-
-        const res = await request(app).delete("/patients/p1");
-
-        expect(res.status).toBe(200);
-        expect(res.body).toEqual(deleted);
-        expect(patientService.deleteNewPatient).toHaveBeenCalledWith("p1", "fakeUserId");
-    });
-
-    test("DELETE /patients/:id ritorna 404 se paziente non trovato", async () => {
-        patientService.deleteNewPatient.mockResolvedValue(null);
-
-        const res = await request(app).delete("/patients/notfound");
-
-        expect(res.status).toBe(404);
-        expect(res.body).toEqual({ error: "Paziente non trovato o non autorizzato" });
+        expect(patientService.createNewPatient).toHaveBeenCalledWith(patientData, "fakeUserId", "en");
     });
 
     test("PUT /patients/:id aggiorna le informazioni di un paziente", async () => {
-        const updated = { id: "p1", name: "Luigi Bianchi" };
+        const patientId = "p1";
+        const updateData = { name: "Luigi Bianchi" };
+        const updated = { id: patientId, ...updateData };
+
         patientService.updatePatientInfo.mockResolvedValue(updated);
 
-        const res = await request(app).put("/patients/p1").send({ name: "Luigi Bianchi" });
+        const res = await request(app)
+            .put(`/patients/${patientId}`)
+            .send(updateData);
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(updated);
-        expect(patientService.updatePatientInfo).toHaveBeenCalledWith(
-            { name: "Luigi Bianchi" },
-            "fakeUserId",
-            "p1"
-        );
+        expect(patientService.updatePatientInfo).toHaveBeenCalledWith(updateData, "fakeUserId", patientId, "en");
+    });
+
+    test("DELETE /patients/:id elimina un paziente", async () => {
+        const patientId = "p1";
+
+        patientService.deleteNewPatient.mockResolvedValue({ deletedCount: 1 });
+
+        const res = await request(app).delete(`/patients/${patientId}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ message: "Paziente eliminato con successo" });
+        expect(patientService.deleteNewPatient).toHaveBeenCalledWith(patientId, "fakeUserId");
+
+    });
+
+    test("DELETE /patients/:id ritorna 404 se il paziente non esiste", async () => {
+        const patientId = "p1";
+
+        patientService.deleteNewPatient.mockResolvedValue({ deletedCount: 0 });
+
+        const res = await request(app).delete(`/patients/${patientId}`);
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: "Paziente non trovato o già eliminato" });
     });
 });

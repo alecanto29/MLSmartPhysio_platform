@@ -19,7 +19,7 @@ const lowPassFilter = async (req, res) => {
 
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await filteringServices.lowPassFilter(csvPath, cutoff, order);
@@ -39,7 +39,7 @@ const highPassFilter = async (req, res) => {
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await filteringServices.highPassFilter(csvPath, cutoff, order);
@@ -59,7 +59,7 @@ const notchFilter = async (req, res) => {
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
         if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `❌ Il file CSV non esiste: ${csvPath}` });
+            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
         }
 
         const result = await filteringServices.notchFilter(csvPath, cutoff, order);

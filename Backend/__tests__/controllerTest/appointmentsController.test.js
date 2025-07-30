@@ -8,9 +8,10 @@ jest.mock("../../src/services/AppointmentsService");
 const app = express();
 app.use(express.json());
 
-// Middleware finto per simulare autenticazione con user ID
+// Middleware finto per simulare autenticazione con user ID e lingua
 app.use((req, res, next) => {
     req.user = { id: "fakeUserId" };
+    req.language = "en";
     next();
 });
 
@@ -69,7 +70,7 @@ describe("AppointmentsController", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(newAppointment);
-        expect(appointmentsService.takeNewAppointment).toHaveBeenCalledWith(newAppointment, "fakeUserId");
+        expect(appointmentsService.takeNewAppointment).toHaveBeenCalledWith(newAppointment, "fakeUserId", "en");
     });
 
     test("DELETE /appointments/old cancella appuntamenti vecchi", async () => {

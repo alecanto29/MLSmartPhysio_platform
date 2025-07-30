@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
+const i18next = require("i18next");
 const patientService = require("../../src/services/PatientService");
 const patientModel = require("../../src/models/Patient");
 const doctorModel = require("../../src/models/Doctor");
@@ -9,6 +10,19 @@ let mongoServer;
 let doctor;
 
 beforeAll(async () => {
+    // Inizializzazione i18next per test
+    await i18next.init({
+        lng: "it",
+        resources: {
+            it: {
+                translation: {
+                    ALL_FIELDS_REQUIRED: "Tutti i campi sono obbligatori",
+                    FUTURE_DATE: "La data di nascita non può essere nel futuro."
+                }
+            }
+        }
+    });
+
     mongoServer = await MongoMemoryServer.create();
     await mongoose.connect(mongoServer.getUri());
     await doctorModel.syncIndexes();
@@ -48,7 +62,7 @@ describe("PatientService", () => {
     };
 
     test("createNewPatient - crea un paziente associato al medico", async () => {
-        const created = await patientService.createNewPatient(basePatient, doctor._id);
+        const created = await patientService.createNewPatient(basePatient, doctor._id, "it");
         expect(created.name).toBe("Mario");
 
         const found = await patientModel.findById(created._id);
@@ -59,7 +73,7 @@ describe("PatientService", () => {
         const incomplete = { ...basePatient };
         delete incomplete.gender;
 
-        await expect(patientService.createNewPatient(incomplete, doctor._id))
+        await expect(patientService.createNewPatient(incomplete, doctor._id, "it"))
             .rejects.toThrow("Tutti i campi sono obbligatori");
     });
 
@@ -69,26 +83,26 @@ describe("PatientService", () => {
             birthDate: "2099-01-01"
         };
 
-        await expect(patientService.createNewPatient(futurePatient, doctor._id))
+        await expect(patientService.createNewPatient(futurePatient, doctor._id, "it"))
             .rejects.toThrow("La data di nascita non può essere nel futuro.");
     });
 
     test("getAllPatients - restituisce solo pazienti del medico", async () => {
-        await patientService.createNewPatient(basePatient, doctor._id);
+        await patientService.createNewPatient(basePatient, doctor._id, "it");
         const patients = await patientService.getAllPatients(doctor._id);
         expect(patients.length).toBe(1);
         expect(patients[0].name).toBe("Mario");
     });
 
     test("getPatientById - restituisce paziente se appartiene al medico", async () => {
-        const created = await patientService.createNewPatient(basePatient, doctor._id);
+        const created = await patientService.createNewPatient(basePatient, doctor._id, "it");
         const found = await patientService.getPatientById(doctor._id, created._id);
         expect(found.surname).toBe("Rossi");
     });
 
     test("getAllCriticPatients - restituisce pazienti critici", async () => {
         const critical = { ...basePatient, isCritical: true };
-        await patientService.createNewPatient(critical, doctor._id);
+        await patientService.createNewPatient(critical, doctor._id, "it");
 
         const result = await patientService.getAllCriticPatients(doctor._id);
         expect(result.length).toBe(1);
@@ -96,30 +110,30 @@ describe("PatientService", () => {
     });
 
     test("updatePatientInfo - aggiorna i dati del paziente", async () => {
-        const created = await patientService.createNewPatient(basePatient, doctor._id);
+        const created = await patientService.createNewPatient(basePatient, doctor._id, "it");
         const updateData = { ...basePatient, name: "Luigi", isCritical: true };
 
-        const updated = await patientService.updatePatientInfo(updateData, doctor._id, created._id);
+        const updated = await patientService.updatePatientInfo(updateData, doctor._id, created._id, "it");
         expect(updated.name).toBe("Luigi");
         expect(updated.isCritical).toBe(true);
     });
 
     test("updatePatientInfo - lancia errore se data futura", async () => {
-        const created = await patientService.createNewPatient(basePatient, doctor._id);
+        const created = await patientService.createNewPatient(basePatient, doctor._id, "it");
         const updateData = { ...basePatient, birthDate: "2100-01-01" };
 
-        await expect(patientService.updatePatientInfo(updateData, doctor._id, created._id))
+        await expect(patientService.updatePatientInfo(updateData, doctor._id, created._id, "it"))
             .rejects.toThrow("La data di nascita non può essere nel futuro.");
     });
 
     test("deleteNewPatient - rimuove paziente e relativi appuntamenti", async () => {
-        const patient = await patientService.createNewPatient(basePatient, doctor._id);
+        const patient = await patientService.createNewPatient(basePatient, doctor._id, "it");
 
         await appointmentModel.create({
             patient: patient._id,
             doctor: doctor._id,
             date: new Date(),
-            time: "09:00"  // o un valore valido conforme allo schema
+            time: "09:00"
         });
 
         await patientService.deleteNewPatient(patient._id, doctor._id);
