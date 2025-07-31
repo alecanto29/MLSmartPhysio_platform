@@ -80,7 +80,7 @@ const SessionDetailsPage = () => {
 
             <div className="session-title-section">
                 <img src="/images/session_list.png" alt="icon" className="session-title-icon" />
-                <h2 className="session-title-text">{t("SESSIO_DETAILS_TITLE")}</h2>
+                <h2 className="session-title-text">{t("SESSION_DETAILS_TITLE")}</h2>
             </div>
 
             <div className="session-box">

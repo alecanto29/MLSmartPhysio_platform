@@ -85,7 +85,7 @@
   "DELETE_SESSION": "Session cancellation succes",
   "NOT_FOUND_SESSION": "No sessions found",
   "SESSION": "Session",
-  "SESSIO_DETAILS_TITLE": "Session Details",
+  "SESSION_DETAILS_TITLE": "Session Details",
   "PATIENT": "Patient",
   "DOCTOR": "Doctor",
   "DATE": "Date",
