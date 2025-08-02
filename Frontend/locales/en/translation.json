@@ -138,6 +138,7 @@
   "FILTER_ORDER": "Filter Order",
   "FILTER_QUALITY": "Quality order",
 
-  "ANALYSIS_MENU": "Session Options"
+  "ANALYSIS_MENU": "Session Options",
+  "RETURN_TIME_DOMAIN": "Time Domain"
 
 }

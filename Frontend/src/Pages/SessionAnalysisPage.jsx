@@ -61,6 +61,9 @@ const SessionAnalysisPage = () => {
         },
     });
 
+    const [isSpectrumMode, setIsSpectrumMode] = useState(false);
+    const [spectrumData, setSpectrumData] = useState([]);
+
     const [yAxisRangeMap, setYAxisRangeMap] = useState({
         sEMG: { min: 0, max: 4 },
         IMU: { min: -20, max: 20 },
@@ -221,6 +224,30 @@ const SessionAnalysisPage = () => {
         await fetchParsedCSV();
     };
 
+    const handleToggleSpectrum = async () => {
+        if (!isSpectrumMode) {
+            try {
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                    sessionId,
+                    dataType,
+                });
+                if (res.data && Array.isArray(res.data)) {
+                    setSpectrumData(res.data);
+                    setIsSpectrumMode(true);
+                    console.log("Analisi spettro completata");
+                } else {
+                    console.warn("Formato dati spettro inatteso:", res.data);
+                }
+            } catch (err) {
+                console.error("Errore nell'analisi spettro:", err.message);
+            }
+        } else {
+            setIsSpectrumMode(false);
+            setSpectrumData([]);
+        }
+    };
+
+
     const handleDownloadAnalysis = async () => {
         try {
             const response = await axios.get(`/smartPhysio/sessions/download/${sessionId}/${dataType}`, {
@@ -243,7 +270,7 @@ const SessionAnalysisPage = () => {
         setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
-    const renderCharts = () =>
+    const renderTimeDomainCharts = () =>
         channels.map((data, i) => {
             const yData = data;
             const xData = Array.from({ length: yData.length }, (_, i) => i);
@@ -251,15 +278,13 @@ const SessionAnalysisPage = () => {
                 <div key={i} className="graph-container">
                     <h4>{t("CHANNEL")} {i + 1}</h4>
                     <Plot
-                        data={[
-                            {
-                                x: xData,
-                                y: yData,
-                                type: "scattergl",
-                                mode: "lines",
-                                line: { color: "rgba(54, 162, 235, 1)", width: 1 },
-                            },
-                        ]}
+                        data={[{
+                            x: xData,
+                            y: yData,
+                            type: "scattergl",
+                            mode: "lines",
+                            line: { color: "rgba(54, 162, 235, 1)", width: 1 },
+                        }]}
                         layout={{
                             width: 1100,
                             height: 300,
@@ -285,6 +310,32 @@ const SessionAnalysisPage = () => {
                 </div>
             );
         });
+
+    const renderSpectrumCharts = () =>
+        spectrumData.map((channelData, i) => (
+            <div key={i} className="graph-container">
+                <h4>{t("CHANNEL")} {i + 1}</h4>
+                <Plot
+                    data={[{
+                        x: channelData.frequencies,
+                        y: channelData.magnitudes,
+                        type: "scattergl",
+                        mode: "lines",
+                        line: { color: "rgba(255, 99, 132, 1)", width: 1 },
+                    }]}
+                    layout={{
+                        width: 1100,
+                        height: 300,
+                        margin: { l: 50, r: 30, b: 40, t: 30 },
+                        title: "",
+                        xaxis: { title: "Frequency (Hz)", showgrid: false },
+                        yaxis: { title: "Magnitude", showgrid: false },
+                    }}
+                    config={{ displayModeBar: false, responsive: true }}
+                />
+            </div>
+        ));
+
 
 
     const renderSectionContent = (section) => {
@@ -460,14 +511,13 @@ const SessionAnalysisPage = () => {
                     <DropDownButtonModel
                         buttonText={t("ANALYSIS_MENU")}
                         items={[
-                            t("SPECTRUM_ANALYSIS_BUTTON"),
+                            isSpectrumMode ? t("RETURN_TIME_DOMAIN") : t("SPECTRUM_ANALYSIS_BUTTON"),
                             t("DOWNLOAD_CSV_BUTTON"),
                             t("RESET_CSV_BUTTON")
                         ]}
                         onItemClick={(item) => {
-                            if (item === t("SPECTRUM_ANALYSIS_BUTTON")) {
-                                // TODO: implementa la logica di Spectrum analysis
-                                console.log("Spectrum analysis triggered");
+                            if (item === t("SPECTRUM_ANALYSIS_BUTTON") || item === t("RETURN_TIME_DOMAIN")) {
+                                handleToggleSpectrum();
                             } else if (item === t("DOWNLOAD_CSV_BUTTON")) {
                                 handleDownloadAnalysis();
                             } else if (item === t("RESET_CSV_BUTTON")) {
@@ -546,7 +596,9 @@ const SessionAnalysisPage = () => {
                         <h3 className={`graph-title ${isAnyOpen ? "expanded" : "collapsed"}`}>
                             {dataType === "sEMG" ? t("GRAPH_TITLE_SEMG") : t("GRAPH_TITLE_IMU")}
                         </h3>
-                        <div className="charts-wrapper">{renderCharts()}</div>
+                        <div className="charts-wrapper">
+                            {isSpectrumMode ? renderSpectrumCharts() : renderTimeDomainCharts()}
+                        </div>
                     </div>
 
                 </div>

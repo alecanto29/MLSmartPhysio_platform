@@ -139,5 +139,6 @@
   "FILTER_ORDER": "Ordine del filtro",
   "FILTER_QUALITY": "Ordine di qualità",
 
-  "ANALYSIS_MENU": "Opzioni Sessione"
+  "ANALYSIS_MENU": "Opzioni Sessione",
+  "RETURN_TIME_DOMAIN": "Dominio Temporale"
 }
