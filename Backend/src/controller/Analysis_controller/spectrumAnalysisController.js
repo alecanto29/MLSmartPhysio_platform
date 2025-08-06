@@ -4,7 +4,7 @@ const fs = require('fs');
 
 
 
-const spectrumAnalysis = async (req, res) => {
+const  spectrumAnalysis = async (req, res) => {
     try {
         const { sessionId, dataType} = req.body;
 

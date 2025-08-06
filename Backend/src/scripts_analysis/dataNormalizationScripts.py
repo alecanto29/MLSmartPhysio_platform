@@ -16,11 +16,11 @@ def min_max_scaling(df):
 def standard_scaling(df):
     for col in df.columns:
         mean = df[col].mean()
-        std = df[col].std()
-        if std == 0:
-            print(f"[{col}] Deviazione standard nulla → Normalizzazione saltata", file=sys.stderr)
+        max_val = df[col].max()
+        if max_val == mean:
+            print(f"[{col}] Valore massimo uguale alla media → Normalizzazione saltata", file=sys.stderr)
             continue
-        df[col] = df[col].apply(lambda x: (x - mean) / std)
+        df[col] = df[col].apply(lambda x: (x - mean) / max_val)
     return df
 
 if __name__ == "__main__":

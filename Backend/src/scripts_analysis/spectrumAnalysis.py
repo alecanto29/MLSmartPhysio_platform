@@ -2,29 +2,45 @@ import pandas as pd
 import numpy as np
 import sys
 import os
+
 from scipy.fft import fft, fftfreq
 
 def spectrum_analyzer(df, sampling_rate=1000):
+
     n_samples = df.shape[0]
     freqs = fftfreq(n_samples, d=1/sampling_rate)
 
     result = []
     for ch in df.columns:
         try:
+            # Estrazione del segnale dalla colonna corrente
             signal = df[ch].values
+
+            # Calcolo della FFT del segnale
             fft_result = fft(signal)
-            magnitudes = np.abs(fft_result[:n_samples // 2])
+
+            # Considerazione della metà positiva dello spettro
+            fft_half = fft_result[:n_samples // 2]
+
+            #Calcolo PSD
+            psd = (1 / (sampling_rate * n_samples)) * np.abs(fft_half) ** 2
+
+            # Moltiplica per 2 i valori tranne DC (0 Hz) e Nyquist, per conservare l'energia totale
+            psd[1:-1] *= 2
+
+            # Frequenze corrispondenti alla metà dello spettro
             freqs_half = freqs[:n_samples // 2]
 
             result.append({
                 "channel": ch,
                 "frequencies": freqs_half.tolist(),
-                "magnitudes": magnitudes.tolist()
+                "psd": psd.tolist()
             })
         except Exception as e:
-            print(f"[ERRORE] FFT fallita sul canale {ch}: {e}", file=sys.stderr)
+            print(f"[ERRORE] Calcolo PSD fallito sul canale {ch}: {e}", file=sys.stderr)
 
     return result
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

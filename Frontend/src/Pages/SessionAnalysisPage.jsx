@@ -180,6 +180,24 @@ const SessionAnalysisPage = () => {
         }
         await new Promise((res) => setTimeout(res, 700));
         await fetchParsedCSV();
+
+        //Se in modalità spettro, aggiorna lo spettro
+        if (isSpectrumMode) {
+            try {
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                    sessionId,
+                    dataType,
+                });
+                if (res.data && Array.isArray(res.data)) {
+                    setSpectrumData(res.data);
+                    console.log("🔄 Spettro aggiornato dopo pulizia");
+                } else {
+                    console.warn("Formato dati spettro inatteso:", res.data);
+                }
+            } catch (err) {
+                console.error("Errore nell'analisi spettro dopo pulizia:", err.message);
+            }
+        }
     };
 
     const handleNormalizationExecution = async () => {
@@ -187,12 +205,12 @@ const SessionAnalysisPage = () => {
         try {
             if (meanMax) {
                 await axios.post(`/smartPhysio/normalize/minmax`, { sessionId, dataType });
-                setYAxisRange({ min: 0, max: 1 });
+                setYAxisRange({ min: -1, max: 1 });
                 setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
             }
             if (standard) {
                 await axios.post(`/smartPhysio/normalize/standard`, { sessionId, dataType });
-                setYAxisRange({ min: -3, max: 3 });
+                setYAxisRange({ min: 0, max: 1 });
                 setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
             }
             console.log("Normalizzazione completata");
@@ -201,7 +219,26 @@ const SessionAnalysisPage = () => {
         }
         await new Promise((res) => setTimeout(res, 700));
         await fetchParsedCSV();
+
+        //Se in modalità spettro, aggiorna lo spettro
+        if (isSpectrumMode) {
+            try {
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                    sessionId,
+                    dataType,
+                });
+                if (res.data && Array.isArray(res.data)) {
+                    setSpectrumData(res.data);
+                    console.log("🔄 Spettro aggiornato dopo normalizzazione");
+                } else {
+                    console.warn("Formato dati spettro inatteso:", res.data);
+                }
+            } catch (err) {
+                console.error("Errore nell'analisi spettro dopo normalizzazione:", err.message);
+            }
+        }
     };
+
 
     const handleFilteringExecution = async () => {
         const { methods, params } = filteringOptions;
@@ -222,6 +259,24 @@ const SessionAnalysisPage = () => {
         }
         await new Promise((res) => setTimeout(res, 700));
         await fetchParsedCSV();
+
+        //se già nel dominio delle frequenze, ricalcola lo spettro
+        if (isSpectrumMode) {
+            try {
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                    sessionId,
+                    dataType,
+                });
+                if (res.data && Array.isArray(res.data)) {
+                    setSpectrumData(res.data);
+                    console.log("🔄 Spettro aggiornato dopo filtraggio");
+                } else {
+                    console.warn("Formato dati spettro inatteso:", res.data);
+                }
+            } catch (err) {
+                console.error("Errore nell'analisi spettro dopo filtro:", err.message);
+            }
+        }
     };
 
     const handleToggleSpectrum = async () => {
@@ -318,7 +373,7 @@ const SessionAnalysisPage = () => {
                 <Plot
                     data={[{
                         x: channelData.frequencies,
-                        y: channelData.magnitudes,
+                        y: channelData.psd, // <-- usa il PSD qui
                         type: "scattergl",
                         mode: "lines",
                         line: { color: "rgba(255, 99, 132, 1)", width: 1 },
@@ -329,12 +384,13 @@ const SessionAnalysisPage = () => {
                         margin: { l: 50, r: 30, b: 40, t: 30 },
                         title: "",
                         xaxis: { title: "Frequency (Hz)", showgrid: false },
-                        yaxis: { title: "Magnitude", showgrid: false },
+                        yaxis: { title: "Power Spectral Density", showgrid: false }, // <-- titolo corretto asse Y
                     }}
                     config={{ displayModeBar: false, responsive: true }}
                 />
             </div>
         ));
+
 
 
 
