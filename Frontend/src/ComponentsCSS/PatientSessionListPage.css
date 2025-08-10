@@ -201,3 +201,15 @@
     pointer-events: none;
 }
 
+.upload-session-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.upload-session-container button {
+    width: auto;         /* non occupa tutta la larghezza */
+    min-width: 70px;     /* o quello che preferisci */
+    padding: 10px 10px;   /* riduce lo spazio interno */
+}

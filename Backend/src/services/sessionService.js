@@ -1,17 +1,18 @@
-
 const sessionModel = require("../models/Session");
 const patientModel = require("../models/Patient");
 const sEMGdata = require('../models/sEMGdataModel');
 const inertialData = require('../models/inertialDataModel');
+const sEMGservice = require("../services/sEMGdataService");
+const imuService = require("../services/inertialDataService");
 
+const csv = require('csv-parser');
 
 const fs = require('fs');
 const path = require('path');
 const { Parser } = require('json2csv');
 
-
-const getSession = async (doctorID) =>{
-    return await sessionModel.find({doctor: doctorID});
+const getSession = async (doctorID) => {
+    return await sessionModel.find({ doctor: doctorID });
 }
 
 const getSessionByID = async (sessionID, doctorID) => {
@@ -31,12 +32,10 @@ const getSessionByID = async (sessionID, doctorID) => {
     return result;
 };
 
-
-//ritorna tutte le sessioni di un paziente in carico ad un dottore
-const getPatientSessionById = async (patientID, doctorID) =>{
-    return await sessionModel.find({doctor: doctorID, patient: patientID});
+// ritorna tutte le sessioni di un paziente in carico ad un dottore
+const getPatientSessionById = async (patientID, doctorID) => {
+    return await sessionModel.find({ doctor: doctorID, patient: patientID });
 }
-
 
 const createSession = async (sessionData, doctorId) => {
     const today = new Date();
@@ -60,7 +59,6 @@ const createSession = async (sessionData, doctorId) => {
 };
 
 const updateSession = async (newSessionData, doctorID, sessionID) => {
-
     console.log("Ricevuto per update:", { newSessionData, doctorID, sessionID });
 
     const targetSession = await getSessionByID(sessionID, doctorID);
@@ -74,7 +72,6 @@ const updateSession = async (newSessionData, doctorID, sessionID) => {
     await targetSession.save();
     return targetSession;
 }
-
 
 const deleteSessionById = async (sessionID, doctorID) => {
     const session = await sessionModel.findOneAndDelete({
@@ -118,7 +115,7 @@ const exportSessionCSV = async (sessionID) => {
         const flatDataIMU = IMUdata.map(doc => {
             const obj = {};
             doc.data.forEach((val, idx) => {
-                obj[`ch${idx + 1}`] = (val);
+                obj[`ch${idx + 1}`] = val;
             });
             return obj;
         });
@@ -145,13 +142,23 @@ const exportSessionCSV = async (sessionID) => {
     }
 };
 
-
 const deleteSessionCSV = (sessionID) => {
-    const filePathsEMG = path.join(__dirname, '../../../tmp', `session_${sessionID}_sEMGdata.csv`);
-    const filePathIMU = path.join(__dirname, '../../../tmp', `session_${sessionID}_IMUdata.csv`);
+    // 1) Elimina i CSV in tmp/
+    const csvSEMG = path.resolve(__dirname, '../../../tmp', `session_${sessionID}_sEMGdata.csv`);
+    const csvIMU = path.resolve(__dirname, '../../../tmp', `session_${sessionID}_IMUdata.csv`);
+    if (fs.existsSync(csvSEMG)) fs.unlinkSync(csvSEMG);
+    if (fs.existsSync(csvIMU)) fs.unlinkSync(csvIMU);
 
-    if (fs.existsSync(filePathsEMG)) fs.unlinkSync(filePathsEMG);
-    if (fs.existsSync(filePathIMU)) fs.unlinkSync(filePathIMU);
+    // 2) Svuota COMPLETAMENTE tmp/data_work (file + sottocartelle)
+    const dataWorkDir = path.resolve(__dirname, '../../tmp/data_work');
+
+    try {
+        if (fs.existsSync(dataWorkDir)) {
+            fs.rmSync(dataWorkDir, { recursive: true, force: true });
+        }
+    } catch (e) {
+        console.warn('Clean data_work failed:', dataWorkDir, e.message);
+    }
 };
 
 const downloadSessionCSV = (sessionId, dataType) => {
@@ -170,6 +177,44 @@ const downloadSessionCSV = (sessionId, dataType) => {
     return filePath;
 };
 
+const importCSVData = async (files, sessionId) => {
+    if (!files || files.length !== 2) {
+        console.error("❌ FILES mancanti o non corretti:", files);
+        throw new Error("Servono esattamente 2 file CSV (sEMG e IMU)");
+    }
+
+    const [file1, file2] = files;
+
+    console.log("✅ File ricevuti:", file1.originalname, file2.originalname);
+
+    const parseCSV = (filePath) =>
+        new Promise((resolve, reject) => {
+            const results = [];
+            fs.createReadStream(filePath)
+                .pipe(csv())
+                .on("data", (data) => {
+                    const row = Object.values(data).map(Number);
+                    results.push(row);
+                })
+                .on("end", () => resolve(results))
+                .on("error", (err) => reject(err));
+        });
+
+    const data1 = await parseCSV(file1.path);
+    const data2 = await parseCSV(file2.path);
+
+    // Determina quale è sEMG (8 canali) e quale è IMU (9 canali)
+    const isFirstEMG = data1[0]?.length === 8;
+    const sEMGData = isFirstEMG ? data1 : data2;
+    const imuData = isFirstEMG ? data2 : data1;
+
+    await sEMGservice.savesEMGdataForImport(sEMGData, sessionId);
+    await imuService.saveInertialDataForImport(imuData, sessionId);
+
+    // Elimina file temporanei
+    fs.unlinkSync(file1.path);
+    fs.unlinkSync(file2.path);
+};
 
 module.exports = {
     getSession,
@@ -180,5 +225,6 @@ module.exports = {
     updateSession,
     exportSessionCSV,
     deleteSessionCSV,
-    downloadSessionCSV
-}
+    downloadSessionCSV,
+    importCSVData
+};

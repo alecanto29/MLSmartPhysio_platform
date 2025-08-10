@@ -6,6 +6,7 @@ import "../ComponentsCSS/PatientSessionListPage.css";
 import MessageHandlerModel from "../AtomicComponents/MessageHandlerModel.jsx";
 import i18n from "i18next";
 import {useTranslation} from "react-i18next";
+import ButtonModel from "../AtomicComponents/ButtonModel";
 
 const PatientSessionListPage = () => {
     const [patientsSessions, setPatientsSessions] = useState([]);
@@ -90,6 +91,67 @@ const PatientSessionListPage = () => {
         }
     };
 
+    const handleSessionCreationAndUpload = async (event) => {
+        const files = event.target.files;
+
+        if (!files || files.length !== 2) {
+            setMessageType("error");
+            setMessage("Seleziona esattamente 2 file CSV (uno per sEMG e uno per IMU)");
+            return;
+        }
+
+        try {
+            const now = new Date();
+            const formattedDate = now.toISOString().split("T")[0];
+            const formattedTime = now.toTimeString().split(" ")[0];
+
+            const doctorId = localStorage.getItem("userId");
+            if (!doctorId) {
+                setMessageType("error");
+                setMessage("ID medico non trovato. Effettua di nuovo l'accesso.");
+                return;
+            }
+
+            const sessionRes = await axios.post("/smartPhysio/sessions", {
+                date: formattedDate,
+                time: formattedTime,
+                notes: "",
+                patient: id, // da useParams
+                doctor: doctorId
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            const sessionId = sessionRes.data._id;
+
+            console.log(sessionId);
+
+            const formData = new FormData();
+            formData.append("files", files[0]);
+            formData.append("files", files[1]);
+
+            await axios.post(`/smartPhysio/sessions/import/${sessionId}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+
+            setMessageType("success");
+            setMessage("Sessione creata e dati importati con successo");
+            await getPatientSessions();
+        } catch (error) {
+            console.error(error);
+            setMessageType("error");
+            setMessage("Errore durante la creazione della sessione o l'import dei dati");
+        } finally {
+            event.target.value = null; // reset input
+        }
+    };
+
+
+
     useEffect(() => {
         getPatientSessions();
     }, [id]);
@@ -130,6 +192,26 @@ const PatientSessionListPage = () => {
                 </div>
             </div>
 
+            {/* Bottone Upload + input file nascosto */}
+            <div className="upload-session-container">
+                <ButtonModel
+                    buttonText={
+                        <>
+                            <i className="bi bi-upload"></i>
+                        </>
+                    }
+                    onClick={() => document.getElementById("fileUploadInput").click()}
+                />
+                <input
+                    type="file"
+                    id="fileUploadInput"
+                    accept=".csv"
+                    multiple
+                    onChange={handleSessionCreationAndUpload}
+                    style={{ display: "none" }}
+                />
+            </div>
+
             <div className="scrollable">
                 {filteredSessions.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#003344", fontWeight: "bold", padding: "20px" }}>
@@ -150,8 +232,8 @@ const PatientSessionListPage = () => {
                                     <div className="card-left">
                                         <img src="/images/session_list.png" alt="Session" />
                                         <span className="card-name">
-                                            {t("SESSION")} {session.sessionNumber} - {new Date(session.date).toLocaleDateString("it-IT")}
-                                        </span>
+                                        {t("SESSION")} {session.sessionNumber} - {new Date(session.date).toLocaleDateString("it-IT")}
+                                    </span>
                                     </div>
 
                                     <div className="card-right">
@@ -171,7 +253,7 @@ const PatientSessionListPage = () => {
                                             className="card-action"
                                             onClick={() =>
                                                 navigate(`/session/analysis/${session._id}`, {
-                                                    state: { patientId: id } // id viene da useParams()
+                                                    state: { patientId: id }
                                                 })
                                             }
                                         >
@@ -218,6 +300,7 @@ const PatientSessionListPage = () => {
             )}
         </div>
     );
+
 };
 
 export default PatientSessionListPage;

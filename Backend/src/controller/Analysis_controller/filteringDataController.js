@@ -2,25 +2,23 @@ const filteringServices = require('../../services/Analysis_services/filteringDat
 const path = require('path');
 const fs = require('fs');
 
-
-
-function parseBool(value) {
-    return value === true || value === 'true';
+function ensureSourceExistsOrWorking(csvPath, sessionId, dataType) {
+    const workDir = process.env.SMARTPHYSIO_WORKDIR || 'data_work';
+    const parquetPath = path.join(path.resolve(__dirname, '../../../../'), workDir, `${sessionId}_${dataType}.parquet`);
+    if (!fs.existsSync(csvPath) && !fs.existsSync(parquetPath)) {
+        return { ok: false, msg: `Sorgente non trovata: né CSV (${csvPath}) né Parquet (${parquetPath})` };
+    }
+    return { ok: true };
 }
 
 const lowPassFilter = async (req, res) => {
     try {
-        const { sessionId, cutoff, order, dataType} = req.body;
-
-        console.log("chiamata pulizia con low filter: param cutoff: " + cutoff + " order: " + order);
-
+        const { sessionId, cutoff, order, dataType } = req.body;
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await filteringServices.lowPassFilter(csvPath, cutoff, order);
         res.json(result);
@@ -31,16 +29,12 @@ const lowPassFilter = async (req, res) => {
 
 const highPassFilter = async (req, res) => {
     try {
-        const { sessionId, cutoff, order, dataType} = req.body;
-
-        console.log("chiamata pulizia con high filter: param cutoff: " + cutoff + " order: " + order);
-
+        const { sessionId, cutoff, order, dataType } = req.body;
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await filteringServices.highPassFilter(csvPath, cutoff, order);
         res.json(result);
@@ -51,16 +45,12 @@ const highPassFilter = async (req, res) => {
 
 const notchFilter = async (req, res) => {
     try {
-        const { sessionId, cutoff, order, dataType} = req.body;
-
-        console.log("chiamata pulizia con notch filter: param cutoff: " + cutoff + " order: " + order);
-
+        const { sessionId, cutoff, order, dataType } = req.body;
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await filteringServices.notchFilter(csvPath, cutoff, order);
         res.json(result);
@@ -69,11 +59,8 @@ const notchFilter = async (req, res) => {
     }
 };
 
-
-
-
 module.exports = {
     lowPassFilter,
     highPassFilter,
-    notchFilter
+    notchFilter,
 };

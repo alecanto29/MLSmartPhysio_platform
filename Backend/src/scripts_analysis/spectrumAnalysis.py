@@ -1,77 +1,59 @@
-import pandas as pd
-import numpy as np
-import sys
-import os
-
+# spectrumAnalysis.py
+import pandas as pd, numpy as np, sys, os, re, json
+from pathlib import Path
 from scipy.fft import fft, fftfreq
+from scipy.signal import welch, detrend
 
-def spectrum_analyzer(df, sampling_rate=1000):
+_RE_CSV = re.compile(r"session_(?P<sid>.+)_(?P<dtype>sEMG|IMU)data\.csv$")
+WORKDIR = Path(os.getenv("SMARTPHYSIO_WORKDIR", "data_work"))
 
-    n_samples = df.shape[0]
-    freqs = fftfreq(n_samples, d=1/sampling_rate)
+def _work_path_from_csv(csv_path: str) -> Path:
+    m = _RE_CSV.search(os.path.basename(csv_path))
+    if not m: return Path(csv_path).with_suffix(".parquet")
+    return WORKDIR / f"{m.group('sid')}_{m.group('dtype')}.parquet"
 
-    result = []
+def spectrum_analyzer(df, fs=1000):
+    out = []
     for ch in df.columns:
         try:
-            # Estrazione del segnale dalla colonna corrente
-            signal = df[ch].values
+            x = df[ch].to_numpy(dtype=float, copy=False)
+            x = detrend(x, type='constant')  # togli DC residua
 
-            # Calcolo della FFT del segnale
-            fft_result = fft(signal)
+            # Welch: finestra Hann, 2048 campioni, 50% overlap
+            f, Pxx = welch(
+                x, fs=fs,
+                window='hann',
+                nperseg=2048,
+                noverlap=1024,
+                detrend=False,
+                scaling='density',        # V^2/Hz
+                return_onesided=True
+            )
 
-            # Considerazione della metà positiva dello spettro
-            fft_half = fft_result[:n_samples // 2]
+            # se preferisci dB:
+            # Pxx = 10*np.log10(Pxx + 1e-20)
 
-            #Calcolo PSD
-            psd = (1 / (sampling_rate * n_samples)) * np.abs(fft_half) ** 2
-
-            # Moltiplica per 2 i valori tranne DC (0 Hz) e Nyquist, per conservare l'energia totale
-            psd[1:-1] *= 2
-
-            # Frequenze corrispondenti alla metà dello spettro
-            freqs_half = freqs[:n_samples // 2]
-
-            result.append({
-                "channel": ch,
-                "frequencies": freqs_half.tolist(),
-                "psd": psd.tolist()
-            })
+            out.append({"channel": ch, "frequencies": f.tolist(), "psd": Pxx.tolist()})
         except Exception as e:
-            print(f"[ERRORE] Calcolo PSD fallito sul canale {ch}: {e}", file=sys.stderr)
-
-    return result
-
+            print(f"[ERRORE] PSD canale {ch}: {e}", file=sys.stderr)
+    return out
 
 if __name__ == "__main__":
+    # STESSA CLI: python spectrumAnalysis.py <csv_path>
     if len(sys.argv) != 2:
-        print("Uso: python spectrumAnalysis.py <csv_path>", file=sys.stderr)
-        sys.exit(1)
-
+        print("Uso: python spectrumAnalysis.py <csv_path>", file=sys.stderr); sys.exit(1)
     csv_path = sys.argv[1]
+    wp = _work_path_from_csv(csv_path)
 
-    if not os.path.exists(csv_path):
-        print(f"[ERRORE] Il file CSV non esiste: {csv_path}", file=sys.stderr)
-        sys.exit(1)
-
-    try:
+    if wp.exists():
+        df = pd.read_parquet(wp)
+    else:
+        if not os.path.exists(csv_path):
+            print(f"[ERRORE] CSV non esiste: {csv_path}", file=sys.stderr); sys.exit(1)
         df = pd.read_csv(csv_path)
-    except Exception as e:
-        print(f"[ERRORE] Lettura CSV fallita: {e}", file=sys.stderr)
-        sys.exit(1)
 
     if df.empty:
-        print("[ERRORE] Il file CSV è vuoto", file=sys.stderr)
-        sys.exit(1)
+        print("[ERRORE] Il file è vuoto", file=sys.stderr); sys.exit(1)
 
-    try:
-        spectrum_data = spectrum_analyzer(df)
-    except Exception as e:
-        print(f"[ERRORE] Errore durante l'analisi spettrale: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    try:
-        import json
-        print(json.dumps(spectrum_data))
-    except Exception as e:
-        print(f"[ERRORE] Output JSON fallito: {e}", file=sys.stderr)
-        sys.exit(1)
+    data = spectrum_analyzer(df)
+    print(json.dumps(data))

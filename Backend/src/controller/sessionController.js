@@ -74,13 +74,14 @@ const exportSessionCSV = async (req, res) => {
 }
 
 const deleteSessionCSV = async (req, res) => {
-    try{
+    try {
         await sessionService.deleteSessionCSV(req.params.sessionId);
-        res.status(200);
-    }catch (error){
-        res.status(500).json({error: error.message});
+        return res.sendStatus(200); // <— invece di res.status(200); senza body
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 const downloadSessionCSV = async (req, res) => {
     try {
@@ -91,7 +92,18 @@ const downloadSessionCSV = async (req, res) => {
     }
 };
 
+const importCSVData = async (req, res) => {
+    try {
+        console.log("🔥 FILES:", req.files);
+        console.log("📦 SESSION ID:", req.params.sessionId);
 
+        await sessionService.importCSVData(req.files, req.params.sessionId);
+        res.status(200).json({ message: "Dati importati con successo" });
+    } catch (err) {
+        console.error("[IMPORT CSV] Errore:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
 
 
 
@@ -104,5 +116,6 @@ module.exports = {
     updateSession,
     exportSessionCSV,
     deleteSessionCSV,
-    downloadSessionCSV
+    downloadSessionCSV,
+    importCSVData
 };

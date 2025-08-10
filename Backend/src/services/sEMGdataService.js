@@ -118,10 +118,39 @@ async function sEMGasCSVexport(sessionID) {
     }
 }
 
+async function savesEMGdataForImport(dataArray, sessionID) {
+    try {
+        const validData = dataArray.filter(entry =>
+            Array.isArray(entry) &&
+            entry.length === 8 &&
+            entry.every(num => typeof num === 'number')
+        );
+
+        if (validData.length === 0) {
+            console.warn("Nessun dato valido da salvare.");
+            return;
+        }
+
+        const BATCH_SIZE = 10000;
+        for (let i = 0; i < validData.length; i += BATCH_SIZE) {
+            const batch = validData.slice(i, i + BATCH_SIZE).map(entry => ({
+                data: entry,
+                sessionId: sessionID
+            }));
+            await sEMGdata.insertMany(batch);
+        }
+
+        console.log(`${validData.length} dati sEMG salvati con successo su MongoDB.`);
+    } catch (error) {
+        console.error("Errore durante il salvataggio dei dati sEMG:", error);
+    }
+}
+
 module.exports = {getAllsEMGdata,
     getAllsEMGdataBySession,
     getDataByChannel,
     deleteAllsEMGdata,
     deleteAllsEMGdataBySession,
     savesEMGdata,
-    sEMGasCSVexport};
+    sEMGasCSVexport,
+    savesEMGdataForImport};

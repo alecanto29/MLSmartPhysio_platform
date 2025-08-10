@@ -1,4 +1,3 @@
-// SessionAnalysisPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import Header from "../../src/AtomicComponents/Header";
 import "../ComponentsCSS/SessionAnalysisPageStyle.css";
@@ -21,7 +20,15 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import DropDownButtonModel from "../AtomicComponents/DropDownButtonModel";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const SessionAnalysisPage = () => {
     const { sessionId } = useParams();
@@ -85,15 +92,23 @@ const SessionAnalysisPage = () => {
         setChartKey(Date.now());
     }, [yAxisRange, channels]);
 
+    // tiene sempre l'ultimo sessionId corrente
     useEffect(() => {
-        const oldSessionId = previousSessionIdRef.current;
-        exportAndFetch();
         previousSessionIdRef.current = sessionId;
+    }, [sessionId]);
+
+// monta: export/fetch; smonta: delete dell'ultimo sessionId
+    useEffect(() => {
+        exportAndFetch(); // parte all'ingresso della pagina
 
         return () => {
-            deleteCSV(oldSessionId);
+            const idToDelete = previousSessionIdRef.current ?? sessionId;
+            if (idToDelete) {
+                // il cleanup non può essere async, ma va bene chiamare la funzione async senza await
+                deleteCSV(idToDelete);
+            }
         };
-    }, [sessionId]);
+    }, []); // <-- importante: vuoto, così il cleanup corre SOLO allo smontaggio
 
     useEffect(() => {
         if (cachedChannels[dataType]) {
@@ -111,28 +126,142 @@ const SessionAnalysisPage = () => {
         else setYAxisRange({ min: -20, max: 20 });
     }, [dataType, normalizationStatus]);
 
+    // --- Downsampling: preserva i picchi (min/max per bucket) ---
+    const downsampleMinMax = (arr, targetLength) => {
+        if (!Array.isArray(arr) || arr.length === 0) return [];
+        if (arr.length <= targetLength) return arr.slice();
+
+        const bucketSize = Math.ceil(arr.length / targetLength);
+        const out = [];
+        for (let i = 0; i < arr.length; i += bucketSize) {
+            let min = Infinity,
+                max = -Infinity;
+            for (let j = i; j < i + bucketSize && j < arr.length; j++) {
+                const v = arr[j];
+                if (v < min) min = v;
+                if (v > max) max = v;
+            }
+            // 2 punti per bucket: min e max → salvano la forma e i picchi
+            out.push(min, max);
+        }
+        return out;
+    };
+
+    // Applica la preview tornata dal backend agli stati UI
+    const applyPreview = (preview, type = dataType) => {
+        if (!preview || !Array.isArray(preview.channels)) return;
+
+        // canali downsamplati già pronti
+        const reduced = preview.channels.map((arr) => (Array.isArray(arr) ? [...arr] : []));
+
+        setChannels(reduced);
+        setCachedChannels((prev) => ({ ...prev, [type]: reduced }));
+
+        // y-range suggerito dal backend (es. dopo normalizzazione)
+        if (
+            preview.yRange &&
+            typeof preview.yRange.min === "number" &&
+            typeof preview.yRange.max === "number"
+        ) {
+            setYAxisRange(preview.yRange);
+            setNormalizationStatus((prev) => ({ ...prev, [type]: true }));
+        }
+    };
+
+    // Numero massimo di punti da mostrare per canale
+    const MAX_POINTS = 3000;
+
+    // Cache per gli assi X: key = length, value = [0..length-1]
+    const xCache = new Map();
+    const getX = (len) => {
+        if (xCache.has(len)) return xCache.get(len);
+        const arr = Array.from({ length: len }, (_, i) => i);
+        xCache.set(len, arr);
+        return arr;
+    };
+
+    // ---- Target massimo di punti per canale nello spettro ----
+    const MAX_SPECTRUM_POINTS = 4000;
+
+    // Binning "min/max per bucket": preserva i picchi (come nel time-domain)
+    const binSpectrumMinMax = (x, y, target = MAX_SPECTRUM_POINTS) => {
+        if (!x || !y || x.length !== y.length) return { x, y };
+        const n = x.length;
+        if (n <= target) return { x: x.slice(), y: y.slice() };
+
+        const bucketSize = Math.ceil(n / target);
+        const bx = [],
+            by = [];
+        for (let i = 0; i < n; i += bucketSize) {
+            let minY = Infinity,
+                maxY = -Infinity;
+            let minXi = -1,
+                maxXi = -1;
+            // troviamo min e max PSD nel bucket
+            for (let j = i; j < i + bucketSize && j < n; j++) {
+                const vy = y[j];
+                if (vy < minY) {
+                    minY = vy;
+                    minXi = j;
+                }
+                if (vy > maxY) {
+                    maxY = vy;
+                    maxXi = j;
+                }
+            }
+            // spingiamo 2 punti (min e max) così i picchi restano visibili
+            if (minXi !== -1) {
+                bx.push(x[minXi]);
+                by.push(y[minXi]);
+            }
+            if (maxXi !== -1 && maxXi !== minXi) {
+                bx.push(x[maxXi]);
+                by.push(y[maxXi]);
+            }
+        }
+        return { x: bx, y: by };
+    };
+
     const fetchParsedCSV = async (type = dataType) => {
         try {
-            const res = await axios.get(`/smartPhysio/sessions/rawcsv/${sessionId}?dataType=${type}`, {
-                responseType: "blob",
-            });
+            const res = await axios.get(
+                `/smartPhysio/sessions/rawcsv/${sessionId}?dataType=${type}`,
+                {
+                    responseType: "blob",
+                }
+            );
+
             const text = await res.data.text();
+
             Papa.parse(text, {
                 header: true,
                 dynamicTyping: true,
+                worker: true, // 🔥 usa il web worker interno
                 complete: (results) => {
-                    const data = results.data;
+                    const rows = results.data;
                     const numChannels = type === "sEMG" ? 8 : 9;
-                    const chData = Array.from({ length: numChannels }, () => []);
-                    data.forEach((row) => {
+
+                    // accumula i canali grezzi
+                    const chDataFull = Array.from({ length: numChannels }, () => []);
+
+                    for (let r = 0; r < rows.length; r++) {
+                        const row = rows[r];
                         for (let i = 0; i < numChannels; i++) {
-                            const val = row[`ch${i + 1}`];
-                            if (!isNaN(val)) chData[i].push(val);
+                            const v = row[`ch${i + 1}`];
+                            if (typeof v === "number" && !Number.isNaN(v)) {
+                                chDataFull[i].push(v);
+                            }
                         }
-                    });
-                    console.log("Dati canali aggiornati:", chData);
-                    setChannels(chData.map((arr) => [...arr]));
-                    setCachedChannels((prev) => ({ ...prev, [type]: chData.map((arr) => [...arr]) }));
+                    }
+
+                    // Sottocampionamento PRIMA di settare lo stato
+                    const reduced = chDataFull.map((arr) => downsampleMinMax(arr, MAX_POINTS));
+
+                    setChannels(reduced.map((a) => [...a])); // copia difensiva
+                    setCachedChannels((prev) => ({ ...prev, [type]: reduced.map((a) => [...a]) }));
+                },
+                error: (err) => {
+                    console.error("Errore parsing CSV:", err);
                 },
             });
         } catch (error) {
@@ -162,38 +291,30 @@ const SessionAnalysisPage = () => {
 
     const handleCleaningExecution = async () => {
         const { methods, params } = cleaningOptions;
-        for (const method in methods) {
-            if (methods[method]) {
-                try {
-                    await axios.post(`/smartPhysio/clean/${method}`, {
-                        sessionId,
-                        dataType,
-                        isNaN: params.isNaN,
-                        isOutliers: params.isOutliers,
-                        outliers_adv: params.outliers_adv,
-                    });
-                    console.log(`Pulizia con ${method} completata`);
-                } catch (error) {
-                    console.error(`Errore durante la pulizia con ${method}:`, error.message);
-                }
-            }
-        }
-        await new Promise((res) => setTimeout(res, 700));
-        await fetchParsedCSV();
 
-        //Se in modalità spettro, aggiorna lo spettro
-        if (isSpectrumMode) {
+        for (const method of Object.keys(methods)) {
+            if (!methods[method]) continue;
             try {
-                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                const { data } = await axios.post(`/smartPhysio/clean/${method}`, {
                     sessionId,
                     dataType,
+                    isNaN: params.isNaN,
+                    isOutliers: params.isOutliers,
+                    outliers_adv: params.outliers_adv,
                 });
-                if (res.data && Array.isArray(res.data)) {
-                    setSpectrumData(res.data);
-                    console.log("🔄 Spettro aggiornato dopo pulizia");
-                } else {
-                    console.warn("Formato dati spettro inatteso:", res.data);
-                }
+                // 🔥 usa la preview tornata dallo script Python (Parquet aggiornato)
+                if (data && data.preview) applyPreview(data.preview);
+                console.log(`Pulizia con ${method} completata`);
+            } catch (error) {
+                console.error(`Errore durante la pulizia con ${method}:`, error.message);
+            }
+        }
+
+        // Se in modalità spettro, ricalcola sul working Parquet
+        if (isSpectrumMode) {
+            try {
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, { sessionId, dataType });
+                if (res.data && Array.isArray(res.data)) setSpectrumData(res.data);
             } catch (err) {
                 console.error("Errore nell'analisi spettro dopo pulizia:", err.message);
             }
@@ -202,77 +323,56 @@ const SessionAnalysisPage = () => {
 
     const handleNormalizationExecution = async () => {
         const { meanMax, standard } = normalizationOptions;
+
         try {
             if (meanMax) {
-                await axios.post(`/smartPhysio/normalize/minmax`, { sessionId, dataType });
-                setYAxisRange({ min: -1, max: 1 });
-                setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
+                const { data } = await axios.post(`/smartPhysio/normalize/minmax`, { sessionId, dataType });
+                if (data && data.preview) applyPreview(data.preview);
             }
             if (standard) {
-                await axios.post(`/smartPhysio/normalize/standard`, { sessionId, dataType });
-                setYAxisRange({ min: 0, max: 1 });
-                setNormalizationStatus((prev) => ({ ...prev, [dataType]: true }));
+                const { data } = await axios.post(`/smartPhysio/normalize/standard`, { sessionId, dataType });
+                if (data && data.preview) applyPreview(data.preview);
             }
             console.log("Normalizzazione completata");
         } catch (err) {
             console.error("Errore Normalization:", err.message);
         }
-        await new Promise((res) => setTimeout(res, 700));
-        await fetchParsedCSV();
 
-        //Se in modalità spettro, aggiorna lo spettro
+        // Se in modalità spettro, ricalcola sul working Parquet
         if (isSpectrumMode) {
             try {
-                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
-                    sessionId,
-                    dataType,
-                });
-                if (res.data && Array.isArray(res.data)) {
-                    setSpectrumData(res.data);
-                    console.log("🔄 Spettro aggiornato dopo normalizzazione");
-                } else {
-                    console.warn("Formato dati spettro inatteso:", res.data);
-                }
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, { sessionId, dataType });
+                if (res.data && Array.isArray(res.data)) setSpectrumData(res.data);
             } catch (err) {
                 console.error("Errore nell'analisi spettro dopo normalizzazione:", err.message);
             }
         }
     };
 
-
     const handleFilteringExecution = async () => {
         const { methods, params } = filteringOptions;
-        for (const method in methods) {
-            if (methods[method]) {
-                try {
-                    await axios.post(`/smartPhysio/filter/${method}`, {
-                        sessionId,
-                        dataType,
-                        cutoff: params[method].cutoff,
-                        order: params[method].order,
-                    });
-                    console.log(`Filtro ${method} applicato`);
-                } catch (err) {
-                    console.error(`Errore filtro ${method}:`, err.message);
-                }
-            }
-        }
-        await new Promise((res) => setTimeout(res, 700));
-        await fetchParsedCSV();
 
-        //se già nel dominio delle frequenze, ricalcola lo spettro
-        if (isSpectrumMode) {
+        for (const method of Object.keys(methods)) {
+            if (!methods[method]) continue;
+
             try {
-                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                const { data } = await axios.post(`/smartPhysio/filter/${method}`, {
                     sessionId,
                     dataType,
+                    cutoff: params[method].cutoff,
+                    order: params[method].order,
                 });
-                if (res.data && Array.isArray(res.data)) {
-                    setSpectrumData(res.data);
-                    console.log("🔄 Spettro aggiornato dopo filtraggio");
-                } else {
-                    console.warn("Formato dati spettro inatteso:", res.data);
-                }
+                if (data && data.preview) applyPreview(data.preview);
+                console.log(`Filtro ${method} applicato`);
+            } catch (err) {
+                console.error(`Errore filtro ${method}:`, err.message);
+            }
+        }
+
+        if (isSpectrumMode) {
+            try {
+                const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, { sessionId, dataType });
+                if (res.data && Array.isArray(res.data)) setSpectrumData(res.data);
             } catch (err) {
                 console.error("Errore nell'analisi spettro dopo filtro:", err.message);
             }
@@ -302,12 +402,14 @@ const SessionAnalysisPage = () => {
         }
     };
 
-
     const handleDownloadAnalysis = async () => {
         try {
-            const response = await axios.get(`/smartPhysio/sessions/download/${sessionId}/${dataType}`, {
-                responseType: "blob",
-            });
+            const response = await axios.get(
+                `/smartPhysio/sessions/download/${sessionId}/${dataType}`,
+                {
+                    responseType: "blob",
+                }
+            );
             const blob = new Blob([response.data], { type: "text/csv" });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -326,20 +428,24 @@ const SessionAnalysisPage = () => {
     };
 
     const renderTimeDomainCharts = () =>
-        channels.map((data, i) => {
-            const yData = data;
-            const xData = Array.from({ length: yData.length }, (_, i) => i);
+        channels.map((yData, i) => {
+            const xData = getX(yData.length); // riusa la cache
+
             return (
                 <div key={i} className="graph-container">
-                    <h4>{t("CHANNEL")} {i + 1}</h4>
+                    <h4>
+                        {t("CHANNEL")} {i + 1}
+                    </h4>
                     <Plot
-                        data={[{
-                            x: xData,
-                            y: yData,
-                            type: "scattergl",
-                            mode: "lines",
-                            line: { color: "rgba(54, 162, 235, 1)", width: 1 },
-                        }]}
+                        data={[
+                            {
+                                x: xData,
+                                y: yData,
+                                type: "scattergl",
+                                mode: "lines",
+                                line: { color: "rgba(54, 162, 235, 1)", width: 1 },
+                            },
+                        ]}
                         layout={{
                             width: 1100,
                             height: 300,
@@ -367,32 +473,48 @@ const SessionAnalysisPage = () => {
         });
 
     const renderSpectrumCharts = () =>
-        spectrumData.map((channelData, i) => (
-            <div key={i} className="graph-container">
-                <h4>{t("CHANNEL")} {i + 1}</h4>
-                <Plot
-                    data={[{
-                        x: channelData.frequencies,
-                        y: channelData.psd, // <-- usa il PSD qui
-                        type: "scattergl",
-                        mode: "lines",
-                        line: { color: "rgba(255, 99, 132, 1)", width: 1 },
-                    }]}
-                    layout={{
-                        width: 1100,
-                        height: 300,
-                        margin: { l: 50, r: 30, b: 40, t: 30 },
-                        title: "",
-                        xaxis: { title: "Frequency (Hz)", showgrid: false },
-                        yaxis: { title: "Power Spectral Density", showgrid: false }, // <-- titolo corretto asse Y
-                    }}
-                    config={{ displayModeBar: false, responsive: true }}
-                />
-            </div>
-        ));
+        spectrumData.map((channelData, i) => {
+            const fx = channelData?.frequencies || [];
+            const fy = channelData?.psd || [];
 
+            // 🔻 Binning se i punti sono tanti
+            // Usa min/max (consigliato per PSD) o mean, come preferisci:
+            const { x, y } =
+                fx.length > MAX_SPECTRUM_POINTS
+                    ? binSpectrumMinMax(fx, fy, MAX_SPECTRUM_POINTS) // oppure binSpectrumMean(fx, fy, MAX_SPECTRUM_POINTS)
+                    : { x: fx, y: fy };
 
-
+            return (
+                <div key={i} className="graph-container">
+                    <h4>
+                        {t("CHANNEL")} {i + 1}
+                    </h4>
+                    <Plot
+                        data={[
+                            {
+                                x,
+                                y,
+                                type: "scattergl",
+                                mode: "lines",
+                                line: { color: "rgba(255, 99, 132, 1)", width: 1 },
+                            },
+                        ]}
+                        layout={{
+                            width: 1100,
+                            height: 300,
+                            margin: { l: 50, r: 30, b: 40, t: 30 },
+                            title: "",
+                            xaxis: { title: "Frequency (Hz)", showgrid: false },
+                            // Se preferisci scala log: yaxis: { type: "log", title: "PSD", showgrid: false }
+                            yaxis: { title: "Power Spectral Density", showgrid: false },
+                        }}
+                        config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
+                        useResizeHandler
+                        style={{ width: "100%", height: "300px" }}
+                    />
+                </div>
+            );
+        });
 
     const renderSectionContent = (section) => {
         switch (section) {
@@ -403,17 +525,20 @@ const SessionAnalysisPage = () => {
                         <div className="cleaning-methods">
                             {["mean", "ffill", "median", "bfill"].map((key) => (
                                 <label key={key}>
-                                    {key === "mean" ? t("CLEANING_MEDIAN") :
-                                        key === "ffill" ? t("CLEANING_LINEAR_PREVIUOS") :
-                                            key === "median" ? t("CLEANING_MEDIAN") :
-                                                t("CLEANING_LINEAR_NEXT")}
+                                    {key === "mean"
+                                        ? t("CLEANING_MEDIAN")
+                                        : key === "ffill"
+                                            ? t("CLEANING_LINEAR_PREVIUOS")
+                                            : key === "median"
+                                                ? t("CLEANING_MEDIAN")
+                                                : t("CLEANING_LINEAR_NEXT")}
                                     <input
                                         type="checkbox"
                                         checked={cleaningOptions.methods[key]}
                                         onChange={() =>
                                             setCleaningOptions((prev) => ({
                                                 ...prev,
-                                                methods: { ...prev.methods, [key]: !prev.methods[key] }
+                                                methods: { ...prev.methods, [key]: !prev.methods[key] },
                                             }))
                                         }
                                     />
@@ -435,7 +560,7 @@ const SessionAnalysisPage = () => {
                                         onChange={() =>
                                             setCleaningOptions((prev) => ({
                                                 ...prev,
-                                                params: { ...prev.params, [key]: !prev.params[key] }
+                                                params: { ...prev.params, [key]: !prev.params[key] },
                                             }))
                                         }
                                     />
@@ -452,14 +577,16 @@ const SessionAnalysisPage = () => {
                         <div className="normalization-methods">
                             {["meanMax", "standard"].map((key) => (
                                 <label key={key}>
-                                    {key === "meanMax" ? t("NORMALIZATION_MIN_MAX_SCALING") : t("NORMALIZATION_STANDARD_SCALING")}
+                                    {key === "meanMax"
+                                        ? t("NORMALIZATION_MIN_MAX_SCALING")
+                                        : t("NORMALIZATION_STANDARD_SCALING")}
                                     <input
                                         type="checkbox"
                                         checked={normalizationOptions[key]}
                                         onChange={() =>
                                             setNormalizationOptions((prev) => ({
                                                 ...prev,
-                                                [key]: !prev[key]
+                                                [key]: !prev[key],
                                             }))
                                         }
                                     />
@@ -475,7 +602,6 @@ const SessionAnalysisPage = () => {
                         <div className="filtering-row filtering-header">
                             <strong>{t("METHODS")}: </strong>
                             <strong>{t("PARAMETERS")}:</strong>
-
                         </div>
 
                         {[
@@ -492,7 +618,7 @@ const SessionAnalysisPage = () => {
                                         onChange={() =>
                                             setFilteringOptions((prev) => ({
                                                 ...prev,
-                                                methods: { ...prev.methods, [key]: !prev.methods[key] }
+                                                methods: { ...prev.methods, [key]: !prev.methods[key] },
                                             }))
                                         }
                                     />
@@ -509,9 +635,9 @@ const SessionAnalysisPage = () => {
                                                     ...prev.params,
                                                     [key]: {
                                                         ...prev.params[key],
-                                                        [k1]: Number(e.target.value)
-                                                    }
-                                                }
+                                                        [k1]: Number(e.target.value),
+                                                    },
+                                                },
                                             }))
                                         }
                                     />
@@ -528,9 +654,9 @@ const SessionAnalysisPage = () => {
                                                     ...prev.params,
                                                     [key]: {
                                                         ...prev.params[key],
-                                                        [k2]: Number(e.target.value)
-                                                    }
-                                                }
+                                                        [k2]: Number(e.target.value),
+                                                    },
+                                                },
                                             }))
                                         }
                                     />
@@ -540,7 +666,6 @@ const SessionAnalysisPage = () => {
                     </div>
                 );
 
-
             default:
                 return null;
         }
@@ -549,13 +674,12 @@ const SessionAnalysisPage = () => {
     const sections = [
         { key: "cleaning", label: t("CLEANING_DROP_MENU"), action: handleCleaningExecution },
         { key: "normalization", label: t("NORMALIZATION_DROP_MENU"), action: handleNormalizationExecution },
-        { key: "filtering", label: t("FILTERING_DROP_MENU"), action: handleFilteringExecution }
+        { key: "filtering", label: t("FILTERING_DROP_MENU"), action: handleFilteringExecution },
     ];
 
     const isAnyOpen = Object.values(openSections).some(Boolean);
 
     return (
-
         <div className="session-analysis-container">
             <Header />
             <div className="session-title-fixed">
@@ -569,23 +693,49 @@ const SessionAnalysisPage = () => {
                         items={[
                             isSpectrumMode ? t("RETURN_TIME_DOMAIN") : t("SPECTRUM_ANALYSIS_BUTTON"),
                             t("DOWNLOAD_CSV_BUTTON"),
-                            t("RESET_CSV_BUTTON")
+                            t("RESET_CSV_BUTTON"),
                         ]}
-                        onItemClick={(item) => {
-                            if (item === t("SPECTRUM_ANALYSIS_BUTTON") || item === t("RETURN_TIME_DOMAIN")) {
+                        onItemClick={async (item) => {
+                            // <<< async qui
+                            if (
+                                item === t("SPECTRUM_ANALYSIS_BUTTON") ||
+                                item === t("RETURN_TIME_DOMAIN")
+                            ) {
                                 handleToggleSpectrum();
                             } else if (item === t("DOWNLOAD_CSV_BUTTON")) {
                                 handleDownloadAnalysis();
                             } else if (item === t("RESET_CSV_BUTTON")) {
+                                // reset time-domain (com’era già)
                                 setCachedChannels((prev) => ({ ...prev, [dataType]: null }));
                                 setYAxisRangeMap((prev) => ({
                                     ...prev,
-                                    [dataType]: dataType === "sEMG"
-                                        ? { min: 0, max: 4 }
-                                        : { min: -20, max: 20 }
+                                    [dataType]:
+                                        dataType === "sEMG" ? { min: 0, max: 4 } : { min: -20, max: 20 },
                                 }));
                                 setNormalizationStatus((prev) => ({ ...prev, [dataType]: false }));
-                                exportAndFetch(dataType);
+
+                                await deleteCSV(sessionId);
+                                // ricarica CSV iniziale
+                                await exportAndFetch(dataType);
+
+                                // *** NUOVO: se sei in spettro, azzera e ricalcola lo spettro iniziale ***
+                                if (isSpectrumMode) {
+                                    setSpectrumData([]); // pulizia immediata UI
+                                    try {
+                                        const res = await axios.post(`/smartPhysio/spectrum/spectrumAnalysis`, {
+                                            sessionId,
+                                            dataType,
+                                        });
+                                        if (res.data && Array.isArray(res.data)) {
+                                            setSpectrumData(res.data); // spettro “originale” dopo il reset
+                                        }
+                                    } catch (err) {
+                                        console.error(
+                                            "Errore ricalcolo spettro dopo reset:",
+                                            err.message
+                                        );
+                                    }
+                                }
                             }
                         }}
                         className="session-options-dropdown"
@@ -593,23 +743,23 @@ const SessionAnalysisPage = () => {
 
                     <DropDownButtonModel
                         buttonText={
-                            [{ label: t("SEMG_DATA"), value: "sEMG" }, { label: t("IMU_DATA"), value: "IMU" }]
-                                .find((i) => i.value === dataType)?.label ?? "Select"
+                            [
+                                { label: t("SEMG_DATA"), value: "sEMG" },
+                                { label: t("IMU_DATA"), value: "IMU" },
+                            ].find((i) => i.value === dataType)?.label ?? "Select"
                         }
                         items={[
                             { label: t("SEMG_DATA"), value: "sEMG" },
-                            { label: t("IMU_DATA"), value: "IMU" }
+                            { label: t("IMU_DATA"), value: "IMU" },
                         ]}
                         onItemClick={(item) => setDataType(item.value)}
                         className="session-data-dropdown"
                     />
-
                 </div>
             </div>
 
             <div className="scrollable-content">
                 <div className="session-analysis-content">
-
                     <div className="menu-container">
                         <div className={`accordion-wrapper ${isAnyOpen ? "expanded" : ""}`}>
                             {sections.map((section) => (
@@ -625,7 +775,9 @@ const SessionAnalysisPage = () => {
                                             </button>
                                         )}
                                         <button
-                                            className={`accordion-button ${openSections[section.key] ? "active" : ""}`}
+                                            className={`accordion-button ${
+                                                openSections[section.key] ? "active" : ""
+                                            }`}
                                             onClick={() => toggleSection(section.key)}
                                         >
                                             {section.label}
@@ -650,26 +802,28 @@ const SessionAnalysisPage = () => {
 
                     <div className="charts-container">
                         <h3 className={`graph-title ${isAnyOpen ? "expanded" : "collapsed"}`}>
-                            {dataType === "sEMG" ? t("GRAPH_TITLE_SEMG") : t("GRAPH_TITLE_IMU")}
+                            {dataType === "sEMG"
+                                ? t("GRAPH_TITLE_SEMG")
+                                : t("GRAPH_TITLE_IMU")}
                         </h3>
                         <div className="charts-wrapper">
                             {isSpectrumMode ? renderSpectrumCharts() : renderTimeDomainCharts()}
                         </div>
                     </div>
-
                 </div>
             </div>
 
             <div
                 className="back-icon-container"
-                onClick={() => navigate(`/patient-session/${patientId}`)}
+                onClick={async () => {
+                    await deleteCSV(sessionId);
+                    navigate(`/patient-session/${patientId}`);
+                }}
             >
                 <i className="bi bi-arrow-left"></i>
             </div>
         </div>
-
     );
-
 };
 
 export default SessionAnalysisPage;

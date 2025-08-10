@@ -58,6 +58,7 @@ const RegistrationPage = () => {
 
             const decoded = JSON.parse(atob(token.split('.')[1]));
             localStorage.setItem("doctorName", `${decoded.name} ${decoded.surname}`);
+            localStorage.setItem("userId", decoded._id); // Salva l'ID del medico
 
             setMessage(t("SUCCESSFULLY_SIGNED_UP"));
             setMessageType("success");

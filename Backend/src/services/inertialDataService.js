@@ -119,6 +119,34 @@ async function InertialasCSVexport(sessionID) {
     }
 }
 
+async function saveInertialDataForImport(dataArray, sessionID) {
+    try {
+        const validData = dataArray.filter(entry =>
+            Array.isArray(entry) &&
+            entry.length === 9 &&
+            entry.every(num => typeof num === 'number')
+        );
+
+        if (validData.length === 0) {
+            console.warn("Nessun dato valido da salvare.");
+            return;
+        }
+
+        const BATCH_SIZE = 10000;
+        for (let i = 0; i < validData.length; i += BATCH_SIZE) {
+            const batch = validData.slice(i, i + BATCH_SIZE).map(entry => ({
+                data: entry,
+                sessionId: sessionID
+            }));
+            await inertialData.insertMany(batch);
+        }
+
+        console.log(`${validData.length} dati IMU salvati con successo su MongoDB.`);
+    } catch (error) {
+        console.error("Errore durante il salvataggio dei dati IMU:", error);
+    }
+}
+
 
 
 module.exports = {
@@ -128,5 +156,6 @@ module.exports = {
     deleteAllInertialData,
     deleteAllInertialDataBySession,
     saveInertialData,
-    InertialasCSVexport
+    InertialasCSVexport,
+    saveInertialDataForImport
 }

@@ -42,6 +42,7 @@ const LoginPage = () => {
             const decoded = JSON.parse(atob(token.split('.')[1]));
             console.log("Decoded JWT:", decoded);
             localStorage.setItem("doctorName", `${decoded.name} ${decoded.surname}`);
+            localStorage.setItem("userId", decoded._id); // Salva l'ID del medico
 
             setMessageType("success");
             setMessage(t("SUCCESSFULLY_LOGIN"));

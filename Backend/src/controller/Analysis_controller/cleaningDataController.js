@@ -2,25 +2,27 @@ const cleaningService = require('../../services/Analysis_services/cleaningDataSe
 const path = require('path');
 const fs = require('fs');
 
-
-
 function parseBool(value) {
     return value === true || value === 'true';
+}
+
+function ensureSourceExistsOrWorking(csvPath, sessionId, dataType) {
+    const workDir = process.env.SMARTPHYSIO_WORKDIR || 'data_work';
+    const parquetPath = path.join(path.resolve(__dirname, '../../../../'), workDir, `${sessionId}_${dataType}.parquet`);
+    if (!fs.existsSync(csvPath) && !fs.existsSync(parquetPath)) {
+        return { ok: false, msg: `Sorgente non trovata: né CSV (${csvPath}) né Parquet (${parquetPath})` };
+    }
+    return { ok: true };
 }
 
 const cleanWithMean = async (req, res) => {
     try {
         const { sessionId, isNaN, isOutliers, outliers_adv, dataType } = req.body;
-
-        console.log("chiamata pulizia con mean: param isNaN: " + isNaN + " ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
-
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await cleaningService.cleanWithMean(csvPath, isNaN, isOutliers, outliers_adv, dataType);
         res.json(result);
@@ -32,14 +34,11 @@ const cleanWithMean = async (req, res) => {
 const cleanWithMedian = async (req, res) => {
     try {
         const { sessionId, isNaN, isOutliers, outliers_adv, dataType } = req.body;
-
-        console.log("chiamata pulizia con median: param isNaN: " + isNaN + "ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await cleaningService.cleanWithMedian(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv), dataType);
         res.json(result);
@@ -51,13 +50,11 @@ const cleanWithMedian = async (req, res) => {
 const cleanWithForwardFill = async (req, res) => {
     try {
         const { sessionId, isNaN, isOutliers, outliers_adv, dataType } = req.body;
-        console.log("chiamata pulizia con ffill: param isNaN: " + isNaN + "ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await cleaningService.cleanWithForwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv), dataType);
         res.json(result);
@@ -69,13 +66,11 @@ const cleanWithForwardFill = async (req, res) => {
 const cleanWithBackwardFill = async (req, res) => {
     try {
         const { sessionId, isNaN, isOutliers, outliers_adv, dataType } = req.body;
-        console.log("chiamata pulizia con bfill: param isNaN: " + isNaN + "ouliers: " + isOutliers + " adv_outliers: " + outliers_adv);
         const rootPath = path.resolve(__dirname, '../../../../');
         const csvPath = path.join(rootPath, 'tmp', `session_${sessionId}_${dataType}data.csv`);
 
-        if (!fs.existsSync(csvPath)) {
-            return res.status(500).json({ error: `Il file CSV non esiste: ${csvPath}` });
-        }
+        const check = ensureSourceExistsOrWorking(csvPath, sessionId, dataType);
+        if (!check.ok) return res.status(500).json({ error: check.msg });
 
         const result = await cleaningService.cleanWithBackwardFill(csvPath, parseBool(isNaN), parseBool(isOutliers), parseBool(outliers_adv), dataType);
         res.json(result);
@@ -84,10 +79,9 @@ const cleanWithBackwardFill = async (req, res) => {
     }
 };
 
-
 module.exports = {
     cleanWithMean,
     cleanWithMedian,
     cleanWithForwardFill,
-    cleanWithBackwardFill
+    cleanWithBackwardFill,
 };
