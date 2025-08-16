@@ -216,6 +216,54 @@ const importCSVData = async (files, sessionId) => {
     fs.unlinkSync(file2.path);
 };
 
+function downsampleMinMax(arr, targetLength) {
+    if (!Array.isArray(arr) || arr.length === 0) return [];
+    if (arr.length <= targetLength) return arr.slice();
+
+    const bucketSize = Math.ceil(arr.length / targetLength);
+    const out = [];
+
+    for (let i = 0; i < arr.length; i += bucketSize) {
+        let min = Infinity, max = -Infinity;
+        for (let j = i; j < i + bucketSize && j < arr.length; j++) {
+            const v = arr[j];
+            if (v < min) min = v;
+            if (v > max) max = v;
+        }
+        out.push(min, max); // min e max per ogni bucket
+    }
+
+    return out;
+}
+
+const buildFastPreview = async (sessionID, dataType = "sEMG", maxPoints = 3000, sampleLimit = 100000) => {
+    const Model = dataType === "sEMG" ? sEMGdata : inertialData;
+    const numChannels = dataType === "sEMG" ? 8 : 9;
+
+    // Prendiamo SOLO i primi N documenti per avere “first paint” rapidissimo:
+    const cursor = Model.find({ sessionId: sessionID }, { data: 1, _id: 0 })
+        .lean()
+        .limit(sampleLimit)
+        .cursor();
+
+    const cols = Array.from({ length: numChannels }, () => []);
+    for await (const doc of cursor) {
+        const arr = doc.data;
+        for (let i = 0; i < numChannels; i++) {
+            const v = dataType === "sEMG" ? (arr[i] / 4096) * 3.3 : arr[i];
+            cols[i].push(v);
+        }
+    }
+
+    const channels = cols.map(ch => downsampleMinMax(ch, maxPoints));
+
+    let yMin = Infinity, yMax = -Infinity;
+    for (const ch of channels) for (const v of ch) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+
+    const yRange = dataType === "sEMG" ? { min: 0, max: 4 } : { min: yMin, max: yMax };
+    return { channels, yRange };
+};
+
 module.exports = {
     getSession,
     getSessionByID,
@@ -226,5 +274,6 @@ module.exports = {
     exportSessionCSV,
     deleteSessionCSV,
     downloadSessionCSV,
-    importCSVData
+    importCSVData,
+    buildFastPreview
 };

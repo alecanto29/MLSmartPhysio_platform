@@ -97,18 +97,45 @@ const SessionAnalysisPage = () => {
         previousSessionIdRef.current = sessionId;
     }, [sessionId]);
 
-// monta: export/fetch; smonta: delete dell'ultimo sessionId
+// monta: PREVIEW veloce dal DB (no CSV) + avvio export CSV in parallelo
     useEffect(() => {
-        exportAndFetch(); // parte all'ingresso della pagina
+        let canceled = false;
+        const currentType = dataType; // inizialmente 'sEMG'
+
+        (async () => {
+            // 1) prova preview istantanea (DB -> downsample -> JSON)
+            try {
+                const { data: prev } = await axios.get(
+                    `/smartPhysio/sessions/preview/${sessionId}`,
+                    { params: { dataType: currentType, maxPoints: 3000, sampleLimit: 100000 } }
+                );
+
+                if (!canceled && prev?.channels) {
+                    applyPreview(prev, currentType);
+                } else {
+                    // fallback se preview non disponibile
+                    await fetchParsedCSV(currentType);
+                }
+            } catch (e) {
+                console.warn("Preview veloce fallita, fallback CSV:", e.message);
+                await fetchParsedCSV(currentType);
+            }
+
+            // 2) avvia export CSV in background (NO await)
+            axios.post(`/smartPhysio/sessions/export/${sessionId}`, { dataType: currentType })
+                .catch(err => console.warn("Export CSV async fallito:", err.message));
+        })();
 
         return () => {
+            canceled = true;
             const idToDelete = previousSessionIdRef.current ?? sessionId;
             if (idToDelete) {
-                // il cleanup non può essere async, ma va bene chiamare la funzione async senza await
+                // non serve await nel cleanup
                 deleteCSV(idToDelete);
             }
         };
-    }, []); // <-- importante: vuoto, così il cleanup corre SOLO allo smontaggio
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // deps vuote: esegue solo al mount
 
     useEffect(() => {
         if (cachedChannels[dataType]) {
@@ -226,9 +253,7 @@ const SessionAnalysisPage = () => {
         try {
             const res = await axios.get(
                 `/smartPhysio/sessions/rawcsv/${sessionId}?dataType=${type}`,
-                {
-                    responseType: "blob",
-                }
+                { responseType: "blob" }
             );
 
             const text = await res.data.text();
@@ -258,16 +283,25 @@ const SessionAnalysisPage = () => {
                     const reduced = chDataFull.map((arr) => downsampleMinMax(arr, MAX_POINTS));
 
                     setChannels(reduced.map((a) => [...a])); // copia difensiva
-                    setCachedChannels((prev) => ({ ...prev, [type]: reduced.map((a) => [...a]) }));
+                    setCachedChannels((prev) => ({
+                        ...prev,
+                        [type]: reduced.map((a) => [...a]),
+                    }));
                 },
                 error: (err) => {
                     console.error("Errore parsing CSV:", err);
                 },
             });
         } catch (error) {
+            if (error?.response?.status === 404) {
+                // CSV non ancora pronto → log “soft”
+                console.info(`[CSV] Non pronto per sessionId=${sessionId}, tipo=${type}`);
+                return; // esci senza errore
+            }
             console.error("Errore nel fetch del CSV:", error.message);
         }
     };
+
 
     const exportAndFetch = async (type = dataType) => {
         try {

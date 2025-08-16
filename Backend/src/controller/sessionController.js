@@ -105,6 +105,21 @@ const importCSVData = async (req, res) => {
     }
 };
 
+const fastPreview = async (req, res) => {
+    try {
+        const { dataType = "sEMG", maxPoints = 3000, sampleLimit = 100000 } = req.query;
+        const result = await sessionService.buildFastPreview(
+            req.params.sessionId,
+            String(dataType),
+            Number(maxPoints),
+            Number(sampleLimit)
+        );
+        res.status(200).json(result); // { channels:[...], yRange:{min,max} }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
 
 
 module.exports = {
@@ -117,5 +132,6 @@ module.exports = {
     exportSessionCSV,
     deleteSessionCSV,
     downloadSessionCSV,
-    importCSVData
+    importCSVData,
+    fastPreview
 };

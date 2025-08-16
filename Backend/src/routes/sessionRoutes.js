@@ -13,6 +13,7 @@ const upload = multer({
 
 // Rotte protette da auth
 router.get("/", auth, sessionController.getSession);
+router.get("/preview/:sessionId", sessionController.fastPreview);
 router.get("/:id", auth, sessionController.getSessionByID);
 router.get("/patient/:id", auth, sessionController.getPatientSessionById);
 router.post("/", auth, sessionController.createSession);
@@ -29,18 +30,22 @@ router.get('/download/:sessionId/:dataType', sessionController.downloadSessionCS
 
 // CSV raw access (debug o download diretto)
 router.get("/rawcsv/:sessionId", (req, res) => {
-    const {sessionId} = req.params;
-    const {dataType} = req.query;
+    const { sessionId } = req.params;
+    const { dataType } = req.query;
 
     if (!dataType || !["sEMG", "IMU"].includes(dataType)) {
         return res.status(400).send("'dataType' mancante o non valido (usa 'sEMG' o 'IMU')");
     }
 
-    const filePath = path.join(__dirname, "../../../tmp", `session_${sessionId}_${dataType}data.csv`);
+    const filePath = path.join(
+        __dirname,
+        "../../../tmp",
+        `session_${sessionId}_${dataType}data.csv`
+    );
 
     if (!fs.existsSync(filePath)) {
-        console.warn(`CSV non trovato: ${filePath}`);
-        return res.status(404).send("CSV non trovato");
+        console.warn(`[RAWCSV] CSV mancante per sessionId=${sessionId}, tipo=${dataType} -> ${filePath}`);
+        return res.status(404).send("CSV non ancora pronto, riprova più tardi");
     }
 
     res.sendFile(filePath);
