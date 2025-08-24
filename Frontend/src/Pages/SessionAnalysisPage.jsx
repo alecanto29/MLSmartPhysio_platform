@@ -156,23 +156,37 @@ const SessionAnalysisPage = () => {
     // --- Downsampling: preserva i picchi (min/max per bucket) ---
     const downsampleMinMax = (arr, targetLength) => {
         if (!Array.isArray(arr) || arr.length === 0) return [];
-        if (arr.length <= targetLength) return arr.slice();
+        const n = arr.length;
+        if (n <= targetLength) return arr.slice();
 
-        const bucketSize = Math.ceil(arr.length / targetLength);
         const out = [];
-        for (let i = 0; i < arr.length; i += bucketSize) {
-            let min = Infinity,
-                max = -Infinity;
-            for (let j = i; j < i + bucketSize && j < arr.length; j++) {
+        for (let k = 0; k < targetLength; k++) {
+            const start = Math.floor((k * n) / targetLength);
+            const end   = Math.floor(((k + 1) * n) / targetLength);
+            let min = Infinity, max = -Infinity, iMin = -1, iMax = -1;
+
+            for (let j = start; j < end; j++) {
                 const v = arr[j];
-                if (v < min) min = v;
-                if (v > max) max = v;
+                if (v < min) { min = v; iMin = j; }
+                if (v > max) { max = v; iMax = j; }
             }
-            // 2 punti per bucket: min e max → salvano la forma e i picchi
-            out.push(min, max);
+            if (iMin === -1) continue;             // bucket vuoto (raro)
+            // emetti in ordine temporale
+            if (iMin <= iMax) {
+                out.push(min);
+                if (iMax !== iMin) out.push(max);
+            } else {
+                out.push(max);
+                out.push(min);
+            }
         }
+        // opzionale: garantisci in/out
+        if (out.length && out[0] !== arr[0]) out[0] = arr[0];
+        if (out.length > 1 && out[out.length - 1] !== arr[n - 1]) out[out.length - 1] = arr[n - 1];
+
         return out;
     };
+
 
     // Applica la preview tornata dal backend agli stati UI
     const applyPreview = (preview, type = dataType) => {

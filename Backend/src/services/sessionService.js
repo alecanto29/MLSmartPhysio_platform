@@ -1,33 +1,26 @@
+// src/services/sessionService.js
 const sessionModel = require("../models/Session");
 const patientModel = require("../models/Patient");
-const sEMGdata = require('../models/sEMGdataModel');
-const inertialData = require('../models/inertialDataModel');
+const sEMGdata = require("../models/sEMGdataModel");
+const inertialData = require("../models/inertialDataModel");
 const sEMGservice = require("../services/sEMGdataService");
 const imuService = require("../services/inertialDataService");
 
-const csv = require('csv-parser');
+const csv = require("csv-parser");
+const fs = require("fs");
+const path = require("path");
+const { Parser } = require("json2csv");
 
-const fs = require('fs');
-const path = require('path');
-const { Parser } = require('json2csv');
-
+// ------------------ Sessioni base ------------------
 const getSession = async (doctorID) => {
     return await sessionModel.find({ doctor: doctorID });
-}
+};
 
 const getSessionByID = async (sessionID, doctorID) => {
-    console.log("getSessionByID - Cerco sessione con:", { sessionID, doctorID });
-
     const result = await sessionModel
         .findOne({ doctor: doctorID, _id: sessionID })
         .populate("patient", "name surname")
         .populate("doctor", "name surname");
-
-    if (!result) {
-        console.warn("Nessuna sessione trovata con questi criteri!");
-    } else {
-        console.log("Sessione trovata:", result);
-    }
 
     return result;
 };
@@ -35,76 +28,76 @@ const getSessionByID = async (sessionID, doctorID) => {
 // ritorna tutte le sessioni di un paziente in carico ad un dottore
 const getPatientSessionById = async (patientID, doctorID) => {
     return await sessionModel.find({ doctor: doctorID, patient: patientID });
-}
+};
 
 const createSession = async (sessionData, doctorId) => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    const formattedDate = today.toISOString().split("T")[0]; // "YYYY-MM-DD"
 
     const newSession = new sessionModel({
         patient: sessionData.patient,
         data: [],
         doctor: doctorId,
         time: today,
-        date: formattedDate
+        date: formattedDate,
     });
 
     await newSession.save();
 
     await patientModel.findByIdAndUpdate(sessionData.patient, {
-        $push: { sessions: newSession._id }
+        $push: { sessions: newSession._id },
     });
 
     return newSession;
 };
 
 const updateSession = async (newSessionData, doctorID, sessionID) => {
-    console.log("Ricevuto per update:", { newSessionData, doctorID, sessionID });
-
     const targetSession = await getSessionByID(sessionID, doctorID);
-
-    if (!targetSession) {
-        throw new Error("Paziente non trovato o non autorizzato");
-    }
+    if (!targetSession) throw new Error("Paziente non trovato o non autorizzato");
 
     targetSession.notes = newSessionData.notes;
-
     await targetSession.save();
     return targetSession;
-}
+};
 
 const deleteSessionById = async (sessionID, doctorID) => {
     const session = await sessionModel.findOneAndDelete({
         _id: sessionID,
-        doctor: doctorID
+        doctor: doctorID,
     });
 
     if (session) {
-        // Rimuove la sessione anche dal paziente
         await patientModel.findByIdAndUpdate(session.patient, {
-            $pull: { sessions: sessionID }
+            $pull: { sessions: sessionID },
         });
     }
 
     return session;
 };
 
+// ------------------ CSV: export / delete / download ------------------
 const exportSessionCSV = async (sessionID) => {
     try {
         console.log(`[EXPORT CSV] Avvio esportazione per sessione: ${sessionID}`);
 
-        const SEMGdata = await sEMGdata.find({ sessionId: sessionID }).lean();
-        const IMUdata = await inertialData.find({ sessionId: sessionID }).lean();
+        // ➜ ORDINE CRONOLOGICO GARANTITO
+        const SEMGdata = await sEMGdata
+            .find({ sessionId: sessionID }, { data: 1, _id: 1 })
+            .sort({ _id: 1 })
+            .lean();
 
-        console.log(`[EXPORT CSV] Numero dati sEMG trovati: ${SEMGdata.length}`);
-        console.log(`[EXPORT CSV] Numero dati IMU trovati: ${IMUdata.length}`);
+        const IMUdata = await inertialData
+            .find({ sessionId: sessionID }, { data: 1, _id: 1 })
+            .sort({ _id: 1 })
+            .lean();
 
-        if (!SEMGdata || !IMUdata || SEMGdata.length === 0 || IMUdata.length === 0) {
-            console.warn(`[EXPORT CSV] Nessun dato disponibile per la sessione ${sessionID}`);
+        console.log(`[EXPORT CSV] sEMG: ${SEMGdata.length}, IMU: ${IMUdata.length}`);
+
+        if (!SEMGdata?.length || !IMUdata?.length) {
             throw new Error("Dati sEMG o IMU mancanti per questa sessione");
         }
 
-        const flatDataSEMG = SEMGdata.map(doc => {
+        const flatDataSEMG = SEMGdata.map((doc) => {
             const obj = {};
             doc.data.forEach((val, idx) => {
                 obj[`ch${idx + 1}`] = (val / 4096) * 3.3;
@@ -112,7 +105,7 @@ const exportSessionCSV = async (sessionID) => {
             return obj;
         });
 
-        const flatDataIMU = IMUdata.map(doc => {
+        const flatDataIMU = IMUdata.map((doc) => {
             const obj = {};
             doc.data.forEach((val, idx) => {
                 obj[`ch${idx + 1}`] = val;
@@ -127,15 +120,14 @@ const exportSessionCSV = async (sessionID) => {
         const fileNamesEMG = `session_${sessionID}_sEMGdata.csv`;
         const fileNameIMU = `session_${sessionID}_IMUdata.csv`;
 
-        const filePathsEMG = path.join(__dirname, '../../../tmp', fileNamesEMG);
-        const filePathsIMU = path.join(__dirname, '../../../tmp', fileNameIMU);
+        const filePathsEMG = path.join(__dirname, "../../../tmp", fileNamesEMG);
+        const filePathsIMU = path.join(__dirname, "../../../tmp", fileNameIMU);
 
         fs.writeFileSync(filePathsEMG, csvsEMG);
         fs.writeFileSync(filePathsIMU, csvIMU);
 
         console.log(`[EXPORT CSV] Esportazione completata con successo`);
         return { filePathsEMG, filePathsIMU };
-
     } catch (err) {
         console.error(`[EXPORT CSV] Errore: ${err.message}`);
         throw new Error(`Errore nell'esportazione CSV: ${err.message}`);
@@ -144,31 +136,55 @@ const exportSessionCSV = async (sessionID) => {
 
 const deleteSessionCSV = (sessionID) => {
     // 1) Elimina i CSV in tmp/
-    const csvSEMG = path.resolve(__dirname, '../../../tmp', `session_${sessionID}_sEMGdata.csv`);
-    const csvIMU = path.resolve(__dirname, '../../../tmp', `session_${sessionID}_IMUdata.csv`);
+    const csvSEMG = path.resolve(
+        __dirname,
+        "../../../tmp",
+        `session_${sessionID}_sEMGdata.csv`
+    );
+    const csvIMU = path.resolve(
+        __dirname,
+        "../../../tmp",
+        `session_${sessionID}_IMUdata.csv`
+    );
     if (fs.existsSync(csvSEMG)) fs.unlinkSync(csvSEMG);
     if (fs.existsSync(csvIMU)) fs.unlinkSync(csvIMU);
 
     // 2) Svuota COMPLETAMENTE tmp/data_work (file + sottocartelle)
-    const dataWorkDir = path.resolve(__dirname, '../../tmp/data_work');
-
+    const dataWorkDir = path.resolve(__dirname, "../../tmp/data_work");
     try {
         if (fs.existsSync(dataWorkDir)) {
             fs.rmSync(dataWorkDir, { recursive: true, force: true });
         }
     } catch (e) {
-        console.warn('Clean data_work failed:', dataWorkDir, e.message);
+        console.warn("Clean data_work failed:", dataWorkDir, e.message);
+    }
+
+    // 3) Elimina le preview cache
+    const previewDir = path.resolve(__dirname, "../../../tmp/previews");
+    try {
+        if (fs.existsSync(previewDir)) {
+            // rimuovi tutti i file che iniziano con sessionID
+            const files = fs.readdirSync(previewDir);
+            for (const f of files) {
+                if (f.includes(`preview_${sessionID}_`)) {
+                    fs.unlinkSync(path.join(previewDir, f));
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Clean previews failed:", e.message);
     }
 };
 
+
 const downloadSessionCSV = (sessionId, dataType) => {
-    const validTypes = ['sEMG', 'IMU'];
+    const validTypes = ["sEMG", "IMU"];
     if (!validTypes.includes(dataType)) {
         throw new Error("Tipo di dato non valido. Usa 'sEMG' o 'IMU'.");
     }
 
     const fileName = `session_${sessionId}_${dataType}data.csv`;
-    const filePath = path.join(__dirname, '../../../tmp', fileName);
+    const filePath = path.join(__dirname, "../../../tmp", fileName);
 
     if (!fs.existsSync(filePath)) {
         throw new Error("Il file richiesto non esiste. Devi prima esportarlo.");
@@ -177,15 +193,13 @@ const downloadSessionCSV = (sessionId, dataType) => {
     return filePath;
 };
 
+// ------------------ Import ------------------
 const importCSVData = async (files, sessionId) => {
     if (!files || files.length !== 2) {
-        console.error("❌ FILES mancanti o non corretti:", files);
         throw new Error("Servono esattamente 2 file CSV (sEMG e IMU)");
     }
 
     const [file1, file2] = files;
-
-    console.log("✅ File ricevuti:", file1.originalname, file2.originalname);
 
     const parseCSV = (filePath) =>
         new Promise((resolve, reject) => {
@@ -216,53 +230,121 @@ const importCSVData = async (files, sessionId) => {
     fs.unlinkSync(file2.path);
 };
 
-function downsampleMinMax(arr, targetLength) {
-    if (!Array.isArray(arr) || arr.length === 0) return [];
-    if (arr.length <= targetLength) return arr.slice();
+// ------------------ Preview veloce ------------------
 
-    const bucketSize = Math.ceil(arr.length / targetLength);
-    const out = [];
-
-    for (let i = 0; i < arr.length; i += bucketSize) {
-        let min = Infinity, max = -Infinity;
-        for (let j = i; j < i + bucketSize && j < arr.length; j++) {
-            const v = arr[j];
-            if (v < min) min = v;
-            if (v > max) max = v;
-        }
-        out.push(min, max); // min e max per ogni bucket
-    }
-
-    return out;
+const { Types } = require("mongoose");
+const PREVIEW_CACHE_DIR = path.join(__dirname, "../../../tmp/previews");
+if (!fs.existsSync(PREVIEW_CACHE_DIR)) {
+    fs.mkdirSync(PREVIEW_CACHE_DIR, { recursive: true });
 }
 
-const buildFastPreview = async (sessionID, dataType = "sEMG", maxPoints = 3000, sampleLimit = 100000) => {
+function mkCachePath(sessionID, dataType, maxPoints) {
+    return path.join(
+        PREVIEW_CACHE_DIR,
+        `preview_${sessionID}_${dataType}_${maxPoints}_approx.json`
+    );
+}
+
+const buildFastPreview = async (
+    sessionID,
+    dataType = "sEMG",
+    maxPoints = 3000
+) => {
     const Model = dataType === "sEMG" ? sEMGdata : inertialData;
     const numChannels = dataType === "sEMG" ? 8 : 9;
 
-    // Prendiamo SOLO i primi N documenti per avere “first paint” rapidissimo:
-    const cursor = Model.find({ sessionId: sessionID }, { data: 1, _id: 0 })
-        .lean()
-        .limit(sampleLimit)
-        .cursor();
+    // --- CACHE ---
+    const cacheFile = mkCachePath(sessionID, dataType, maxPoints);
+    if (fs.existsSync(cacheFile)) {
+        try {
+            return JSON.parse(fs.readFileSync(cacheFile, "utf8"));
+        } catch { /* cache corrotta → ricalcola */ }
+    }
 
-    const cols = Array.from({ length: numChannels }, () => []);
-    for await (const doc of cursor) {
-        const arr = doc.data;
+    // Match robusto
+    const idObj = Types.ObjectId.isValid(sessionID) ? new Types.ObjectId(sessionID) : null;
+    const matchExpr = idObj
+        ? { $or: [{ sessionId: idObj }, { sessionId: sessionID }] }
+        : { sessionId: sessionID };
+
+    // Quanti documenti totali
+    const total = await Model.countDocuments(matchExpr);
+    if (!total) {
+        const empty = {
+            channels: Array.from({ length: numChannels }, () => []),
+            yRange: dataType === "sEMG" ? { min: 0, max: 4 } : { min: 0, max: 0 },
+        };
+        fs.writeFileSync(cacheFile, JSON.stringify(empty));
+        return empty;
+    }
+
+    // Campiono un numero limitato di documenti, sparsi
+    const sampleSize = Math.min(total, Math.max(maxPoints * 8, 2000));
+
+    const scaleExpr = (i) =>
+        dataType === "sEMG"
+            ? { $multiply: [{ $divide: [{ $arrayElemAt: ["$data", i] }, 4096] }, 3.3] }
+            : { $toDouble: { $arrayElemAt: ["$data", i] } };
+
+    const pipeline = [
+        { $match: matchExpr },
+        { $sample: { size: sampleSize } },
+        { $sort: { _id: 1 } },
+        {
+            $bucketAuto: {
+                groupBy: "$_id",
+                buckets: Math.min(maxPoints, sampleSize),
+                output: Object.fromEntries(
+                    Array.from({ length: numChannels }).flatMap((_, i) => [
+                        [`min${i}`, { $min: scaleExpr(i) }],
+                        [`max${i}`, { $max: scaleExpr(i) }],
+                    ])
+                ),
+            },
+        },
+    ];
+
+    const buckets = await Model.aggregate(pipeline).allowDiskUse(true);
+
+    // ricostruzione dai bucket
+    const channels = Array.from({ length: numChannels }, () => []);
+    let yMin = Infinity, yMax = -Infinity;
+
+    for (const b of buckets) {
         for (let i = 0; i < numChannels; i++) {
-            const v = dataType === "sEMG" ? (arr[i] / 4096) * 3.3 : arr[i];
-            cols[i].push(v);
+            const vmin = b[`min${i}`];
+            const vmax = b[`max${i}`];
+            if (vmin === undefined && vmax === undefined) continue;
+            if (vmin !== undefined) {
+                channels[i].push(vmin);
+                yMin = Math.min(yMin, vmin);
+                yMax = Math.max(yMax, vmin);
+            }
+            if (vmax !== undefined && vmax !== vmin) {
+                channels[i].push(vmax);
+                yMin = Math.min(yMin, vmax);
+                yMax = Math.max(yMax, vmax);
+            }
         }
     }
 
-    const channels = cols.map(ch => downsampleMinMax(ch, maxPoints));
+    const yRange = dataType === "sEMG"
+        ? { min: 0, max: 4 }
+        : { min: yMin, max: yMax };
 
-    let yMin = Infinity, yMax = -Infinity;
-    for (const ch of channels) for (const v of ch) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+    const preview = { channels, yRange };
 
-    const yRange = dataType === "sEMG" ? { min: 0, max: 4 } : { min: yMin, max: yMax };
-    return { channels, yRange };
+    // --- Salva in cache ---
+    try {
+        fs.writeFileSync(cacheFile, JSON.stringify(preview));
+    } catch { /* ignore */ }
+
+    return preview;
 };
+
+
+
+
 
 module.exports = {
     getSession,
@@ -275,5 +357,5 @@ module.exports = {
     deleteSessionCSV,
     downloadSessionCSV,
     importCSVData,
-    buildFastPreview
+    buildFastPreview,
 };

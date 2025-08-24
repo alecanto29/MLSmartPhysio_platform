@@ -4,43 +4,34 @@ import pandas as pd
 from typing import List, Dict, Any
 
 def downsample_minmax(arr: np.ndarray, target_len: int) -> List[float]:
-    """
-    Downsampling per bucket con preservazione dei picchi:
-    per ogni bucket inserisce [min, max]. Se il bucket ha 1 elemento, inserisce solo quello.
-    - arr: array 1D (NaN verranno rimossi)
-    - target_len: numero target di punti (approssimato; con min+max per bucket possono essere ~2*target_len)
-    """
-    if arr is None:
-        return []
-
-    # assicurati di avere un array float e senza NaN
     x = np.asarray(arr, dtype=float)
-    if x.size == 0:
-        return []
-    x = x[~np.isnan(x)]
-    if x.size == 0:
-        return []
+    x = x[np.isfinite(x)]
+    n = x.size
+    if n == 0 or n <= target_len:
+        return x.tolist()
 
-    if x.size <= target_len:
-        # ritorna una copia float
-        return x.astype(float).tolist()
-
-    # dimensione del bucket
-    bs = int(np.ceil(x.size / target_len))
     out: List[float] = []
-    # scansiona a blocchi e prendine min e max
-    for i in range(0, x.size, bs):
-        seg = x[i : i + bs]
+    for k in range(target_len):
+        start = (k * n) // target_len
+        end   = ((k + 1) * n) // target_len
+        seg = x[start:end]
         if seg.size == 0:
             continue
-        seg_min = float(np.min(seg))
-        out.append(seg_min)
-        if seg.size > 1:
-            seg_max = float(np.max(seg))
-            # evita duplicato se min==max e seg.size==1 gestito sopra
-            if seg_max != seg_min:
-                out.append(seg_max)
+        i_min = int(np.argmin(seg)); vmin = float(seg[i_min])
+        i_max = int(np.argmax(seg)); vmax = float(seg[i_max])
+        # indici relativi -> assoluti
+        a_min = start + i_min; a_max = start + i_max
+        if a_min <= a_max:
+            out.append(vmin)
+            if a_max != a_min: out.append(vmax)
+        else:
+            out.append(vmax)
+            out.append(vmin)
+    if out:
+        out[0] = float(x[0])
+        out[-1] = float(x[-1])
     return out
+
 
 
 def _coerce_numeric_df(df: pd.DataFrame) -> pd.DataFrame:
