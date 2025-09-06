@@ -475,50 +475,77 @@ const SessionAnalysisPage = () => {
         setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
+    // --- helper locale: min/max sicuri su valori finiti ---
+    const finiteMinMax = (arr) => {
+        let min = Infinity, max = -Infinity, seen = false;
+        for (let i = 0; i < arr.length; i++) {
+            const v = arr[i];
+            if (Number.isFinite(v)) {
+                seen = true;
+                if (v < min) min = v;
+                if (v > max) max = v;
+            }
+        }
+        return seen ? { min, max } : null;
+    };
+
     const renderTimeDomainCharts = () =>
         channels.map((yData, i) => {
             const xData = getX(yData.length); // riusa la cache
 
+            // SOLO per IMU CH1: serie "safe" (non tocca lo state)
+            const isIMUch1 = dataType === "IMU" && i === 0;
+            const yForPlot = isIMUch1
+                ? yData.map(v => (Number.isFinite(v) ? v : null)) // buchi come null (WebGL ok con connectgaps)
+                : yData;
+
+            // Range:
+            // - sEMG: come prima
+            // - IMU CH1: usa solo valori finiti
+            // - altri IMU: come prima (tuo min/max classico)
+            const yRange =
+                dataType === "sEMG"
+                    ? [yAxisRange.min, yAxisRange.max]
+                    : isIMUch1
+                        ? (() => {
+                            const mm = finiteMinMax(yData);
+                            if (!mm) return [-20, 20];
+                            const pad = Math.max((mm.max - mm.min) * 0.1, 1e-6);
+                            return [mm.min - pad, mm.max + pad];
+                        })()
+                        : (() => {
+                            const min = Math.min(...yData);
+                            const max = Math.max(...yData);
+                            const padding = (max - min) * 0.1 || 1;
+                            return [min - padding, max + padding];
+                        })();
+
             return (
                 <div key={i} className="graph-container">
-                    <h4>
-                        {t("CHANNEL")} {i + 1}
-                    </h4>
+                    <h4>{t("CHANNEL")} {i + 1}</h4>
                     <Plot
-                        data={[
-                            {
-                                x: xData,
-                                y: yData,
-                                type: "scattergl",
-                                mode: "lines",
-                                line: { color: "rgba(54, 162, 235, 1)", width: 1 },
-                            },
-                        ]}
+                        data={[{
+                            x: xData,
+                            y: yForPlot,
+                            type: "scattergl",                // WebGL ovunque
+                            mode: "lines",
+                            connectgaps: isIMUch1,            // unisci segmenti validi SOLO su CH1 IMU
+                            line: { color: "rgba(54, 162, 235, 1)", width: 1 },
+                        }]}
                         layout={{
                             width: 1100,
                             height: 300,
                             margin: { l: 50, r: 30, b: 40, t: 30 },
                             title: "",
                             xaxis: { title: "Sample", showgrid: false },
-                            yaxis: {
-                                title: "Amplitude",
-                                range:
-                                    dataType === "sEMG"
-                                        ? [yAxisRange.min, yAxisRange.max]
-                                        : (() => {
-                                            const min = Math.min(...yData);
-                                            const max = Math.max(...yData);
-                                            const padding = (max - min) * 0.1 || 1;
-                                            return [min - padding, max + padding];
-                                        })(),
-                                showgrid: false,
-                            },
+                            yaxis: { title: "Amplitude", range: yRange, showgrid: false },
                         }}
                         config={{ displayModeBar: false, responsive: true }}
                     />
                 </div>
             );
         });
+
 
     const renderSpectrumCharts = () =>
         spectrumData.map((channelData, i) => {
